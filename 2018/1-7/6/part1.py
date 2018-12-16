@@ -3,7 +3,7 @@ from scipy.spatial import distance
 import matplotlib.pyplot as plt
 
 # read the data using scipy
-points = np.loadtxt('6/input.txt', delimiter=', ')
+points = np.loadtxt('6/input1.txt', delimiter=', ')
 
 # build a grid of the appropriate size - note the -1 and +2 to ensure all points
 # are within the grid
