@@ -1,4 +1,3 @@
-import copy
 from sortedcontainers import SortedDict
 from collections import deque
 
@@ -193,8 +192,3 @@ def isOpposition(units):
         if foundElf and foundGoblin:
             break
     return foundElf and foundGoblin
-
-
-def part2(path: str):
-    lines = parseInput(path)
-    print(lines)

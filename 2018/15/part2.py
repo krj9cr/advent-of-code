@@ -1,8 +1,10 @@
 from sortedcontainers import SortedDict
 from collections import deque
 
+# global variables that won't change
 startingHP = 200
 goblinAttackPower = 3
+
 
 def parseInput(path: str):
     with open(path, 'r') as file:
@@ -137,13 +139,6 @@ def countElves(units):
 
 
 def part1(board, units, numStartingElves: int, elfAttackPower: int):
-    # board = parseInput(path)
-    # units = getUnits(board)
-    # numStartingElves = countElves(units)
-
-    # print(units)
-    # printBoard(board)
-
     # start rounds
     numRounds = 0
     while isOpposition(units):
@@ -153,7 +148,6 @@ def part1(board, units, numStartingElves: int, elfAttackPower: int):
         for y in range(0, len(board)):
             row = board[y]
             for x in range(0, len(row)):
-                # print(hadTurn)
                 if board[y][x] in "EG" and (y, x) not in hadTurn:
                     # pop unit off the list
                     unit = units.pop((y, x))
@@ -191,9 +185,6 @@ def part1(board, units, numStartingElves: int, elfAttackPower: int):
             return None
         # increment
         numRounds += 1
-        # print(numRounds)
-        # print(units)
-        # printBoard(board)
     print(units)
     printBoard(board)
     print("")
