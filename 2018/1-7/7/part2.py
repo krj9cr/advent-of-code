@@ -1,10 +1,5 @@
-import sys
-from toposort import toposort
-from functools import reduce as _reduce
-from collections import defaultdict
 import networkx as nx
 import string
-import matplotlib.pyplot as plt
 
 
 def parseInput(input):

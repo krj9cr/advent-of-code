@@ -1,12 +1,3 @@
-import sys
-
-if len(sys.argv) < 2:
-    print "Usage: " + sys.argv[0] + " <input>"
-    exit(1)
-
-input = sys.argv[1]
-
-
 def countLetters(str):
     counts = {}
     # put letters in dictionary
@@ -35,12 +26,13 @@ def sumAndMult(listOfCounts):
     return num2 * num3
 
 
-with open(input, 'r') as file:
-    counts = []
-    for line in file:
-        str = line.strip()
-        strCount = countLetters(str)
-        counts.append(strCount)
-        print str, strCount
-    value = sumAndMult(counts)
-    print value
+def part1(path: str):
+    with open(path, 'r') as file:
+        counts = []
+        for line in file:
+            str = line.strip()
+            strCount = countLetters(str)
+            counts.append(strCount)
+            # print(str, strCount)
+        value = sumAndMult(counts)
+        print(value)

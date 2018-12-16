@@ -1,6 +1,3 @@
-import sys
-
-
 def parseInput(path):
     with open(path, 'r') as file:
         for line in file:
@@ -65,7 +62,6 @@ def sumRoot(tree):
             print ("   ",children)
             for meta in metadata:
                 child = children.get(meta)
-                # print("    ",meta, child)
                 if child:
                     childsum = sumRoot({meta: child})
                     print(childsum)

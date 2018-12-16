@@ -1,8 +1,6 @@
-import sys
-from toposort import toposort
-from functools import reduce as _reduce
 from collections import defaultdict
 import networkx as nx
+
 
 def parseInput(input):
     pairs = []
@@ -15,13 +13,13 @@ def parseInput(input):
     return pairs
 
 
-
 def solve(lines):
     G = nx.DiGraph()
     for line in lines:
         parts = line.split(" ")
         G.add_edge(parts[1], parts[7])
     print(''.join(nx.lexicographical_topological_sort(G)))
+
 
 def createGraph(pairs):
     flatpairs = [item for sublist in pairs for item in sublist]
@@ -94,33 +92,3 @@ def part1(filePath):
     with open(filePath, 'r') as file:
         lines = [line for line in file]
         solve(lines)
-    # pairs = parseInput(filePath)
-    # print(pairs)
-    # graph = createGraph(pairs)
-    # print(graph.graph)
-    # graph.topologicalSort()
-    # print("")
-    # toposorted = topo(deps)
-    #
-    # groups = []
-    # for s in toposorted:
-    #     groups.append(sorted(list(s)))
-    # print(groups)
-    # order = []
-    # for i in range(0, len(groups)):
-    #     group = groups[i]
-    #     if len(group) == 1:
-    #         order.append(group[0])
-    #     else:
-    #         order.append(group[0])
-    #         available = group[1:]
-    #         if i+1 < len(groups):
-    #             for a in available:
-    #                 groups[i+1].append(a)
-    #             sorted(groups[i+1])
-    #         else:
-    #             for a in available:
-    #                 order.append(a)
-    #     print(groups)
-    #
-    # print(order)
