@@ -1,29 +1,22 @@
-import sys
+def part2(path: str):
+    with open(path, 'r') as file:
+        # init
+        lines = []
+        freq = {0: 1}
+        total = 0
+        for line in file:
+            lines.append(int(line.strip()))
 
-if len(sys.argv) < 2:
-    print "Usage: " + sys.argv[0] + " <input>"
-    exit(1)
-
-input = sys.argv[1]
-
-with open(input, 'r') as file:
-    # init
-    lines = []
-    freq = {0: 1}
-    sum = 0
-    for line in file:
-        lines.append(int(line.strip()))
-
-    repeat = True
-    while (repeat):
-        for num in lines:
-            sum += num
-            seen = freq.get(sum)
-            if seen == None:
-                freq[sum] = 1
-            elif seen == 1:
-                freq[sum] += 1
-                repeat = False
-                break
-    print freq
-    print "NUM: " + str(sum)
+        repeat = True
+        while repeat:
+            for num in lines:
+                total += num
+                seen = freq.get(total)
+                if seen is None:
+                    freq[total] = 1
+                elif seen == 1:
+                    freq[total] += 1
+                    repeat = False
+                    break
+        # print(freq)
+        print(total)
