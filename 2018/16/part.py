@@ -168,7 +168,7 @@ def part1(path: str):
     operations = ["addr", "addi", "mulr", "muli",
                   "banr", "bani", "borr", "bori",
                   "setr", "seti", "gtir", "gtri",
-                  "gtrr", "eqir", "eqri", "eqrr",]
+                  "gtrr", "eqir", "eqri", "eqrr"]
 
     instructionSets = parseInput(path)
     print(instructionSets)
