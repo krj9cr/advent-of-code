@@ -1,3 +1,7 @@
+# noop
+def noop(registers, instr):
+    return registers
+
 # addr (add register) stores into register C the result of adding register A and register B.
 def addr(registers, instr):
     valA = registers[instr[1]]
@@ -152,20 +156,21 @@ def part1(path: str):
     #print(ip, program)
     while ip < len(program):
         instruction = program[ip]
-        #print("ip=", ip, registers, instruction, end=" ")
+        print("ip=", ip, registers, instruction, end=" ")
         registers[boundRegister] = ip
         op = instruction[0]
         registers = globals()[op](registers, instruction)
         ip = registers[boundRegister]
         ip += 1
-        #print(registers, "nextIp=", ip)
+        print(registers, "nextIp=", ip)
     print("part1:", registers)
 
 def part2(path: str):
-    registers = [1, 0, 0, 0, 0, 0]
+    registers = [24619952, 10551396, 2, 10551396, 0, 10551396]
     ip, program = parseProgram(path)
     boundRegister = ip
-    ip = registers[boundRegister] 
+    # ip = registers[boundRegister]
+    ip = 3
     #print(ip, program)
     while ip < len(program):
         instruction = program[ip]
