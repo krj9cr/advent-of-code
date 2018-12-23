@@ -170,7 +170,6 @@ def reconstruct_path_with_tool(came_from, start, goal):
     current_tool = 0
     path = []
     while (x, y) != start:
-        # print(current)
         path.append((x, y, current_tool))
         x, y, current_tool = came_from[(x, y, current_tool)]
     path.append((start[0], start[1], 0))  # optional
@@ -178,10 +177,10 @@ def reconstruct_path_with_tool(came_from, start, goal):
     return path
 
 
-# between 899 and 1051, not 1009, not 1044, not 982, not 1015 or 1016 or 1017
 def part2(depth: int, targetX: int, targetY: int):
     # init board
-    board = initBoard(0, 0, targetX, targetY, depth, 10)
+    # note padding here because we can travel BEYOND the rectangle between the start/end points
+    board = initBoard(0, 0, targetX, targetY, depth, 100)
     fillBoard(board, targetX, targetY, depth)
     fillBoardTypes(board)
     # printBoard(board)
