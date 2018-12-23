@@ -1,5 +1,22 @@
-from collections import deque
 import heapq
+
+#   0 => torch
+#   1 => climbing gear
+#   2 => neither
+# In rocky regions, you can use the climbing gear or the torch.
+# You cannot use neither (you'll likely slip and fall).
+rocky_tools = {0, 1}
+# In wet regions, you can use the climbing gear or neither tool.
+# You cannot use the torch (if it gets wet, you won't have a light source).
+wet_tools = {1, 2}
+# In narrow regions, you can use the torch or neither tool.
+# You cannot use the climbing gear (it's too bulky to fit).
+narrow_tools = {0, 2}
+
+#   0 => rocky
+#   1 => wet
+#   2 => narrow
+allowed_tools = {0: rocky_tools, 1: wet_tools, 2: narrow_tools}
 
 
 class PriorityQueue:
@@ -94,157 +111,95 @@ def initBoard(startX: int, startY: int, targetX: int, targetY: int, depth: int, 
     return board
 
 
-def costToMove(board, nextSpot, currentTool):
-    x2, y2 = nextSpot
-    # check if our current tool works in the next region
-    if checkRegion(board[y2][x2], currentTool):
-        return 1
-    else:
-        return 7
+# guesses the cost of going from current position to goal
+# should always underestimate the actual cost
+def heuristic(goal, x2, y2, current_tool):
+    (x1, y1) = goal
+    dist = abs(x1 - x2) + abs(y1 - y2)
+    # if current tool is different than torch, we will have to change it at least once
+    if current_tool != 0:
+        dist += 7
+    return dist
 
 
-# source: https://www.redblobgames.com/pathfinding/a-star/implementation.html
-def dijkstra_search(board, start, goal):
-    frontier = PriorityQueue()
-    frontier.put((start, 0), 0)
-    came_from = {}
-    cost_so_far = {}
-    tried_tools = {}
-    came_from[start] = None
-    cost_so_far[start] = 0
-    tried_tools[start] = [0]
-    tried_tools[goal] = [0]
+def a_star_search(board, start, goal):
+    # init
+    queue = PriorityQueue()
+    current_tool = 0
+    came_from = {}  # keeps track of our path to the goal
+    cost_so_far = {}  # keeps track of cost to arrive at ((x, y), tool)
 
-    while not frontier.empty():
-        current, current_tool = frontier.get()
-        x, y = current
+    # add start infos
+    queue.put((start[0], start[1], current_tool), 0)
+    came_from[(start[0], start[1], 0)] = None
+    cost_so_far[(start[0], start[1], 0)] = 0
 
-        if current == goal:
-            if current_tool != 0:
-                cost_so_far[goal] += 7
+    while not queue.empty():
+        x, y, current_tool = queue.get()
+
+        if (x, y) == goal:
             break
 
+        # for each adjacent square
         for x2, y2 in ((x, y + 1), (x + 1, y), (x - 1, y), (x, y - 1)):
             if 0 <= y2 < len(board) and 0 <= x2 < len(board[y2]):
                 next_spot = (x2, y2)
-                # check the tools we've tried for the next spot
-                if next_spot not in tried_tools:
-                    next_tool = switchTool(board, x2, y2, start, goal, current_tool, [])
-                    tried_tools[next_spot] = [next_tool]
-                else:
-                    if next_spot == start or next_spot == goal:
-                        next_tool = 0
-                    else:
-                        next_tool = switchTool(board, x2, y2, start, goal, current_tool, tried_tools[next_spot])
-                        tried_tools[next_spot] = tried_tools[next_spot] + [next_tool]
-                # get cost based on whether or not we switch tools
-                if current_tool != next_tool:
-                    move_cost = 7
-                else:
-                    move_cost = 1
-                # set tool
-                # current_tool = next_tool
-                new_cost = cost_so_far[current] + move_cost
-                if next_spot not in cost_so_far or \
-                        new_cost < cost_so_far[next_spot] or\
-                        (next_spot != start and next_spot != goal and len(tried_tools[next_spot]) < 2):
-                    if next_spot not in cost_so_far or new_cost < cost_so_far[next_spot]:
-                        cost_so_far[next_spot] = new_cost
-                    frontier.put((next_spot, next_tool), new_cost)
-                    came_from[next_spot] = (current, current_tool)
+                tool_set = allowed_tools[board[y2][x2]]
+                if next_spot == goal or next_spot == start:
+                    tool_set = {0}
+                # we can only switch tools if BOTH current and next spots allow it?!!!!!??!?!?
+                tool_set = tool_set.intersection(allowed_tools[board[y][x]])
+                # for each allowed tool at that spot
+                for allowed_tool in tool_set:
+                    cost_to_move = 1
+                    if allowed_tool != current_tool:
+                        cost_to_move += 7
+                    new_cost = cost_so_far[(x, y, current_tool)] + cost_to_move
+                    if (x2, y2, allowed_tool) not in cost_so_far or\
+                            new_cost < cost_so_far[(x2, y2, allowed_tool)]:
+                        cost_so_far[(x2, y2, allowed_tool)] = new_cost
+                        priority = new_cost + heuristic(goal, x2, y2, allowed_tool)
+                        queue.put((x2, y2, allowed_tool), priority)
+                        came_from[(x2, y2, allowed_tool)] = (x, y, current_tool)
 
     return came_from, cost_so_far
 
 
-def switchTool(board, x, y, start, end, current_tool, tried_tools):
-    if (x, y) == start or (x, y) == end:
-        return 0
-    region_type = board[y][x]
-    if checkRegion(region_type, current_tool):
-        return current_tool
-    else:
-        if region_type == 0:
-            if 0 in tried_tools:
-                return 1
-            else:
-                return 0
-        elif region_type == 1:
-            if 1 in tried_tools:
-                return 2
-            else:
-                return 1
-        elif region_type == 2:
-            if 2 in tried_tools:
-                return 0
-            else:
-                return 2
-
-
-def checkRegion(regionType, currentTool):
-    # currentTool
-    #   0 => torch
-    #   1 => climbing gear
-    #   2 => neither
-    #
-    # In rocky regions, you can use the climbing gear or the torch.
-    # You cannot use neither (you'll likely slip and fall).
-    if regionType == 0:
-        if currentTool == 0 or currentTool == 1:
-            return True
-        else:
-            return False
-    # In wet regions, you can use the climbing gear or neither tool.
-    # You cannot use the torch (if it gets wet, you won't have a light source).
-    if regionType == 1:
-        if currentTool == 1 or currentTool == 2:
-            return True
-        else:
-            return False
-    # In narrow regions, you can use the torch or neither tool.
-    # You cannot use the climbing gear (it's too bulky to fit).
-    if regionType == 2:
-        if currentTool == 0 or currentTool == 2:
-            return True
-        else:
-            return False
-    return False
-
-
-def reconstruct_path(came_from, start, goal):
-    current = goal
+def reconstruct_path_with_tool(came_from, start, goal):
+    x, y = goal
     current_tool = 0
     path = []
-    while current != start:
-        path.append((current, current_tool))
-        current, current_tool = came_from[current]
-    path.append((start, 0))  # optional
+    while (x, y) != start:
+        # print(current)
+        path.append((x, y, current_tool))
+        x, y, current_tool = came_from[(x, y, current_tool)]
+    path.append((start[0], start[1], 0))  # optional
     path.reverse()  # optional
     return path
 
-# between 899 and 1051, not 1009, not 1044
+
+# between 899 and 1051, not 1009, not 1044, not 982, not 1015 or 1016 or 1017
 def part2(depth: int, targetX: int, targetY: int):
     # init board
-    board = initBoard(0, 0, targetX, targetY, depth, 20)
+    board = initBoard(0, 0, targetX, targetY, depth, 10)
     fillBoard(board, targetX, targetY, depth)
     fillBoardTypes(board)
-    printBoard(board)
+    # printBoard(board)
 
     # init vars
     start = (0, 0)
     end = (targetX, targetY)
 
     # run pathfinding
-    came_from, time = dijkstra_search(board, start, end)
-    # print(time)
-    print(time[start], time[end])
-    path = reconstruct_path(came_from, start, end)
-    print(path)
-    total_cost = 0
+    came_from, cost_so_far = a_star_search(board, start, end)
+    print("end cost:", cost_so_far[(targetX, targetY, 0)])
+    path = reconstruct_path_with_tool(came_from, start, end)
+    # print(path)
+    total_cost = -1  # accounts for +1 for just starting at start
     current_tool = 0
-    for spot, next_tool in path:
+    for x, y, next_tool in path:
+        total_cost += 1
         if next_tool != current_tool:
             total_cost += 7
-        else:
-            total_cost += 1
         current_tool = next_tool
     print("total_cost:", total_cost)
