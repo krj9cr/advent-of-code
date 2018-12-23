@@ -3,7 +3,7 @@ import string
 import re
 
 if len(sys.argv) < 2:
-    print "Usage: " + sys.argv[0] + " <input>"
+    print("Usage: " + sys.argv[0] + " <input>")
     exit(1)
 
 input = sys.argv[1]
@@ -54,5 +54,5 @@ for letter in string.ascii_lowercase:
     # print letter, result
     letter_results[letter] = len(reacted)
 
-print letter_results
-print letter_results[min(letter_results, key=lambda x: letter_results[x])]
+print(letter_results)
+print(letter_results[min(letter_results, key=lambda x: letter_results[x])])

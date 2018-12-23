@@ -2,7 +2,7 @@ import sys
 import string
 
 if len(sys.argv) < 2:
-    print "Usage: " + sys.argv[0] + " <input>"
+    print("Usage: " + sys.argv[0] + " <input>")
     exit(1)
 
 input = sys.argv[1]
@@ -34,4 +34,4 @@ while detectReaction(line):
         line = line.replace(find1, "")
         line = line.replace(find2, "")
 
-print len(line)
+print(len(line))
