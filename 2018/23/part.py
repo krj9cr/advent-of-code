@@ -70,6 +70,7 @@ def part2(path: str):
     # add constraints
     for bot_pos, bot_r in bots:
         cost += If(z3_dist((x, y, z), bot_pos) <= bot_r, 1, 0)
+    # consequently there were no ties, so we didn't have to check for the point closest to (0, 0, 0)
     op.maximize(cost)
 
     # get info from z3
