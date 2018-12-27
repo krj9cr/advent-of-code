@@ -16,11 +16,11 @@ class Group:
         self.effective_power = self.units * self.attack_damage
 
     def __str__(self):
-        # return "effective_power: " + str(self.effective_power) + " units: " + str(self.units) + " hp: " +\
-        #        str(self.hp) + " attack_damage: " + str(self.attack_damage) +\
-        #        " attack_type: " + self.attack_type + " weakness: " + str(self.weaknesses) +\
-        #        " immunities: " + str(self.immunities) + " initiative: " + str(self.initiative)
-        return "Group " + str(self.index) + " contains " + str(self.units) + " units"
+        return "effective_power: " + str(self.effective_power) + " units: " + str(self.units) + " hp: " +\
+               str(self.hp) + " attack_damage: " + str(self.attack_damage) +\
+               " attack_type: " + self.attack_type + " weakness: " + str(self.weaknesses) +\
+               " immunities: " + str(self.immunities) + " initiative: " + str(self.initiative)
+        # return "Group " + str(self.index) + " contains " + str(self.units) + " units"
 
 
 def parse_input(path: str):
@@ -104,12 +104,12 @@ def target_selection(immune_system: dict, infection: dict):
             available_groups.remove(chosen_target[0])
 
     # print info
-    for attacking_group in selections:
-        target_group = selections[attacking_group][0]
-        damage = selections[attacking_group][1]
-        print(attacking_group.army + " group " + str(attacking_group.index) + " would deal defending group " +
-              str(target_group.index) + " " + str(damage) + " damage")
-    print()
+    # for attacking_group in selections:
+    #     target_group = selections[attacking_group][0]
+    #     damage = selections[attacking_group][1]
+    #     print(attacking_group.army + " group " + str(attacking_group.index) + " would deal defending group " +
+    #           str(target_group.index) + " " + str(damage) + " damage")
+    # print()
 
     return selections
 
@@ -150,9 +150,9 @@ def attack(immune_system: dict, infection: dict, targets: dict):
                 if target_group:
                     damage = calculate_damage(attacking_group, target_group)
                     killed = take_damage(target_group, damage)
-                    print(attacking_group.army + " group " + str(attacking_group.index) + " attacks defending group " +
-                          str(target_group.index) + ", with " + str(damage) + " damage, killing " +
-                          str(killed))
+                    # print(attacking_group.army + " group " + str(attacking_group.index) + " attacks defending group " +
+                    #       str(target_group.index) + ", with " + str(damage) + " damage, killing " +
+                    #       str(killed))
                     if target_group.units > 0:
                         if target_group.army == "immune":
                             immune_system[target_group.index] = target_group
@@ -163,7 +163,7 @@ def attack(immune_system: dict, infection: dict, targets: dict):
                             del immune_system[target_group.index]
                         else:
                             del infection[target_group.index]
-    print()
+    # print()
     return immune_system, infection
 
 
@@ -180,20 +180,38 @@ def print_armies(immune_system, infection):
     print_army(infection)
 
 
-def part1(path: str):
-    immune_system, infection = parse_input(path)
-    print_armies(immune_system, infection)
+def fight(immune_system, infection):
+    # print_armies(immune_system, infection)
+    stalemate_iterations = 10000
+    iteration = 0
 
     # fight until one side has no units left
     while len(immune_system) > 0 and len(infection) > 0:
-        print_armies(immune_system, infection)
+        immune_system_size = len(immune_system)
+        infection_size = len(infection)
+
+        # print_armies(immune_system, infection)
         # target selection phase
         targets = target_selection(immune_system, infection)
         # attacking phase
         immune_system, infection = attack(immune_system, infection, targets)
 
-    # done
-    print_armies(immune_system, infection)
+        # detect stalemates
+        new_immune_system_size = len(immune_system)
+        new_infection_size = len(infection)
+        # if sizes are unchanged
+        if new_immune_system_size == immune_system_size and new_infection_size == infection_size:
+            iteration += 1
+            # print("iter", iteration)
+            if iteration > stalemate_iterations:
+                print("STALEMATE")
+                break
+
+
+def part1(path: str):
+    immune_system, infection = parse_input(path)
+
+    fight(immune_system, infection)
 
     # add up total remaining units
     total_units = 0
@@ -203,5 +221,35 @@ def part1(path: str):
 
 
 def part2(path: str):
-    lines = parse_input(path)
-    print(lines)
+    immune_system, infection = parse_input(path)
+
+    boost = 1
+    while True:
+        print(boost)
+        # copy armies
+        immune_system_test = deepcopy(immune_system)
+        infection_test = deepcopy(infection)
+
+        # boost immune system
+        for i in immune_system_test:
+            group = immune_system_test[i]
+            group.attack_damage += boost
+            group.effective_power = group.attack_damage * group.units
+
+        # print_armies(immune_system_test, infection_test)
+
+        # simulate fight
+        fight(immune_system_test, infection_test)
+
+        if len(infection_test) == 0 and len(immune_system_test) > 0:
+            break
+        boost += 1
+
+    # done
+    print_armies(immune_system_test, infection_test)
+
+    # add up total remaining units
+    total_units = 0
+    for group in list(immune_system_test.values()) + list(infection_test.values()):
+        total_units += group.units
+    print("part2:", total_units)
