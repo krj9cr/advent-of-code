@@ -19,5 +19,5 @@ Infection:
 22 units each with 45002 hit points (weak to bludgeoning) with an attack that does 3748 bludgeoning damage at initiative 17
 3028 units each with 35744 hit points (weak to bludgeoning) with an attack that does 18 fire damage at initiative 11
 778 units each with 17656 hit points (weak to fire) with an attack that does 35 bludgeoning damage at initiative 2
-47 units each with 16006 hit points (immune to bludgeoning; weak to cold, radiation) with an attack that does 645 cold damage at initiative 20
+47 units each with 16006 hit points (weak to cold, radiation; immune to bludgeoning) with an attack that does 645 cold damage at initiative 20
 4431 units each with 13632 hit points (weak to fire; immune to bludgeoning) with an attack that does 6 bludgeoning damage at initiative 1
