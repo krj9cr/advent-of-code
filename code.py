@@ -1,11 +1,11 @@
 
+
 ###########################
 # helpers
 ###########################
 def parseInputFile():
     with open((__file__.rstrip("code.py") + "input.txt"), 'r') as file:
-        file_input = file.read()
-        return parseInput(file_input)
+        return [parseLine(line) for line in file]
 
 def parseFile(path: str):
     with open(path, 'r') as file:
