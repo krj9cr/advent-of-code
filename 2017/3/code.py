@@ -5,22 +5,42 @@ import math
 ###########################
 def part1(data):
     print(data)
-    # print(math.sqrt(data))
-    for i in range(537,539):
-        if i % 2 == 1:
-            print("bottom right corner:", i*i, "circle size:", i)
-            sq = (i*i)+1
-            circle = i+2
-            print("start of next circle:", sq, "next circle size:", circle)
-            topright = sq+(circle-2)
-            print("top right corner:", topright)
-            idx = circle-(data-topright)
-            print("index of num:", idx)
-            halfway = math.floor(circle/2)
-            print((halfway-idx)+(i))
+    root = nextSquareRoot(data)
+    sq = root * root
+    print("square root:", root, "square:", sq)
+    ring = findRing(root)
+    print("ring:", ring)
 
-# 685 too high
+    dist_from_corner = int(root/2) + ring
+    print("dist_from_corner:", dist_from_corner)
 
+    diff = sq - data
+    from_corner = diff
+
+    print("inital diff:", diff)
+    print("from corner:", from_corner)
+    while diff >= root:
+        diff -= root-1
+        from_corner -= diff
+
+        print("diff:", diff)
+    print("ANSWER:", from_corner)
+
+
+def nextSquareRoot(n: int):
+    # Find the square root of given N
+    nroot = math.sqrt(n)
+    # Calculate its floor value
+    nroot_floor = math.floor(nroot)
+    # Then add 1 to it
+    sq = nroot_floor + 1
+    # make it odd for this problem
+    if sq % 2 == 0:
+        sq += 1
+    return sq
+
+def findRing(sq: int):
+    return int(sq/2)
 
 def testpart1(data):
     part1(data)
@@ -30,27 +50,28 @@ def testpart1(data):
 ###########################
 def part2(data):
     print(data)
+    board = [[0, 0, 0],
+             [0, 1, 0],
+             [0, 0, 0]]
+
+
 
 def testpart2(data):
     part2(data)
-
-# def runpart2():
-#     part2(parseInputFile())
 
 ###########################
 # run
 ###########################
 if __name__ == '__main__':
-    print("PART 1 TEST DATA")
-    # testpart1(6)
-    # testpart1(12)
-    # testpart1(26)
+    # print("PART 1 TEST DATA")
+    # testpart1(23)
+    # testpart1(1024)
 
-    print("\nPART 1 RESULT")
-    testpart1(289326)
+    # print("\nPART 1 RESULT")
+    # testpart1(289326)
 
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2(["5 9 2 8","9 4 7 3","3 8 6 5"])
-    #
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\n\nPART 2 TEST DATA")
+    testpart2(747)
+
+    print("\nPART 2 RESULT")
+    # testpart2(289326)
