@@ -54,8 +54,6 @@ def testNum(i):
         return 1
     return 0
 
-# 2099 too high
-
 def runpart1():
     part1()
 
@@ -68,7 +66,14 @@ def testPairs(s):
     for i in range(0, len(sp)):
         char = sp[i]
         if prev == char:
-            if
+            steps = 0
+            for j in range(i+1, len(sp)):
+                if char == sp[j]:
+                    steps +=1
+            if steps % 2 == 1:
+                return False
+            else:
+                return True
         else:
             prev = char
     return False
@@ -90,8 +95,7 @@ def part2():
 def runpart2():
     part2()
 
-# 1468 too high
-# 1668 too high
+# 1417 too high
 
 ###########################
 # run
@@ -106,10 +110,8 @@ if __name__ == '__main__':
 #     runpart1()
 
     print("\n\nPART 2 TEST DATA")
-    print(testNum2(122345))
-    print(testNum2(123444))
-    print(testNum2(111122))
-
+    print(testNum2(111223))
+    print(testNum2(122234))
 
     print("\nPART 2 RESULT")
     runpart2()
