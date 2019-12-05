@@ -61,26 +61,30 @@ def runpart1():
 # part2
 ###########################
 def testPairs(s):
-    prev = s[0]
-    sp = s[1:]
-    for i in range(0, len(sp)):
-        char = sp[i]
-        if prev == char:
-            steps = 0
-            for j in range(i+1, len(sp)):
-                if char == sp[j]:
-                    steps +=1
-            if steps % 2 == 1:
-                return False
-            else:
-                return True
+    # print(s)
+    if len(s) == 0 or len(s) == 1:
+        return False
+    if len(s) == 2:
+        if s[0] == s[1]:
+            return True
+    if s[0] == s[1]:
+        if s[0] != s[2]:
+            return True
         else:
-            prev = char
-    return False
+            if len(s) == 3:
+                return False
+            # find the next different thing
+            for i in range(3, len(s)):
+                if s[i] != s[0]:
+                    return testPairs(s[i:])
+            return False
+    else:
+        return testPairs(s[1:])
 
 def testNum2(i):
     s = str(i)
-    if len(s) == 6 and testIncrease(s) and testPairs(s) and testDouble(s):
+    if len(s) == 6 and testIncrease(s) and testPairs(s):
+        print(i)
         return 1
     return 0
 
@@ -95,7 +99,6 @@ def part2():
 def runpart2():
     part2()
 
-# 1417 too high
 
 ###########################
 # run
@@ -109,9 +112,16 @@ if __name__ == '__main__':
 #     print("\nPART 1 RESULT")
 #     runpart1()
 
-    print("\n\nPART 2 TEST DATA")
-    print(testNum2(111223))
-    print(testNum2(122234))
+    # print("\n\nPART 2 TEST DATA")
+    # print(testNum2(111223))
+    # print(testNum2(122234))
+    # print(testNum2(123334))
+    # print(testNum2(123344))
+    # print(testNum2(123444))
 
-    print("\nPART 2 RESULT")
-    runpart2()
+    # print(testNum2(111122))
+    # print(testNum2(111123))
+    # print(testNum2(128899))
+
+    # print("\nPART 2 RESULT")
+    # runpart2()
