@@ -1,4 +1,4 @@
-import networkx as nx
+
 
 ###########################
 # helpers
@@ -15,27 +15,13 @@ def parseInput(lines):
     return [parseLine(line) for line in lines]
 
 def parseLine(line: str):
-    return line.strip().split(")")
+    return line.strip()
 
 ###########################
 # part1
 ###########################
 def part1(data):
-    graph = nx.DiGraph()
-    for pair in data:
-        graph.add_edge(pair[0], pair[1])
-    root = list(nx.topological_sort(graph))[0]
-    nodes = set(graph.nodes)
-    nodes.remove(root)
-
-    count = 0
-    for node in nodes:
-        orbits = set()
-        for path in nx.all_simple_paths(graph,root,node):
-            [orbits.add(p) for p in set(path)]
-        orbits.remove(node)
-        count += len(orbits)
-    print(count)
+    print(data)
 
 def testpart1(data):
     lines = parseInput(data)
@@ -48,10 +34,7 @@ def runpart1():
 # part2
 ###########################
 def part2(data):
-    graph = nx.Graph()
-    for pair in data:
-        graph.add_edge(pair[0], pair[1])
-    print(nx.shortest_path_length(graph, 'YOU', 'SAN')-2)
+    print(data)
 
 def testpart2(data):
     lines = parseInput(data)
@@ -64,14 +47,16 @@ def runpart2():
 # run
 ###########################
 if __name__ == '__main__':
-    # print("PART 1 TEST DATA")
-    # testpart1(["COM)B","B)C","C)D","D)E","E)F","B)G","G)H","D)I","E)J","J)K","K)L"])
+    print("PART 1 TEST DATA")
+    testpart1("1111")
+    testpart1("1234")
 
     # print("\nPART 1 RESULT")
     # runpart1()
 
     # print("\n\nPART 2 TEST DATA")
-    # testpart2(["COM)B","B)C","C)D","D)E","E)F","B)G","G)H","D)I","E)J","J)K","K)L","K)YOU","I)SAN"])
+    # testpart2("1122")
+    # testpart2("1111")
 
-    print("\nPART 2 RESULT")
-    runpart2()
+    # print("\nPART 2 RESULT")
+    # runpart2()
