@@ -162,71 +162,11 @@ def op9(modes, data, i, relativeBase):
         arg = data[relativeBase+arg]
     return relativeBase + arg
 
-def ampintcode(data, phaseSetting, ampinputs, ampindex, relativeBase):
-    ip = 0
-    usedphase = False
-    while ip < len(data):
-        # print(data)
-        nextOp = data[ip]
-        modes, op = parseOp(nextOp)
-        if op == 1:
-            op1(modes, data, ip, relativeBase)
-            ip += 4
-        elif op == 2:
-            op2(modes, data, ip, relativeBase)
-            ip += 4
-        elif op == 3:
-            if usedphase:
-                while True:
-                    with locks[ampindex]:
-                        wow = ampinputs[ampindex]
-                    if wow is None:
-                        print("incode waiting...")
-                        time.sleep(1)
-                    else:
-                        break
-                with locks[ampindex]:
-                    op3(modes, ampinputs[ampindex], data, ip, relativeBase)
-                    ampinputs[ampindex] = None
-            else:
-                op3(modes, phaseSetting, data, ip, relativeBase)
-                usedphase = True
-            ip += 2
-        elif op == 4:
-            idx = (ampindex+1)
-            with locks[idx]:
-                ampinputs[idx] = op4(modes, data, ip, relativeBase)
-            time.sleep(2)
-            ip += 2
-        elif op == 5:
-            ip = op5(modes, data, ip, relativeBase)
-        elif op == 6:
-            ip = op6(modes, data, ip, relativeBase)
-        elif op == 7:
-            op7(modes, data, ip, relativeBase)
-            ip += 4
-        elif op == 8:
-            op8(modes, data, ip, relativeBase)
-            ip += 4
-        elif op == 9:
-            relativeBase = op9(modes, data, ip, relativeBase)
-            ip += 2
-        elif op == 99:
-            with runninglock:
-                running = False
-                print("ROBOT DONE")
-            return
-        else:
-            print("BAD OPCODE????", modes, op)
-            print("IP: ",ip)
-            print("data:",data)
-            exit(1)
-
-# def intcode(data, relativeBase, mem):
-#     working = False
-#     outp = 2
+# def ampintcode(data, phaseSetting, ampinputs, ampindex, relativeBase):
 #     ip = 0
+#     usedphase = False
 #     while ip < len(data):
+#         # print(data)
 #         nextOp = data[ip]
 #         modes, op = parseOp(nextOp)
 #         if op == 1:
@@ -236,46 +176,27 @@ def ampintcode(data, phaseSetting, ampinputs, ampindex, relativeBase):
 #             op2(modes, data, ip, relativeBase)
 #             ip += 4
 #         elif op == 3:
-#             while True:
-#                 with locks[1]:
-#                     wow = mem[1]
-#                 if wow is None:
-#                     time.sleep(1)
-#                     # print("intcode waiting...")
-#                 else:
-#                     break
-#             with locks[1]:
-#                 print("intcode processing input: ", mem)
-#                 op3(modes, mem[1], data, ip, relativeBase)
-#                 mem[1] = None
-#                 working = True
+#             if usedphase:
+#                 while True:
+#                     with locks[ampindex]:
+#                         wow = ampinputs[ampindex]
+#                     if wow is None:
+#                         print("incode waiting...")
+#                         time.sleep(1)
+#                     else:
+#                         break
+#                 with locks[ampindex]:
+#                     op3(modes, ampinputs[ampindex], data, ip, relativeBase)
+#                     ampinputs[ampindex] = None
+#             else:
+#                 op3(modes, phaseSetting, data, ip, relativeBase)
+#                 usedphase = True
 #             ip += 2
 #         elif op == 4:
-#             o = op4(modes, data, ip, relativeBase)
-#             if working:
-#                 with locks[2]:
-#                     mem[outp] = o
-#                 if outp == 2:
-#                     outp = 3
-#                 else:
-#                     outp = 2
-#                     print("intcode output: ", mem)
-#                     working = False
-#             else:
-#                 print("trying to output while not processing input")
-#             # while True:
-#             #     with locks[2]:
-#             #         wow = mem[outp]
-#             #     if wow is not None:
-#             #         time.sleep(1)
-#             #     else:
-#             #         mem[outp] = o
-#             #         if outp == 2:
-#             #             outp = 3
-#             #         else:
-#             #             outp = 2
-#             #             print("intcode output: ", mem)
-#             #         break
+#             idx = (ampindex+1)
+#             with locks[idx]:
+#                 ampinputs[idx] = op4(modes, data, ip, relativeBase)
+#             time.sleep(2)
 #             ip += 2
 #         elif op == 5:
 #             ip = op5(modes, data, ip, relativeBase)
@@ -291,16 +212,15 @@ def ampintcode(data, phaseSetting, ampinputs, ampindex, relativeBase):
 #             relativeBase = op9(modes, data, ip, relativeBase)
 #             ip += 2
 #         elif op == 99:
-#             with locks[0]:
-#                 mem[0] = False
+#             with runninglock:
+#                 running = False
+#                 print("ROBOT DONE")
 #             return
 #         else:
-#             print("BAD OPCODE:",op)
-#             with locks[0]:
-#                 mem[0] = False
+#             print("BAD OPCODE????", modes, op)
+#             print("IP: ",ip)
+#             print("data:",data)
 #             exit(1)
-#     return True
-
 
 ###########################
 # part1
@@ -321,11 +241,14 @@ def turnRobot(robotdir, newdir):
             return "up"
         else:
             return "down"
-    else:
+    elif robotdir == "down":
         if newdir == 0:
             return "right"
         else:
             return "left"
+    else:
+        print("BAD ROBOT DIR", robotdir)
+        exit(1)
 
 def moveRobot(loc, robotdir, newdir):
     newrobotdir = turnRobot(robotdir, newdir)
@@ -335,81 +258,157 @@ def moveRobot(loc, robotdir, newdir):
         return loc[0]-1, loc[1], newrobotdir
     elif newrobotdir == "right":
         return loc[0]+1, loc[1], newrobotdir
-    else:
+    elif newrobotdir == "down":
         return loc[0], loc[1]+1, newrobotdir
+    else:
+        print("BAD NEW ROBOT DIR", newrobotdir)
+        exit(1)
 
-def controlRobot(ampins):
-    panels = {}
-    loc = (0,0)
-    robotdir = "up"
-    outp = 0
-    outputs = [None, None]
-    while True:
-        # grab next output
-        with locks[1]:
-            if ampins[1] is not None:
-                outputs[outp] = ampins[1]
-                ampins[1] = None
-                if outp == 0:
-                    outp = 1
-                else:
-                    outp = 0
-                    print()
-                    print("using outputs:",outputs)
-                    # get output
-                    paintColor = outputs[0]
-                    newdir = outputs[1]
-
-                    # paint the current spot
-                    panels[loc] = paintColor
-                    print("painted ", loc, " ", paintColor)
-                    print("panels", panels)
-
-                    # move the robot
-                    loc1, loc2, robotdir = moveRobot(loc, robotdir, newdir)
-                    loc = (loc1, loc2)
-                    print("robot now at:", loc, robotdir)
-
-                    with locks[0]:
-                        # set the color for the new spot
-                        if panels.get(loc) is not None:
-                            ampins[0] = panels[loc]
-                        else:
-                            ampins[0] = 0 # black by default
-                        print("after moving: ", ampins)
-        with runninglock:
-            if not running:
-                print("FINAL panels", panels)
-                print(len(panels.keys()))
-                return
-        time.sleep(2)
+# def controlRobot(ampins):
+#     panels = {}
+#     loc = (0,0)
+#     robotdir = "up"
+#     outp = 0
+#     outputs = [None, None]
+#     while True:
+#         # grab next output
+#         with locks[1]:
+#             if ampins[1] is not None:
+#                 outputs[outp] = ampins[1]
+#                 ampins[1] = None
+#                 if outp == 0:
+#                     outp = 1
+#                 else:
+#                     outp = 0
+#                     print()
+#                     print("using outputs:",outputs)
+#                     # get output
+#                     paintColor = outputs[0]
+#                     newdir = outputs[1]
+#
+#                     # paint the current spot
+#                     panels[loc] = paintColor
+#                     print("painted ", loc, " ", paintColor)
+#                     print("panels", panels)
+#
+#                     # move the robot
+#                     loc1, loc2, robotdir = moveRobot(loc, robotdir, newdir)
+#                     loc = (loc1, loc2)
+#                     print("robot now at:", loc, robotdir)
+#
+#                     with locks[0]:
+#                         # set the color for the new spot
+#                         if panels.get(loc) is not None:
+#                             ampins[0] = panels[loc]
+#                         else:
+#                             ampins[0] = 0 # black by default
+#                         print("after moving: ", ampins)
+#         with runninglock:
+#             if not running:
+#                 print("FINAL panels", panels)
+#                 print(len(panels.keys()))
+#                 return
+#         time.sleep(2)
 
 def part1(data):
     print(data)
-    for _ in range(0, 2000):
+    for _ in range(0, 20000):
         data.append(0)
     # output = []
     relativeBase = 0
     # running = True
     # mem = [True, 0, None, None]
 
-    ampins = [None for _ in range(0, 2)]
+    # ampins = [None for _ in range(0, 2)]
 
     # start robot
     # color = 1 # black by default
-    t1 = threading.Thread(target=ampintcode, args=(data.copy(), 0, ampins, 0, relativeBase))
-    t2 = threading.Thread(target=controlRobot, args=(ampins,))
+    # t1 = threading.Thread(target=ampintcode, args=(data.copy(), 0, ampins, 0, relativeBase))
+    # t2 = threading.Thread(target=controlRobot, args=(ampins,))
+    #
+    # t1.start()
+    # t2.start()
+    # t1.join()
+    # t2.join()
 
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    color = 0
+    panels = {}
+    loc = (0,0)
+    robotdir = "up"
+    outputs = []
+    robotsteps = 0
 
+    ip = 0
+    while ip < len(data):
+        # print(data)
+        nextOp = data[ip]
+        modes, op = parseOp(nextOp)
+        if op == 1:
+            op1(modes, data, ip, relativeBase)
+            ip += 4
+        elif op == 2:
+            op2(modes, data, ip, relativeBase)
+            ip += 4
+        elif op == 3:
+            print()
+            dacolor = 0
+            if panels.get(loc) is not None:
+                dacolor = panels[loc]
+            print("robot input loc", loc, "with color:",dacolor)
+            op3(modes, dacolor, data, ip, relativeBase)
+            ip += 2
+        elif op == 4:
+            o = op4(modes, data, ip, relativeBase)
+            outputs.append(o)
+            if len(outputs) >= 2:
+                print("robot outputs:",outputs)
+                # get output
+                paintColor = outputs[0]
+                newdir = outputs[1]
 
+                # paint the current spot
+                panels[loc] = paintColor
+                print("painted ", loc, " ", paintColor)
+                print("panels", panels)
 
-def testpart1(data):
-    lines = parseInput(data)
-    part1(lines)
+                # move the robot
+                loc1, loc2, robotdir = moveRobot(loc, robotdir, newdir)
+                loc = (loc1, loc2)
+                robotsteps += 1
+                if robotsteps > 20000:
+                    exit(0)
+
+                # set the color for the new spot
+                # if panels.get(loc) is not None:
+                #     color = panels[loc]
+                # else:
+                #     color = 0  # black by default
+                print("robot now at:", loc, robotdir)
+
+                # reset outputs
+                outputs = []
+            ip += 2
+        elif op == 5:
+            ip = op5(modes, data, ip, relativeBase)
+        elif op == 6:
+            ip = op6(modes, data, ip, relativeBase)
+        elif op == 7:
+            op7(modes, data, ip, relativeBase)
+            ip += 4
+        elif op == 8:
+            op8(modes, data, ip, relativeBase)
+            ip += 4
+        elif op == 9:
+            relativeBase = op9(modes, data, ip, relativeBase)
+            ip += 2
+        elif op == 99:
+            print("ROBOT DONE")
+            break
+        else:
+            print("BAD OPCODE????", modes, op)
+            print("IP: ", ip)
+            print("data:", data)
+            exit(1)
 
 def runpart1():
     part1(parseInputFile())
