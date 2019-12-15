@@ -4,6 +4,9 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 from intcode import Intcode
 
+import plotly.graph_objects as go
+import numpy as np
+
 ###########################
 # helpers
 ###########################
@@ -59,20 +62,19 @@ def moveRobot(loc, robotdir, newdir):
         print("BAD NEW ROBOT DIR", newrobotdir)
         exit(1)
 
-def part1(data):
-    print(data)
-    panels = {(0,0):0}
-    loc = (0,0)
+def controlRobot(data, startPanelColor=0):
+    panels = {(0, 0): startPanelColor}
+    loc = (0, 0)
     robotdir = "up"
     robotsteps = 0
 
-    intcode_input = [0]
-    intcode = Intcode(initial_state=data, intcode_input=intcode_input,debug=False)
+    intcode_input = [startPanelColor]
+    intcode = Intcode(initial_state=data, intcode_input=intcode_input, debug=False)
 
     while intcode.running:
         # check for outputs
         if len(intcode.output) >= 2:
-            print("robot outputs:",intcode.output)
+            print("robot outputs:", intcode.output)
             # get output
             paintColor = intcode.output[0]
             newdir = intcode.output[1]
@@ -83,7 +85,7 @@ def part1(data):
             print("panels", panels)
 
             # move the robot
-            print("robot was at:",loc, robotdir)
+            print("robot was at:", loc, robotdir)
             loc1, loc2, robotdir = moveRobot(loc, robotdir, newdir)
             loc = (loc1, loc2)
             robotsteps += 1
@@ -95,12 +97,16 @@ def part1(data):
             if panels.get(loc) is not None:
                 intcode_input.append(panels[loc])
             else:
-                intcode_input.append(0) # black by default
+                intcode_input.append(0)  # black by default
             print("robot now at:", loc, robotdir)
             intcode.output = []
         intcode.step()
+    return panels
 
-    print("panels",panels)
+def part1(data):
+    print(data)
+    panels = controlRobot(data, 0)
+    print("panels", panels)
     print(len(panels))
 
 def runpart1():
@@ -109,8 +115,46 @@ def runpart1():
 ###########################
 # part2
 ###########################
+def printPanels(panels):
+    maxx = 0
+    maxy = 0
+    # find dimensions
+    for panel in panels:
+        maxx = max(maxx, panel[0])
+        maxy = max(maxy, panel[1])
+    print("maxx",maxx,"maxy",maxy)
+    # make grid
+    grid = []
+    for y in range(maxy+1):
+        row = []
+        for x in range(maxx+1):
+            row.append(" . ")
+        grid.append(row)
+    # populate grid cells
+    for panel in panels:
+        # if white
+        if panels[panel] == 1:
+            grid[panel[1]][panel[0]] = " # "
+    # print
+    for row in grid:
+        for item in row:
+            print(item)
+
+def plotPanels(panels):
+    x = []
+    y = []
+    for panel in panels:
+        # if white
+        if panels[panel] == 1:
+            x.append(panel[0])
+            y.append(panel[1])
+    fig = go.Figure(data=go.Scatter(x=x, y=y, mode='markers'))
+    fig.show()
+
 def part2(data):
     print(data)
+    panels = controlRobot(data, 1)
+    plotPanels(panels)
 
 def testpart2(data):
     lines = parseInput(data)
@@ -124,12 +168,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
-
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
