@@ -67,7 +67,7 @@ def part1(data):
     robotsteps = 0
 
     intcode_input = [0]
-    intcode = Intcode(initial_state=data, intcode_input=intcode_input)
+    intcode = Intcode(initial_state=data, intcode_input=intcode_input,debug=False)
 
     while intcode.running:
         # check for outputs
