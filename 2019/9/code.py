@@ -1,3 +1,8 @@
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+from intcode import Intcode
 
 ###########################
 # helpers
@@ -194,9 +199,13 @@ def intcode(data, input, relativeBase):
 # part1
 ###########################
 def part1(data):
-    for _ in range(0, 1000):
-        data.append(0)
-    print("output",intcode(data, 1, 0))
+    # for _ in range(0, 1000):
+    #     data.append(0)
+    # print("output",intcode(data, 1, 0))
+    print(data)
+    intcoder = Intcode(data, [1], debug=True)
+    intcoder.run()
+    print(intcoder.output)
 
 def testpart1(data):
     lines = parseInput(data)
@@ -209,9 +218,13 @@ def runpart1():
 # part2
 ###########################
 def part2(data):
-    for _ in range(0, 1000):
-        data.append(0)
-    print("output",intcode(data, 2, 0))
+    # for _ in range(0, 1000):
+    #     data.append(0)
+    # print("output",intcode(data, 2, 0))
+    print(data)
+    intcoder = Intcode(data, [2], debug=True)
+    intcoder.run()
+    print(intcoder.output)
 
 def testpart2(data):
     lines = parseInput(data)
@@ -229,12 +242,12 @@ if __name__ == '__main__':
     # testpart1("1102,34915192,34915192,7,4,7,99,0")
     # testpart1("104,1125899906842624,99")
 
-    # print("\nPART 1 RESULT")
-    # runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
     # print("\n\nPART 2 TEST DATA")
     # testpart2("1122")
     # testpart2("1111")
 
-    print("\nPART 2 RESULT")
-    runpart2()
+    # print("\nPART 2 RESULT")
+    # runpart2()
