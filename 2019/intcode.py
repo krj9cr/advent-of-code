@@ -49,49 +49,6 @@ class Intcode:
             args.append(arg)
         return args
 
-    def getNextParams(self, modes, arg1write=False):
-        # self.validateMem(self.ip + 3)
-        arg1 = self.ip + 1
-        arg2 = self.ip + 2
-        arg3 = self.ip + 3
-
-        arg1 = self.state[arg1]
-        arg2 = self.state[arg2]
-        arg3 = self.state[arg3]
-
-        # adjust arg1
-        if arg1write:
-            if modes[0] == 0:
-                arg1 = arg1
-            elif modes[0] == 2:
-                arg1 += self.relativeBase
-        else:
-            if modes[0] == 0:
-                # self.validateMem(arg1)
-                arg1 = self.state[arg1]
-            elif modes[0] == 2:
-                mem = self.relativeBase + arg1
-                # self.validateMem(mem)
-                arg1 = self.state[mem]
-
-        # adjust arg2
-        if modes[1] == 0:
-            # self.validateMem(arg2)
-            if arg2 < len(self.state):
-                arg2 = self.state[arg2]
-        elif modes[1] == 2:
-            mem = self.relativeBase + arg2
-            # self.validateMem(mem)
-            arg2 = self.state[mem]
-
-        # adjust arg3, assume we are writing to this location
-        if modes[2] == 0:
-            if arg3 < len(self.state):
-                arg3 = self.state[arg3]
-        if modes[2] == 2:
-            arg3 += self.relativeBase
-        return arg1, arg2, arg3
-
     def op1(self, args):
         arg1, arg2, arg3 = args
         self.state[arg3] = arg1 + arg2
