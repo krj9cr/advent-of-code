@@ -182,8 +182,6 @@ def part2(data):
 def runpart2():
     part2(parseInputFile())
 
-# 148 too low
-
 ###########################
 # run
 ###########################
