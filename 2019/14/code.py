@@ -1,3 +1,4 @@
+import math
 
 class Chemical:
     name = ""
@@ -58,6 +59,13 @@ def parseLine(line: str):
         inputs[chem.name] = chem
     return Formula(inputs, output)
 
+
+
+formulas = []
+fuelformula = None
+onhand = {}
+use = {}
+
 def findTotalChemicalInputAmount(chemicalname, usedformulas):
     count = 0
     for formula in usedformulas:
@@ -66,29 +74,78 @@ def findTotalChemicalInputAmount(chemicalname, usedformulas):
                 count += formula.inputs[i].amount
     return count
 
+def findFormulaWithInputChemical(chemicalname):
+    for formula in formulas:
+        for i in formula.inputs:
+            if i == chemicalname:
+                return formula
+    return None
+
+def findFormulaWithOutputChemical(chemicalname):
+    for formula in formulas:
+        if formula.output.name == chemicalname:
+            return formula
+    return None
+
+def satisfyFormula(formula, outputAmount):
+    # account for what we might have onhand
+    if formula.output.name in onhand:
+        outputAmount -= onhand[formula.output.name]
+    mult = 1
+    # check if we need to multiply the amounts
+    if formula.output.amount < outputAmount:
+        mult = math.ceil(outputAmount / formula.output.amount)
+        outputAmount = formula.output.amount * mult
+    else:
+        outputAmount = formula.output.amount
+
+    print("onhand", onhand)
+    print("Making",outputAmount, "of",formula.output.name)
+    print("mult",mult)
+    # for each input, use what we have, or make it
+    for inputName in formula.inputs:
+        inputAmount = formula.inputs[inputName].amount * mult
+        print("checking input amount",inputAmount,"for",inputName)
+        # if ORE, just summon the amount we need
+        if inputName == "ORE":
+            print("inputname is ORE")
+            if inputName in onhand:
+                onhand[inputName] += inputAmount
+            else:
+                onhand[inputName] = inputAmount
+            continue
+        # check if we have enough on hand or not
+        if inputName in onhand and onhand[inputName] >= inputAmount:
+            onhand[inputName] -= inputAmount
+        else:
+            f2 = findFormulaWithOutputChemical(inputName)
+            satisfyFormula(f2, inputAmount)
+            # use it
+            if inputName in onhand and onhand[inputName] >= inputAmount:
+                onhand[inputName] -= inputAmount
+    print("onhand", onhand)
+    # once everything is satisfied, we can make the output
+    if formula.output.name in onhand:
+        onhand[formula.output.name] += outputAmount
+    else:
+        onhand[formula.output.name] = outputAmount
+
+
 ###########################
 # part1
 ###########################
 def part1(data):
-    # check repeat outputs... because that would be harder
-    # outputs = []
-    # for formula in data:
-    #     if formula.output.name in outputs:
-    #         print("RUHROH duplicate",formula.output.name)
-    #     outputs.append(formula.output.name)
-    # print(outputs)
-
     # find starting formula with FUEL
-    formulas = []
-    usedformulas = []
     for formula in data:
         if formula.output.name == "FUEL":
-            usedformulas.append(formula)
+            fuelformula = formula
         else:
             formulas.append(formula)
-    [print(formula) for formula in usedformulas]
     print("REST")
     [print(formula) for formula in formulas]
+
+    satisfyFormula(fuelformula, 1)
+    print("ORE",onhand["ORE"])
 
 
 def runpart1():
