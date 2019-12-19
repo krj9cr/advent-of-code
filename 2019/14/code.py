@@ -99,16 +99,15 @@ def satisfyFormula(formula, outputAmount):
     else:
         outputAmount = formula.output.amount
 
-    print("onhand", onhand)
-    print("Making",outputAmount, "of",formula.output.name)
-    print("mult",mult)
+    # print("onhand", onhand)
+    # print("Making",outputAmount, "of",formula.output.name)
+    # print("mult",mult)
     # for each input, use what we have, or make it
     for inputName in formula.inputs:
         inputAmount = formula.inputs[inputName].amount * mult
-        print("checking input amount",inputAmount,"for",inputName)
+        # print("checking input amount",inputAmount,"for",inputName)
         # if ORE, just summon the amount we need
         if inputName == "ORE":
-            print("inputname is ORE")
             if inputName in onhand:
                 onhand[inputName] += inputAmount
             else:
@@ -123,7 +122,7 @@ def satisfyFormula(formula, outputAmount):
             # use it
             if inputName in onhand and onhand[inputName] >= inputAmount:
                 onhand[inputName] -= inputAmount
-    print("onhand", onhand)
+    # print("onhand", onhand)
     # once everything is satisfied, we can make the output
     if formula.output.name in onhand:
         onhand[formula.output.name] += outputAmount
@@ -141,11 +140,10 @@ def part1(data):
             fuelformula = formula
         else:
             formulas.append(formula)
-    print("REST")
-    [print(formula) for formula in formulas]
 
     satisfyFormula(fuelformula, 1)
     print("ORE",onhand["ORE"])
+    return onhand["ORE"]
 
 
 def runpart1():
@@ -155,11 +153,34 @@ def runpart1():
 # part2
 ###########################
 def part2(data):
-    print(data)
+    cargo = 1000000000000
+    oreToFuel = part1(data)
+    # just guessed at this until we got close
+    fuelGuess = 1935265 # int(cargo / oreToFuel)
 
-def testpart2(data):
-    lines = parseInput(data)
-    part2(lines)
+    # find starting formula with FUEL
+    for formula in data:
+        if formula.output.name == "FUEL":
+            fuelformula = formula
+        else:
+            formulas.append(formula)
+
+
+    onhand.clear()
+    finalOre = satisfyFormula(fuelformula, fuelGuess)
+    oreDiff = cargo - onhand["ORE"]
+    prevGuess = None
+
+    while oreDiff > 0:
+        onhand.clear()
+        print("checking guess", fuelGuess)
+        finalOre = satisfyFormula(fuelformula, fuelGuess)
+        oreDiff = cargo - onhand["ORE"]
+        print("diff",oreDiff)
+        prevGuess = fuelGuess
+        fuelGuess += 1
+
+# 1120816 too low
 
 def runpart2():
     part2(parseInputFile())
@@ -169,12 +190,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
-
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
