@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+import math
 
 ###########################
 # helpers
@@ -85,8 +86,6 @@ def numAsteriodsDetected(data, x, y):
                 xs = i[::xslope]
                 goDirection(data, xs, ys, x, y) # down right
 
-    # printField(data,x,y)
-
     # count remaining asteroids
     count = 0
     for j in range(0, len(data)):
@@ -94,7 +93,6 @@ def numAsteriodsDetected(data, x, y):
             if i >= 0 and i < len(data[0]) and j >= 0 and j < len(data):
                 if (i,j) != (x,y) and data[j][i] == '#':
                     count += 1
-    # print("count for",(x,y)," is",count)
     return count
 
 def goDirection(data, x, y, startx, starty):
@@ -137,103 +135,56 @@ def runpart1():
 ###########################
 # part2
 ###########################
-def goDirection2(data, x, y, startx, starty, count):
-    points = [(int(i),int(j)) for (i,j) in list(zip(x,y))]
-    if len(points) > 1:
-        for (i, j) in points:
-            if (i,j) != (startx,starty):
-                if i >= 0 and i < len(data[0]) and j >= 0 and j < len(data):
-                    if data[j][i] == '#':
-                        data[j][i] = count
-                        count += 1
-                        print(i,j,count)
-                        if count == 200:
-                            print("200!!!", (i,j))
-                            exit(0)
-                        return count
-    return count
-
-def rotation(data, x, y, count):
-    w = len(data[0])
-    h = len(data)
-
-    slopes = []
-    # for xslope in range(1, w):
-    #     for yslope in range(h, 0, -1):
-    #         slopes.append((xslope, yslope))
-
-    for yslope in range(1, h):
-        for xslope in range(1, w):
-            slopes.append((xslope, yslope))
-
-    if y - 2 >= 0:
-        j = np.linspace(y, 0, y + 1)
-        i = 0 * j + x
-        count = goDirection2(data, i, j, x, y, count)  # up
-    if y - 2 >= 0 and x + 2 < w:
-        j = np.linspace(y, 0, y + 1)
-        i = np.linspace(x, w - 1, w - x)
-        slopes = sorted(slopes, key=lambda k: np.arctan2(k[0], k[1]))
-        print("slopes:", slopes)
-        for (xslope, yslope) in slopes:
-            ys = j[::yslope]
-            xs = i[::xslope]
-            count = goDirection2(data, xs, ys, x, y, count)  # up right
-    if x + 2 < w:
-        i = np.linspace(x, w - 1, w - x)
-        j = 0 * i + y
-        count = goDirection2(data, i, j, x, y, count)  # right
-    if y + 2 < h and x + 2 < w:
-        j = np.linspace(y, h - 1, h - y)
-        i = np.linspace(x, w - 1, w - x)
-        slopes = sorted(slopes, key=lambda k: np.arctan2(k[0], k[1]))
-        print("slopes:", slopes)
-        for (xslope, yslope) in slopes:
-            ys = j[::yslope]
-            xs = i[::xslope]
-            count = goDirection2(data, xs, ys, x, y, count)  # down right
-    if y + 2 < h:
-        j = np.linspace(y, h - 1, h - y)
-        i = 0 * j + x
-        count = goDirection2(data, i, j, x, y, count)  # down
-    if y + 2 < h and x - 2 >= 0:
-        j = np.linspace(y, h - 1, h - y)
-        i = np.linspace(x, 0, x + 1)
-        slopes = sorted(slopes, key=lambda k: np.arctan2(k[0], k[1]))
-        print("slopes:", slopes)
-        for (xslope, yslope) in slopes:
-            ys = j[::yslope]
-            xs = i[::xslope]
-            count = goDirection2(data, xs, ys, x, y, count)  # down left
-    if x - 2 >= 0:
-        i = np.linspace(x, 0, x + 1)
-        j = 0 * i + y
-        count = goDirection2(data, i, j, x, y, count)  # left
-    if y - 2 >= 0 and x - 2 >= 0:
-        j = np.linspace(y, 0, y + 1)
-        i = np.linspace(x, 0, x + 1)
-        slopes = sorted(slopes, key=lambda k: np.arctan2(k[0], k[1]))
-        print("slopes:", slopes)
-        for (xslope, yslope) in slopes:
-            ys = j[::yslope]
-            xs = i[::xslope]
-            count = goDirection2(data, xs, ys, x, y, count)  # up left
-    printField(data, x, y)
-    return count
+def clockwiseangle_and_distance(point, origin, refvec=[0,1]):
+    # Vector between point and the origin: v = p - o
+    vector = [point[0]-origin[0], point[1]-origin[1]]
+    # Length of vector: ||v||
+    lenvector = math.hypot(vector[0], vector[1])
+    # If length is zero there is no angle
+    if lenvector == 0:
+        return -math.pi, 0
+    # Normalize vector: v/||v||
+    normalized = [vector[0]/lenvector, vector[1]/lenvector]
+    dotprod  = normalized[0]*refvec[0] + normalized[1]*refvec[1]     # x1*x2 + y1*y2
+    diffprod = refvec[1]*normalized[0] - refvec[0]*normalized[1]     # x1*y2 - y1*x2
+    angle = math.atan2(diffprod, dotprod)
+    return angle, lenvector
 
 def part2(data):
-    bestPos = part1(data)
-    count = 1
+    print(data)
+    spot = part1(data)
+    print("part1 spot", spot)
+    asteroids = []
+    for y in range(len(data)):
+        for x in range(len(data[0])):
+            char = data[y][x]
+            if char == '#' and (x,y) != spot:
+                angle, l = clockwiseangle_and_distance((x, y), spot)
+                asteroids.append((x,y,angle,l))
+    asteroids = sorted(asteroids, key=lambda x: x[3])
+    asteroids = sorted(asteroids, key=lambda x: -x[2])
+    print(asteroids)
+    wow = asteroids
+    wow = [asteroids[0]]
+    lastangle = asteroids[0][2]
+    asteroids = asteroids[1:]
+    # do loops around to do each angle once
+    while len(wow) < 200:
+        for asteroid in asteroids:
+            if asteroid[2] == lastangle or asteroid in wow:
+                continue
+            else:
+                wow.append(asteroid)
+                lastangle = asteroid[2]
+    print(wow)
+    print(wow[198:201])
+    asteroid = wow[199]
+    print(asteroid)
+    print("answer", (asteroid[0] * 100) + asteroid[1])
 
-    while True:
-        count = rotation(data, bestPos[0], bestPos[1], count)
-        printField(data,bestPos[0],bestPos[1])
 
 def runpart2():
     part2(parseInputFile())
-
-# 1600 TOO LOW
-# 1709 too high
 
 ###########################
 # run
@@ -241,10 +192,6 @@ def runpart2():
 if __name__ == '__main__':
     # print("\nPART 1 RESULT")
     # runpart1()
-
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
 
     print("\nPART 2 RESULT")
     runpart2()

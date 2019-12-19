@@ -28,6 +28,25 @@ def phaseRow(inputDigits, patternDigits):
         total += (inp * pat)
     return abs(total) % 10
 
+def phaseRow2(inputDigits, outi):
+    total = 0
+    out3 = outi*3
+    out4 = outi*4
+    for i in range(len(inputDigits)):
+        inp = inputDigits[i]
+        pi = (i % out4) + 1
+        if outi <= pi < (outi*2):
+            total += inp
+        elif out3 <= pi < out4:
+            total -= inp
+        # otherwise do nothing, because we multiply by 0
+    return abs(total) % 10
+
+def phaseRow3(inputDigits, outi, size):
+    pattern = np.resize(np.repeat(basePattern, outi), size+1)[1:]
+    total = np.sum(np.array(inputDigits) * pattern)
+    return abs(total) % 10
+
 ###########################
 # part1
 ###########################
@@ -35,20 +54,11 @@ def part1(data, phases=100):
     print(data)
     size = len(data)
     print("size",size)
-    patterns = []
-    for outi in range(size):
-        repeatedDigits = list(np.repeat(basePattern, outi+1))
-        diff = (size + 1) - len(repeatedDigits)
-        if diff > 0:
-            for d in range(diff):
-                repeatedDigits.append(repeatedDigits[d])
-        patterns.append(repeatedDigits[1:size + 1])
-    print(len(patterns))
     currDigits = deepcopy(data)
     for phasei in range(phases):
         nextDigits = []
-        for outi in range(size):
-            nextDigits.append(phaseRow(currDigits, patterns[outi]))
+        for outi in range(1,size+1):
+            nextDigits.append(phaseRow3(currDigits, outi, size))
         currDigits = deepcopy(nextDigits)
     print("final digits:")
     [print(item,end='') for item in currDigits[0:8]]
@@ -65,28 +75,27 @@ def runpart1():
 # part2
 ###########################
 def part2(data, phases=100):
+    origsize = len(data)
     print(data)
     messageoffset = int(''.join([str(num) for num in data[:7]]))
     data = data * 10000
+
+    # throw some away
+    toss = max( 0, ( ( messageoffset - 1 ) | ( origsize - 1 ) ) + 1 - origsize )
+    newoffset = messageoffset - toss
+    data = data[toss:]
     size = len(data)
+
     print("size",size)
-    patterns = []
-    for outi in range(size):
-        repeatedDigits = list(np.repeat(basePattern, outi+1))
-        diff = (size + 1) - len(repeatedDigits)
-        if diff > 0:
-            for d in range(diff):
-                repeatedDigits.append(repeatedDigits[d])
-        patterns.append(repeatedDigits[1:size + 1])
-    print(len(patterns))
     currDigits = deepcopy(data)
     for phasei in range(phases):
         nextDigits = []
-        for outi in range(size):
-            nextDigits.append(phaseRow(currDigits, patterns[outi]))
+        for outi in range(1,size+1):
+            nextDigits.append(phaseRow3(currDigits, outi, size))
         currDigits = deepcopy(nextDigits)
         print('phase', phasei)
-    message = currDigits[messageoffset+1:messageoffset+8+1]
+    print("final",currDigits)
+    message = currDigits[newoffset+1:newoffset+8+1]
     print("message:",message)
 
 def testpart2(data, phases=100):
@@ -109,10 +118,10 @@ if __name__ == '__main__':
     # print("\nPART 1 RESULT")
     # runpart1()
 
-    print("\n\nPART 2 TEST DATA")
+    # print("\n\nPART 2 TEST DATA")
     testpart2("03036732577212944063491565474664")
-    testpart2("02935109699940807407585447034323")
-    testpart2("03081770884921959731165446850517")
+    # testpart2("02935109699940807407585447034323")
+    # testpart2("03081770884921959731165446850517")
 
     # print("\nPART 2 RESULT")
     # runpart2()
