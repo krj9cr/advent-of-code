@@ -6,7 +6,6 @@ from intcode import Intcode
 
 import plotly.graph_objects as go
 import random
-from sortedcontainers import SortedDict
 from collections import deque
 
 ###########################

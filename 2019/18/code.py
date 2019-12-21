@@ -25,9 +25,9 @@ def findKeysAndDoors(grid):
                 start = (x,y)
             if char != wallChar and char != emptyChar and char != startChar:
                 if char.islower():
-                    keys[(x,y)] = char
+                    keys[char] = (x,y)
                 else:
-                    doors[(x,y)] = char
+                    doors[char] = (x,y)
     return keys, doors, start
 
 def printGrid(grid):
@@ -36,9 +36,15 @@ def printGrid(grid):
             print(item, end="")
         print()
 
+def isDoor(char):
+    if char != wallChar and char != emptyChar and char != startChar and char.isupper():
+        return True
+    else:
+        return False
+
 def bfs(grid, start, end):
-    queue = deque([[startChar]])
-    seen = set([startChar])
+    queue = deque([[start]])
+    seen = set([start])
     while queue:
         path = queue.popleft()
         x, y = path[-1]
@@ -46,7 +52,7 @@ def bfs(grid, start, end):
             return path
         for x2, y2 in ((x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1)):
             if 0 <= x2 < len(grid[0]) and 0 <= y2 < len(grid):
-                if grid[(x2,y2)] != wallChar:
+                if grid[y2][x2] != wallChar:
                     if (x2, y2) not in seen:
                         queue.append(path + [(x2,y2)])
                         seen.add((x2,y2))
@@ -60,6 +66,51 @@ def part1(grid):
     print("start", start)
     print("keys", keys)
     print("doors", doors)
+    steps = 0
+    currLoc = start
+    acquiredKeys = set()
+
+    distToObjects = {}
+    for key in keys:
+        distToObjects[key] = bfs(grid, start, keys[key])
+    # for door in doors:
+    #     distToObjects[door] = bfs(grid, start, doors[door])
+    print(distToObjects)
+
+    blockages = {}
+    for object in distToObjects:
+        path = distToObjects[object]
+        for coord in path:
+            for door in doors:
+                if coord == doors[door] and object != door:
+                    if object in blockages:
+                        blockages[object].append(door)
+                    else:
+                        blockages[object] = [door]
+    print(blockages)
+
+    # move to closest key
+    for key, value in sorted(distToObjects.items(), key=lambda item: len(item[1])):
+        if key not in blockages or blockages[key] is None:
+            currLoc = value[-1]
+            steps += len(value)
+            acquiredKeys.add(key)
+            distToObjects.pop(key)
+            break
+
+    # revist any keys blocked by the one we just got
+    for key in blockages.keys():
+        doors = blockages[key]
+        for door in doors:
+            if door.lower() in acquiredKeys:
+                doors = doors.remove(door)
+        blockages[key] = doors
+
+    print("actuired keys", acquiredKeys)
+    print("distances",distToObjects)
+    print("blockages", blockages)
+
+
 
 def runpart1():
     part1(parseInputFile())
