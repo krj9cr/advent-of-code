@@ -57,6 +57,23 @@ def bfs(grid, start, end):
                         queue.append(path + [(x2,y2)])
                         seen.add((x2,y2))
 
+def computeDistances(grid, keys, start, acquiredKeys):
+    distToObjects = {}
+    for key in keys:
+        if key not in acquiredKeys:
+            distToObjects[key] = bfs(grid, start, keys[key])
+    # for door in doors:
+    #     distToObjects[door] = bfs(grid, start, doors[door])
+    # print(distToObjects)
+
+    return distToObjects
+
+def allKeys(keys, acquiredKeys):
+    for key in keys:
+        if key not in acquiredKeys:
+            return False
+    return True
+
 ###########################
 # part1
 ###########################
@@ -70,13 +87,8 @@ def part1(grid):
     currLoc = start
     acquiredKeys = set()
 
-    distToObjects = {}
-    for key in keys:
-        distToObjects[key] = bfs(grid, start, keys[key])
-    # for door in doors:
-    #     distToObjects[door] = bfs(grid, start, doors[door])
-    print(distToObjects)
 
+    distToObjects = computeDistances(grid, keys, currLoc, acquiredKeys)
     blockages = {}
     for object in distToObjects:
         path = distToObjects[object]
@@ -84,32 +96,45 @@ def part1(grid):
             for door in doors:
                 if coord == doors[door] and object != door:
                     if object in blockages:
-                        blockages[object].append(door)
+                        blockages[object].add(door)
                     else:
-                        blockages[object] = [door]
-    print(blockages)
+                        blockages[object] = set(door)
 
-    # move to closest key
-    for key, value in sorted(distToObjects.items(), key=lambda item: len(item[1])):
-        if key not in blockages or blockages[key] is None:
-            currLoc = value[-1]
-            steps += len(value)
-            acquiredKeys.add(key)
-            distToObjects.pop(key)
-            break
-
-    # revist any keys blocked by the one we just got
-    for key in blockages.keys():
-        doors = blockages[key]
-        for door in doors:
-            if door.lower() in acquiredKeys:
-                doors = doors.remove(door)
-        blockages[key] = doors
-
-    print("actuired keys", acquiredKeys)
     print("distances",distToObjects)
     print("blockages", blockages)
 
+    while not allKeys(keys, acquiredKeys):
+        distToObjects = computeDistances(grid, keys, currLoc, acquiredKeys)
+
+        # move to closest key, or next alphabetically?
+        l = sorted(distToObjects.items(), key=lambda item: item)
+        l = sorted(l, key=lambda item: len(item[1]))
+        for key, path in l:
+            if key not in blockages or blockages[key] is None:
+                print("moving towards",key)
+                currLoc = path[-1]
+                steps += len(path) - 1
+                acquiredKeys.add(key)
+                distToObjects.pop(key)
+                break
+
+        # revist any keys blocked by the one we just got
+        for key in blockages.keys():
+            doors = blockages[key]
+            if doors is not None:
+                for door in doors:
+                    if door.lower() in acquiredKeys:
+                        doors.remove(door)
+                        if len(doors) == 0:
+                            blockages[key] = None
+                        break
+
+        print("actuired keys", acquiredKeys)
+        print("distances",distToObjects)
+        print("blockages", blockages)
+    print("steps",steps)
+
+# 5206 too high
 
 
 def runpart1():
