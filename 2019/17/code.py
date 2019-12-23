@@ -83,8 +83,36 @@ def runpart1():
 ###########################
 # part2
 ###########################
+def pathToASCII(path):
+    result = []
+    for p in path:
+        for char in p:
+            result.append(ord(char))
+        result.append(44) # comma
+    # replace final comma with newline
+    result[-1] = 10
+    return result
+
 def part2(data):
     print(data)
+    # "Force the vacuum robot to wake up by changing the
+    #  value in your ASCII program at address 0 from 1 to 2"
+    data[0] = 2
+
+    # found these paths by hand!
+    A = ["R", "8", "L", "10", "L", "12", "R", "4"]
+    B = ["R", "8", "L", "12", "R", "4", "R", "4"]
+    C = ["R", "8", "L", "10", "R", "8"]
+    routine = ["A", "B", "A", "C", "A", "B", "C", "B", "C", "B"]
+
+    # convert paths to input
+    intcode_input = pathToASCII(routine) + pathToASCII(A) + pathToASCII(B) + pathToASCII(C) + [ord("n"),10]
+    print("input", intcode_input)
+    # fire it off
+    intcoder = Intcode(data, intcode_input, extra_mem=10000, debug=False)
+    intcoder.run()
+    output = intcoder.output
+    print(output[-1])
 
 def testpart2(data):
     lines = parseInput(data)
@@ -98,12 +126,12 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
     # print("\n\nPART 2 TEST DATA")
     # testpart2("1122")
     # testpart2("1111")
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
