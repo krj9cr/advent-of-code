@@ -1,8 +1,9 @@
 
 class Intcode:
-    def __init__(self, initial_state=None, intcode_input=None, extra_mem=2000, debug=False):
+    def __init__(self, initial_state=None, intcode_input_callback=None, extra_mem=2000, debug=False):
         self.initial_state = initial_state
-        self.intcode_input = intcode_input
+        self.intcode_input_callback = intcode_input_callback
+        self.intcode_input_index = 0
 
         self.state = self.initial_state[:]
         for _ in range(0, extra_mem):
@@ -61,9 +62,14 @@ class Intcode:
 
     def op3(self, args):
         arg1 = args[0]
+        if callable(self.intcode_input_callback):
+            input_val = self.intcode_input_callback(self.intcode_input_index)
+        else:
+            input_val = self.intcode_input_callback[self.intcode_input_index]
+        self.intcode_input_index += 1
         if self.debug:
-            print("writing to",arg1, "value",self.intcode_input[-1])
-        self.state[arg1] = self.intcode_input[-1]
+            print("writing to", arg1, "value", input_val)
+        self.state[arg1] = input_val
         self.ip += 2
 
     def op4(self, args):
@@ -119,8 +125,6 @@ class Intcode:
             args = self.getArgs(modes, 3)
             self.op2(args)
         elif op == 3:
-            if self.debug:
-                print("using input", self.intcode_input[-1])
             args = self.getArgs(modes, 1, write=True)
             self.op3(args)
         elif op == 4:

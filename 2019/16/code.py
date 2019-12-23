@@ -75,28 +75,29 @@ def runpart1():
 # part2
 ###########################
 def part2(data, phases=100):
-    origsize = len(data)
     print(data)
     messageoffset = int(''.join([str(num) for num in data[:7]]))
     data = data * 10000
 
-    # throw some away
-    toss = max( 0, ( ( messageoffset - 1 ) | ( origsize - 1 ) ) + 1 - origsize )
-    newoffset = messageoffset - toss
-    data = data[toss:]
+    data = data[messageoffset:]
     size = len(data)
+    results = data[0:8]
 
     print("size",size)
-    currDigits = deepcopy(data)
-    for phasei in range(phases):
-        nextDigits = []
-        for outi in range(1,size+1):
-            nextDigits.append(phaseRow3(currDigits, outi, size))
-        currDigits = deepcopy(nextDigits)
-        print('phase', phasei)
-    print("final",currDigits)
-    message = currDigits[newoffset+1:newoffset+8+1]
-    print("message:",message)
+
+    next_top = 100
+    next_bottom = 1
+    acc = 1
+    for n in range(1,size):
+        acc = acc * next_top // next_bottom
+        next_top += 1
+        next_bottom += 1
+        for i in range(8):
+            if n+i >= len(data):
+                continue
+            results[i] = (results[i] + acc * data[n+i]) % 10
+
+    print("message:",results)
 
 def testpart2(data, phases=100):
     lines = parseInput(data)
@@ -119,9 +120,9 @@ if __name__ == '__main__':
     # runpart1()
 
     # print("\n\nPART 2 TEST DATA")
-    testpart2("03036732577212944063491565474664")
+    # testpart2("03036732577212944063491565474664")
     # testpart2("02935109699940807407585447034323")
     # testpart2("03081770884921959731165446850517")
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()

@@ -4,6 +4,8 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 from intcode import Intcode
 
+from copy import deepcopy
+
 ###########################
 # helpers
 ###########################
@@ -23,6 +25,18 @@ def printGrid(grid):
             print(item,end='')
         print()
 
+def drawPoints(points):
+    size = 0
+    for x, y in points:
+        size = max(size, x, y)
+    for j in range(size):
+        for i in range(size):
+            if (i,j) in points:
+                print("#",end="")
+            else:
+                print(".",end="")
+        print()
+
 ###########################
 # part1
 ###########################
@@ -37,25 +51,16 @@ def part1(data):
             row.append(".")
         grid.append(row)
 
-    intcode_input = [0, 0]
-    i = j = 0
-
-    intcoder = Intcode(data, intcode_input, debug=False)
-    while intcoder.running:
-        # check for outputs
-        if len(intcoder.output) >= 1:
+    for j in range(size):
+        for i in range(size):
+            print("inputs",i,j)
+            # in this problem, the intcoder only runs once for each input
+            intcoder = Intcode(deepcopy(data), [i, j], debug=False)
+            intcoder.run()
+            print("output",intcoder.output)
             if intcoder.output[0] == 1:
                 grid[j][i] = "#"
-            intcoder.output = []
-            # change inputs, too
-            i += 1
-            if i == size:
-                i = 0
-                j += 1
-                if j == size:
-                    break
-            intcode_input = [i, j]
-        intcoder.step()
+
     printGrid(grid)
     count = 0
     for row in grid:
@@ -64,10 +69,6 @@ def part1(data):
                 count += 1
 
     print("count",count)
-
-def testpart1(data):
-    lines = parseInput(data)
-    part1(lines)
 
 def runpart1():
     part1(parseInputFile())
@@ -78,9 +79,32 @@ def runpart1():
 def part2(data):
     print(data)
 
-def testpart2(data):
-    lines = parseInput(data)
-    part2(lines)
+    points = []
+    size = 50
+
+    x = y = 1
+    upperslope = 1.7
+    lowerslope = 2
+
+    first = last = 0
+
+    for k in range(size):
+        x2 = list(range(int(x*upperslope), int(x*lowerslope)+1))
+        # y2 = list(range(int(y*upperslope), int(y*lowerslope)+1))
+        j = y
+        for i in x2:
+            print("inputs",i,j)
+            # in this problem, the intcoder only runs once for each input
+            intcoder = Intcode(deepcopy(data), [i, j], debug=False)
+            intcoder.run()
+            if intcoder.output[0] == 1:
+                points.append((i,j))
+        x +=1
+        y +=1
+
+    drawPoints(points)
+    print("points",points)
+    print("count",len(points))
 
 def runpart2():
     part2(parseInputFile())
@@ -89,16 +113,9 @@ def runpart2():
 # run
 ###########################
 if __name__ == '__main__':
-    print("PART 1 TEST DATA")
-    # testpart1("1111")
-    # testpart1("1234")
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
-
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
