@@ -1,6 +1,6 @@
 from collections import deque
 import itertools
-
+import sys
 
 ###########################
 # helpers
@@ -31,6 +31,23 @@ def findKeysAndDoors(grid):
                 else:
                     doors[char] = (x,y)
     return keys, doors, start
+
+def findKeysAndDoorsAndStarts(grid):
+    keys = {}
+    doors = {}
+    starts = []
+    for y in range(len(grid)):
+        for x in range(len(grid[0])):
+            char = grid[y][x]
+            if char == startChar:
+                starts.append((x,y))
+                continue
+            if char != wallChar and char != emptyChar and char != startChar:
+                if char.islower():
+                    keys[char] = (x,y)
+                else:
+                    doors[char] = (x,y)
+    return keys, doors, starts
 
 def printGrid(grid):
     for row in grid:
@@ -164,8 +181,36 @@ def runpart1():
 ###########################
 # part2
 ###########################
-def part2(data):
-    print(data)
+def part2(grid):
+    # printGrid(grid)
+    keys, doors, starts = findKeysAndDoorsAndStarts(grid)
+    print("start", starts)
+    print("keys", keys)
+    print("doors", doors)
+
+    steps = 0
+
+    # manually count number of steps on each path
+    robot_paths = [
+        ['y','a','c','i','q','x','n'],
+        ['u','k','b','h'],
+        ['o','r','j','d','v','p'],
+        ['t','g','e','z','w','f','s','m','l']
+    ]
+
+    for i in range(len(starts)):
+        start = starts[i]
+        big_path = robot_paths[i]
+        print("robot",start,"going to",big_path[0])
+        path = bfs(grid, start, keys[big_path[0]])
+        currLoc = path[-1]
+        steps += len(path) - 1
+        for j in range(1, len(big_path)):
+            path = bfs(grid, currLoc, keys[big_path[j]])
+            currLoc = path[-1]
+            steps += len(path) - 1
+
+    print("steps",steps)
 
 def runpart2():
     part2(parseInputFile())
@@ -175,9 +220,9 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
