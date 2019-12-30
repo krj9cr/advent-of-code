@@ -1,4 +1,6 @@
 from collections import deque
+import itertools
+
 
 ###########################
 # helpers
@@ -36,12 +38,6 @@ def printGrid(grid):
             print(item, end="")
         print()
 
-def isDoor(char):
-    if char != wallChar and char != emptyChar and char != startChar and char.isupper():
-        return True
-    else:
-        return False
-
 def bfs(grid, start, end):
     queue = deque([[start]])
     seen = set([start])
@@ -62,15 +58,13 @@ def computeDistances(grid, keys, start, acquiredKeys):
     for key in keys:
         if key not in acquiredKeys:
             distToObjects[key] = bfs(grid, start, keys[key])
-    # for door in doors:
-    #     distToObjects[door] = bfs(grid, start, doors[door])
-    # print(distToObjects)
 
     return distToObjects
 
-def allKeys(keys, acquiredKeys):
-    for key in keys:
-        if key not in acquiredKeys:
+
+def checkRules(path, rules):
+    for i, j in rules:
+        if path.index(i) > path.index(j):
             return False
     return True
 
@@ -83,58 +77,85 @@ def part1(grid):
     print("start", start)
     print("keys", keys)
     print("doors", doors)
-    steps = 0
-    currLoc = start
-    acquiredKeys = set()
 
+    # generate all possible key paths
+    # working_orders = {}
+    best_path = None
+    best_steps = 5206 # found this number after guessing
 
-    distToObjects = computeDistances(grid, keys, currLoc, acquiredKeys)
-    blockages = {}
-    for object in distToObjects:
-        path = distToObjects[object]
-        for coord in path:
-            for door in doors:
-                if coord == doors[door] and object != door:
-                    if object in blockages:
-                        blockages[object].add(door)
-                    else:
-                        blockages[object] = set(door)
+    # rules
+    # rules = [("k","v"),("a","u"),("d","k"),("a","d"),("d","b"),("a","h"),("d","h"),
+    #          ("u","c"),("b","c"),("g","c"),("u","i"),("b","i"),("g","i"),("f","n"),
+    #          ("z","n"),("w","q"),("w","x"),("p","s"),("p","m"),("p","l"),("q","s"),
+    #          ("q","m"),("q","l"),("q","f"),("v","p"),("k","p"),("v","e"),("r","j")]
+    rules = []
+    possible_start =['g','r','j', 'd','y', 'a', 'u', 'k', 'b', 'h','c', 'i', 'v', 'p', 'o', 't',   'e', 'z', 'w', 'q', 'x', 'f', 's', 'm', 'l', 'n']
 
-    print("distances",distToObjects)
-    print("blockages", blockages)
+    paths = {}
+    # copmute paths from start to keys
+    for key in keys:
+        path = bfs(grid, start, keys[key])
+        paths[("start",key)] = path
+    # compute paths between keys
+    for key in keys:
+        for key2 in keys:
+            if key != key2:
+                path = bfs(grid, keys[key], keys[key2])
+                paths[(key,key2)] = path
 
-    while not allKeys(keys, acquiredKeys):
-        distToObjects = computeDistances(grid, keys, currLoc, acquiredKeys)
+    letters = list(keys.keys())
+    for l in possible_start:
+        letters.remove(l)
 
-        # move to closest key, or next alphabetically?
-        l = sorted(distToObjects.items(), key=lambda item: item)
-        l = sorted(l, key=lambda item: len(item[1]))
-        for key, path in l:
-            if key not in blockages or blockages[key] is None:
-                print("moving towards",key)
-                currLoc = path[-1]
-                steps += len(path) - 1
-                acquiredKeys.add(key)
-                distToObjects.pop(key)
-                break
+    all_permutations = itertools.permutations(letters)  # no list(...)
 
-        # revist any keys blocked by the one we just got
-        for key in blockages.keys():
-            doors = blockages[key]
-            if doors is not None:
+    # for each keypath, try to run it
+    for perm in all_permutations:
+        key_order = possible_start + list(perm)
+        # check some rules before even trying
+        if not checkRules(key_order, rules):
+            # print("tossing",key_order)
+            continue
+        currLoc = start
+        currKey = "start"
+        acquiredKeys = set()
+        steps = 0
+        badPath = False
+        print('testing path', key_order)
+        # try to visit each key
+        for key in key_order:
+            # path_to_key = bfs(grid, currLoc, keys[key])
+            path_to_key = paths[(currKey, key)]
+            # print("path from",currLoc,"to",key,":", path_to_key)
+            # check if the path contains a door
+            for coord in path_to_key:
                 for door in doors:
                     if door.lower() in acquiredKeys:
-                        doors.remove(door)
-                        if len(doors) == 0:
-                            blockages[key] = None
+                        continue
+                    if coord == doors[door]:
+                        # print(door,"blocks path")
+                        badPath = True
                         break
+                if badPath:
+                    break
+            # otherwise 'move' to the key and pick it up
+            currLoc = path_to_key[-1]
+            currKey = key
+            steps += len(path_to_key) - 1
+            acquiredKeys.add(key)
+            # stop early if worse than best
+            if steps >= best_steps:
+                badPath = True
+            if badPath:
+                break
+        if not badPath:
+            # once we visited all the keys, save the steps
+            if steps < best_steps:
+                best_steps = steps
+                best_path = key_order
+                print("best path",best_path,"with steps", best_steps)
 
-        print("actuired keys", acquiredKeys)
-        print("distances",distToObjects)
-        print("blockages", blockages)
-    print("steps",steps)
-
-# 5206 too high
+    print("best path", best_path, "with steps", best_steps)
 
 
 def runpart1():
