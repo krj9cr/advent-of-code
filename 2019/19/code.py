@@ -77,34 +77,59 @@ def runpart1():
 # part2
 ###########################
 def part2(data):
-    print(data)
 
+    print(data)
     points = []
     size = 50
 
-    x = y = 1
-    upperslope = 1.7
-    lowerslope = 2
+    i = 0
+    j = 0
+    while i < size and j < size:
+        print("inputs",i,j)
+        # in this problem, the intcoder only runs once for each input
+        intcoder = Intcode(deepcopy(data), [i, j], debug=False)
+        intcoder.run()
+        print("output",intcoder.output)
+        if intcoder.output[0] == 1:
+            points.append((i,j))
+            i += 1
+            j += 1
+        else:
 
-    first = last = 0
 
-    for k in range(size):
-        x2 = list(range(int(x*upperslope), int(x*lowerslope)+1))
-        # y2 = list(range(int(y*upperslope), int(y*lowerslope)+1))
-        j = y
-        for i in x2:
-            print("inputs",i,j)
-            # in this problem, the intcoder only runs once for each input
-            intcoder = Intcode(deepcopy(data), [i, j], debug=False)
-            intcoder.run()
-            if intcoder.output[0] == 1:
-                points.append((i,j))
-        x +=1
-        y +=1
+
 
     drawPoints(points)
     print("points",points)
     print("count",len(points))
+    # print(data)
+    #
+    # points = []
+    # size = 50
+    #
+    # x = y = 1
+    # upperslope = 1.7
+    # lowerslope = 2
+    #
+    # first = last = 0
+    #
+    # for k in range(size):
+    #     x2 = list(range(int(x*upperslope), int(x*lowerslope)+1))
+    #     # y2 = list(range(int(y*upperslope), int(y*lowerslope)+1))
+    #     j = y
+    #     for i in x2:
+    #         print("inputs",i,j)
+    #         # in this problem, the intcoder only runs once for each input
+    #         intcoder = Intcode(deepcopy(data), [i, j], debug=False)
+    #         intcoder.run()
+    #         if intcoder.output[0] == 1:
+    #             points.append((i,j))
+    #     x +=1
+    #     y +=1
+    #
+    # drawPoints(points)
+    # print("points",points)
+    # print("count",len(points))
 
 def runpart2():
     part2(parseInputFile())
