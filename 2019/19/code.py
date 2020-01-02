@@ -79,57 +79,41 @@ def runpart1():
 def part2(data):
 
     print(data)
+    i = j = 10
     points = []
-    size = 50
 
-    i = 0
-    j = 0
-    while i < size and j < size:
+    while True:
+        # zig zag down the bottom line
         print("inputs",i,j)
         # in this problem, the intcoder only runs once for each input
         intcoder = Intcode(deepcopy(data), [i, j], debug=False)
         intcoder.run()
         print("output",intcoder.output)
+        # down if it's a spot, right if not
         if intcoder.output[0] == 1:
             points.append((i,j))
-            i += 1
+            # if it's a spot, check the upper right corner
+            x = i + 99
+            y = j - 99
+            if y >= 0:
+                print("checking upper corner",x,y)
+                intcoder = Intcode(deepcopy(data), [x, y], debug=False)
+                intcoder.run()
+                if intcoder.output[0] == 1:
+                    # we good
+                    points.append((x,y))
+                    # drawPoints(points)
+                    # take the upper left corner
+                    # x * 10000 + y
+                    points.append((i,y))
+                    print("answer:",i*10000 + y)
+
+                    exit(0)
+            # go down
             j += 1
         else:
-
-
-
-
-    drawPoints(points)
-    print("points",points)
-    print("count",len(points))
-    # print(data)
-    #
-    # points = []
-    # size = 50
-    #
-    # x = y = 1
-    # upperslope = 1.7
-    # lowerslope = 2
-    #
-    # first = last = 0
-    #
-    # for k in range(size):
-    #     x2 = list(range(int(x*upperslope), int(x*lowerslope)+1))
-    #     # y2 = list(range(int(y*upperslope), int(y*lowerslope)+1))
-    #     j = y
-    #     for i in x2:
-    #         print("inputs",i,j)
-    #         # in this problem, the intcoder only runs once for each input
-    #         intcoder = Intcode(deepcopy(data), [i, j], debug=False)
-    #         intcoder.run()
-    #         if intcoder.output[0] == 1:
-    #             points.append((i,j))
-    #     x +=1
-    #     y +=1
-    #
-    # drawPoints(points)
-    # print("points",points)
-    # print("count",len(points))
+            # go right
+            i += 1
 
 def runpart2():
     part2(parseInputFile())
