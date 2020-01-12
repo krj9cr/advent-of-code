@@ -20,30 +20,18 @@ def parseLine(line: str):
 ###########################
 # part1
 ###########################
-def part1(data, size):
+def part1(data, size, cardIdx=2019):
     # print(data)
-
-    deck = [ i for i in range(size) ]
-
     for instruction in data:
         if "deal into new stack" == instruction:
-            deck = list(reversed(deck))
+            cardIdx = (-cardIdx - 1) % size
         elif "deal with increment" in instruction:
             increment = int(instruction.split(" ")[-1])
-            newdeck = [0 for _ in range(size)]
-            newi = 0
-            for i in range(size):
-                newdeck[newi] = deck[i]
-                newi += increment
-                newi = newi % size
-            deck = newdeck
+            cardIdx = (cardIdx * increment) % size
         elif "cut" in instruction:
             cut = int(instruction.split(" ")[-1])
-            newdeck = deck[cut:] + deck[:cut]
-            deck = newdeck
-        # print(deck)
-    if size > 2019:
-        print("2019",deck.index(2019))
+            cardIdx = (cardIdx - cut) % size
+    print("2019",cardIdx)
 
 def testpart1(data, size):
     lines = parseInput(data)
@@ -55,32 +43,33 @@ def runpart1():
 ###########################
 # part2
 ###########################
-def part2(data, size):
+# Fermat's little theorem gives a simple inv:
+def inv(a, n): return pow(a, n-2, n)
+
+# https://en.wikipedia.org/wiki/Linear_congruential_generator
+def part2(data, size, cardIdx=2020, numShuffles=101741582076661):
     # print(data)
+    a, b = 1, 0
+    for instruction in data:
+        if "deal into new stack" == instruction:
+            la, lb = -1, -1
+        elif "deal with increment" in instruction:
+            la, lb = int(instruction.split(" ")[-1]), 0
+        elif "cut" in instruction:
+            la, lb = 1, -int(instruction.split(" ")[-1])
+        # la * (a * x + b) + lb == la * a * x + la*b + lb
+        # The `% n` doesn't change the result, but keeps the numbers small.
+        a = (la * a) % size
+        b = (la * b + lb) % size
 
-    deck = [ i for i in range(size) ]
+    Ma = pow(a, numShuffles, size)
+    Mb = (b * (Ma - 1) * inv(a - 1, size)) % size
 
-    for x in range(101741582076661):
-        print(x)
-        for instruction in data:
-            if "deal into new stack" == instruction:
-                deck = list(reversed(deck))
-            elif "deal with increment" in instruction:
-                increment = int(instruction.split(" ")[-1])
-                newdeck = [0 for _ in range(size)]
-                newi = 0
-                for i in range(size):
-                    newdeck[newi] = deck[i]
-                    newi += increment
-                    newi = newi % size
-                deck = newdeck
-            elif "cut" in instruction:
-                cut = int(instruction.split(" ")[-1])
-                newdeck = deck[cut:] + deck[:cut]
-                deck = newdeck
-            # print(deck)
-    if size > 2020:
-        print("2020:",deck.index(2020))
+    # This computes "where does 2020 end up", but I want "what is at 2020".
+    # print((Ma * c + Mb) % n)
+
+    # So need to invert (2020 - MB) * inv(Ma)
+    print("location of 2020",((cardIdx - Mb) * inv(Ma, size)) % size)
 
 
 def testpart2(data):
@@ -104,10 +93,6 @@ if __name__ == '__main__':
     #
     # print("\nPART 1 RESULT")
     # runpart1()
-
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
 
     print("\nPART 2 RESULT")
     runpart2()
