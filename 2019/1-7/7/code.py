@@ -1,6 +1,7 @@
 from itertools import permutations
 import sys
 import threading, time
+from lib.intcode import Intcode
 
 locks = [ threading.Lock() for _ in range(0,5)]
 
@@ -16,8 +17,6 @@ def parseInput(lines):
 
 def parseLine(line: str):
     return line.strip()
-
-
 
 def parseOp(op):
     s = str(op)
@@ -105,58 +104,6 @@ def op8(modes, data, i):
     else:
         data[data[i+3]] = 0
 
-
-def intcode(data, inputs):
-    # print(data)
-    ip = 0
-    inputi = 0
-    output = []
-    while ip < len(data):
-        # print(data)
-        nextOp = data[ip]
-        modes, op = parseOp(nextOp)
-        if op == 1:
-            # print("op 1")
-            op1(modes, data, ip)
-            ip += 4
-        elif op == 2:
-            # print("op 2")
-            op2(modes, data, ip)
-            ip += 4
-        elif op == 3:
-            # print("op 3")
-            while inputs[inputi] is None:
-                time.sleep(1)
-            op3(inputs[inputi], data, ip)
-            inputi += 1
-            ip += 2
-        elif op == 4:
-            # print("op 4")
-            output.append(op4(modes, data, ip))
-            ip += 2
-        elif op == 5:
-            # print("op 5")
-            ip = op5(modes, data, ip)
-        elif op == 6:
-            # print("op 6")
-            ip = op6(modes, data, ip)
-        elif op == 7:
-            # print("op 7")
-            op7(modes, data, ip)
-            ip += 4
-        elif op == 8:
-            # print("op 8")
-            op8(modes, data, ip)
-            ip += 4
-        elif op == 99:
-            # print("exiting")
-            break
-        else:
-            print("BAD OPCODE??")
-            exit(1)
-    return output
-
-
 ###########################
 # part1
 ###########################
@@ -173,7 +120,9 @@ def part1(data):
     for phase in phases:
         ampout = 0
         for ampi in range(0, 5):
-            ampout = intcode(data.copy(), [phase[ampi], ampout])[0]
+            intcoder = Intcode(data.copy(), [phase[ampi], ampout])
+            intcoder.run()
+            ampout = intcoder.output[0]
         if ampout > largest:
             largest = ampout
             largestphase = phase
