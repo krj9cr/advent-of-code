@@ -1,4 +1,5 @@
 from copy import deepcopy
+from lib.print import print_2d_grid
 
 ###########################
 # helpers
@@ -9,12 +10,6 @@ def parseInputFile():
 
 def parseLine(line: str):
     return [char for char in line.strip()]
-
-def printGrid(grid):
-    for row in grid:
-        for item in row:
-            print(item, end="")
-        print()
 
 def countAdjType(board, x, y, target="#"):
     count = 0
@@ -57,7 +52,7 @@ def calcBio(board):
 # part1
 ###########################
 def part1(board):
-    printGrid(board)
+    print_2d_grid(board)
     prevBoards = [deepcopy(board)]
     numIters = 1
     while True:
@@ -66,12 +61,12 @@ def part1(board):
         for prevBoard in prevBoards:
             if board == prevBoard:
                 print("SAME")
-                printGrid(board)
+                print_2d_grid(board)
                 print("answer:",calcBio(board))
                 exit(0)
         print(numIters)
         numIters += 1
-        printGrid(board)
+        print_2d_grid(board)
         print("")
         prevBoards.append(deepcopy(board))
 
@@ -96,7 +91,7 @@ def getEmptyLayer():
 def printLayers(layers):
     for i in sorted(layers.keys()):
         print("Layer",i)
-        printGrid(layers[i])
+        print_2d_grid(layers[i])
         print()
 
 def countBugs(layer):
