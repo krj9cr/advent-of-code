@@ -1,5 +1,5 @@
 import random
-from lib.intcode import Intcode
+from lib.intcode import Intcode, asciiToIntcodeInput
 
 ###########################
 # helpers
@@ -13,33 +13,6 @@ def parseInput(lines):
 
 def parseLine(line: str):
     return line.strip()
-
-def asciiToGrid(ascii):
-    grid = []
-    row = []
-    for a in ascii:
-        if a == 10 and len(row) > 0:
-            grid.append(row[:])
-            row = []
-        else:
-            row.append(str(chr(a)))
-    return grid
-
-def printGrid(grid):
-    for row in grid:
-        for item in row:
-            print(item,end="")
-        print()
-
-def asciiToIntcodeInput(astr):
-    result = []
-    for s in astr:
-        for char in s:
-            result.append(ord(char))
-    # add final newline if necessary
-    if result[-1] != 10:
-        result.append(10)
-    return result
 
 ###########################
 # part1

@@ -1,5 +1,6 @@
-from collections import deque
 import networkx as nx
+from lib.search import bfs_2d_grid
+from lib.print import print_2d_grid
 
 ###########################
 # helpers
@@ -54,27 +55,6 @@ def findDoors(grid):
 
     return doors
 
-def printGrid(grid):
-    for row in grid:
-        for item in row:
-            print(item, end="")
-        print()
-
-def bfs(grid, start, end):
-    queue = deque([[start]])
-    seen = set([start])
-    while queue:
-        path = queue.popleft()
-        x, y = path[-1]
-        if (x, y) == end:
-            return path
-        for x2, y2 in ((x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1)):
-            if 0 <= x2 < len(grid[0]) and 0 <= y2 < len(grid):
-                if grid[y2][x2] == emptyChar:
-                    if (x2, y2) not in seen:
-                        queue.append(path + [(x2,y2)])
-                        seen.add((x2,y2))
-
 def getPairs(source):
     result = []
     for p1 in range(len(source)):
@@ -86,7 +66,7 @@ def getPairs(source):
 # part1
 ###########################
 def part1(grid):
-    printGrid(grid)
+    print_2d_grid(grid)
     doors = findDoors(grid)
     print("doors", doors)
 
@@ -112,7 +92,7 @@ def part1(grid):
         door2, coord2 = pair[1]
         if coord != coord2 and not G.has_edge(door2, door):
             if door != door2:
-                path = bfs(grid, coord, coord2)
+                path = bfs_2d_grid(grid, coord, coord2, include=[emptyChar])
                 if path is not None:
                     w = len(path)-1
                     print("adding", w, "edge",(door, coord), (door2, coord2))
@@ -130,7 +110,7 @@ def runpart1():
 # part2
 ###########################
 def part2(grid):
-    printGrid(grid)
+    print_2d_grid(grid)
     doors = findDoors(grid)
     num_layers = 30
 
@@ -191,7 +171,7 @@ def part2(grid):
             # make sure we have both nodes (e.g. not outer for first layer)
             if G.has_node(u) and G.has_node(v):
                 if door != door2 and coord != coord2 and not G.has_edge(u, v):
-                    path = bfs(grid, coord, coord2)
+                    path = bfs_2d_grid(grid, coord, coord2, include=[emptyChar])
                     if path is not None:
                         w = len(path)-1
                         print("adding", w, "edge",u, v)
@@ -218,8 +198,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    # print("\nPART 1 RESULT")
-    # runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
     print("\nPART 2 RESULT")
     runpart2()

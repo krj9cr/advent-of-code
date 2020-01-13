@@ -1,5 +1,6 @@
 from copy import deepcopy
 from lib.intcode import Intcode
+from lib.print import print_2d_grid
 
 ###########################
 # helpers
@@ -13,12 +14,6 @@ def parseInput(lines):
 
 def parseLine(line: str):
     return line.strip()
-
-def printGrid(grid):
-    for row in grid:
-        for item in row:
-            print(item,end='')
-        print()
 
 def drawPoints(points):
     size = 0
@@ -56,7 +51,7 @@ def part1(data):
             if intcoder.output[0] == 1:
                 grid[j][i] = "#"
 
-    printGrid(grid)
+    print_2d_grid(grid)
     count = 0
     for row in grid:
         for item in row:

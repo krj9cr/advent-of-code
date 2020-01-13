@@ -1,4 +1,5 @@
-from lib.intcode import Intcode
+from lib.print import print_2d_grid
+from lib.intcode import Intcode, asciiToGrid
 
 ###########################
 # helpers
@@ -12,23 +13,6 @@ def parseInput(lines):
 
 def parseLine(line: str):
     return line.strip()
-
-def asciiToGrid(ascii):
-    grid = []
-    row = []
-    for a in ascii:
-        if a == 10 and len(row) > 0:
-            grid.append(row[:])
-            row = []
-        else:
-            row.append(str(chr(a)))
-    return grid
-
-def printGrid(grid):
-    for row in grid:
-        for item in row:
-            print(item,end="")
-        print()
 
 def findIntersections(grid):
     intersections = []
@@ -61,7 +45,7 @@ def part1(data):
     output = intcoder.output
     print(output)
     grid = asciiToGrid(output)
-    printGrid(grid)
+    print_2d_grid(grid)
     intersections = findIntersections(grid)
     print("intersections:",intersections)
     total = 0
