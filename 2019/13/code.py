@@ -1,8 +1,4 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from intcode import Intcode
+from lib.intcode import Intcode
 
 ###########################
 # helpers
@@ -52,6 +48,7 @@ def runpart1():
 ###########################
 # part2
 ###########################
+# TODO: I think this broke because the Intcoder doesn't read the "last" input, it reads the "next"
 def part2(data):
     print(data)
     data[0] = 2
@@ -64,7 +61,7 @@ def part2(data):
     padPos = 0
     while intcoder.running:
         # check for outputs
-        if len(intcoder.output) >= 3:
+        if len(intcoder.output) == 3:
             # print("output",intcoder.output)
             o1, o2, o3 = intcoder.output
             if o3 == 4:

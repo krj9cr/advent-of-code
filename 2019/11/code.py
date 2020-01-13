@@ -1,11 +1,6 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from intcode import Intcode
+from lib.intcode import Intcode
 
 import plotly.graph_objects as go
-import numpy as np
 
 ###########################
 # helpers
@@ -69,7 +64,7 @@ def controlRobot(data, startPanelColor=0):
     robotsteps = 0
 
     intcode_input = [startPanelColor]
-    intcode = Intcode(initial_state=data, intcode_input=intcode_input, debug=False)
+    intcode = Intcode(data, intcode_input, debug=False)
 
     while intcode.running:
         # check for outputs
@@ -168,8 +163,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    # print("\nPART 1 RESULT")
-    # runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
-    print("\nPART 2 RESULT")
-    runpart2()
+    # print("\nPART 2 RESULT")
+    # runpart2()

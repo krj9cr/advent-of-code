@@ -1,9 +1,4 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir2 = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir2)
-from intcode import Intcode
+from lib.intcode import Intcode
 
 ###########################
 # helpers
@@ -25,7 +20,7 @@ def part1(data, input):
     print(data)
     intcoder = Intcode(data, [input],debug=True)
     intcoder.run()
-    print(intcoder.output)
+    print(intcoder.output[-1])
 
 def testpart1(data):
     lines = parseInput(data)
@@ -42,7 +37,7 @@ def part2(data, input):
     print(data)
     intcoder = Intcode(data, [input])
     intcoder.run()
-    print(intcoder.output)
+    print(intcoder.output[0])
 
 def testpart2(data, input):
     lines = parseInput(data)
@@ -55,9 +50,9 @@ def runpart2():
 # run
 ###########################
 if __name__ == '__main__':
-    print("PART 1 TEST DATA")
+    # print("PART 1 TEST DATA")
     # testpart1("3,0,4,0,99")
-#     testpart1("1,1,1,4,99,5,6,0,99")
+    # testpart1("1,1,1,4,99,5,6,0,99")
 
     print("\nPART 1 RESULT")
     runpart1()

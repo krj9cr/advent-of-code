@@ -109,8 +109,8 @@ if __name__ == '__main__':
 #     print(testNum(223450))
 #     print(testNum(123789))
 
-#     print("\nPART 1 RESULT")
-#     runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
     # print("\n\nPART 2 TEST DATA")
     # print(testNum2(111223))

@@ -1,8 +1,4 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from intcode import Intcode
+from lib.intcode import Intcode
 
 ###########################
 # helpers
@@ -114,10 +110,6 @@ def part2(data):
     output = intcoder.output
     print(output[-1])
 
-def testpart2(data):
-    lines = parseInput(data)
-    part2(lines)
-
 def runpart2():
     part2(parseInputFile())
 
@@ -126,12 +118,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    # print("\nPART 1 RESULT")
-    # runpart1()
-
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
+    print("\nPART 1 RESULT")
+    runpart1()
 
     print("\nPART 2 RESULT")
     runpart2()
