@@ -1,4 +1,4 @@
-from lib.intcode import Intcode, asciiToGrid, asciiToIntcodeInput
+from lib.intcode import Intcode, intcodeOutputToAscii, asciiToIntcodeInput
 from lib.print import print_2d_grid
 
 ###########################
@@ -50,7 +50,7 @@ def part1(data):
             print("hull damage:", intcoder.output[-1])
         else:
             print("droid fell")
-            print_2d_grid(asciiToGrid(intcoder.output))
+            print_2d_grid(intcodeOutputToAscii(intcoder.output))
             print()
     else:
         print("ERROR: no intcoder output??")
@@ -110,7 +110,7 @@ def part2(data):
             print("hull damage:", intcoder.output[-1])
         else:
             print("droid fell")
-            print_2d_grid(asciiToGrid(intcoder.output))
+            print_2d_grid(intcodeOutputToAscii(intcoder.output))
             print()
     else:
         print("ERROR: no intcoder output??")

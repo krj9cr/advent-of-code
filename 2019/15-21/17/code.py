@@ -1,5 +1,5 @@
 from lib.print import print_2d_grid
-from lib.intcode import Intcode, asciiToGrid
+from lib.intcode import Intcode, intcodeOutputToAscii
 
 ###########################
 # helpers
@@ -44,7 +44,7 @@ def part1(data):
     intcoder.run()
     output = intcoder.output
     print(output)
-    grid = asciiToGrid(output)
+    grid = intcodeOutputToAscii(output)
     print_2d_grid(grid)
     intersections = findIntersections(grid)
     print("intersections:",intersections)
