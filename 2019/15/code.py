@@ -1,8 +1,4 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from intcode import Intcode
+from lib.intcode import Intcode
 
 import plotly.graph_objects as go
 import random
@@ -185,8 +181,8 @@ def runpart2():
 # run
 ###########################
 if __name__ == '__main__':
-    # print("\nPART 1 RESULT")
-    # runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
     print("\nPART 2 RESULT")
     runpart2()

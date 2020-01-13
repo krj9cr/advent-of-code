@@ -1,9 +1,5 @@
-import os,sys,inspect,random
-from copy import deepcopy
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from intcode import Intcode
+import random
+from lib.intcode import Intcode
 
 ###########################
 # helpers
@@ -53,6 +49,9 @@ def part1(data):
     random.seed(1)
     steps = 0
 
+    # I randomly explored rooms to draw a map of the rooms
+    # then was able to manually write these instructions to
+    # visit all rooms with items we might want to take
     to_pressure_plate = ["east","east","west","west", # hull breach
                          "north","east","north","south","west", # gift wrap
                          "north","north","south","south","south", # hull breach
@@ -61,6 +60,7 @@ def part1(data):
                          "north","east","east", # pressure room
                          "inv"]
     ppi = 0
+    # manually figured out which items got us the correct weight
     do_not_take = [
         # things that cause you to die if you pick it up
         "photons", "infinite loop", "giant electromagnet", "escape pod", "molten lava",
@@ -124,7 +124,7 @@ def part1(data):
                     nextInput = "take " + items[0]
                 # go next direction on route
                 elif len(doors) > 0:
-                    # choose randomly
+                    # choose randomly to do initial exploration
                     # random.shuffle(doors)
                     # nextInput = doors[0]
                     nextInput = to_pressure_plate[ppi]
@@ -140,25 +140,10 @@ def part1(data):
         s += str(chr(o))
     print(s)
 
-def testpart1(data):
-    lines = parseInput(data)
-    part1(lines)
-
 def runpart1():
     part1(parseInputFile())
 
-###########################
-# part2
-###########################
-def part2(data):
-    print(data)
-
-def testpart2(data):
-    lines = parseInput(data)
-    part2(lines)
-
-def runpart2():
-    part2(parseInputFile())
+# no part 2! yay
 
 ###########################
 # run
@@ -168,5 +153,3 @@ if __name__ == '__main__':
     print("\nPART 1 RESULT")
     runpart1()
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
