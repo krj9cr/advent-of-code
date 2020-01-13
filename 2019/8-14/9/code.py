@@ -13,17 +13,6 @@ def parseInput(lines):
 def parseLine(line: str):
     return line.strip()
 
-def parseOp(op):
-    s = str(op)
-    numZerosAdd =  5 - len(s)
-    zeros = ""
-    for i in range(0,numZerosAdd):
-        zeros += "0"
-    s = zeros + s
-    modes = s[0:3]
-    op = s[3:]
-    return [int(m) for m in reversed(modes)], int(op)
-
 ###########################
 # part1
 ###########################
