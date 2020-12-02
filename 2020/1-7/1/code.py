@@ -15,30 +15,33 @@ def parseInput(lines):
     return [parseLine(line) for line in lines]
 
 def parseLine(line: str):
-    return line.strip()
+    return int(line.strip())
 
 ###########################
 # part1
 ###########################
 def part1(data):
-    print(data)
-
-def testpart1(data):
-    lines = parseInput(data)
-    part1(lines)
+    for num1 in data:
+        for num2 in data:
+            if num1 != num2 and num1 + num2 == 2020:
+                print("num1: ", num1, "num2: ", num2, "answer: ", num1*num2)
+                return
 
 def runpart1():
     part1(parseInputFile())
+
 
 ###########################
 # part2
 ###########################
 def part2(data):
-    print(data)
+    for num1 in data:
+        for num2 in data:
+            for num3 in data:
+                if num1 != num2 and num2 != num3 and num1 != num3 and num1 + num2 + num3 == 2020:
+                    print("num1: ", num1, "num2: ", num2, "num3: ", num3, "answer: ", num1*num2*num3)
+                    return
 
-def testpart2(data):
-    lines = parseInput(data)
-    part2(lines)
 
 def runpart2():
     part2(parseInputFile())
@@ -47,16 +50,8 @@ def runpart2():
 # run
 ###########################
 if __name__ == '__main__':
-    # print("PART 1 TEST DATA")
-    # testpart1("1111")
-    # testpart1("1234")
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    print("\nPART 1 RESULT")
-    runpart1()
-
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
-
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
