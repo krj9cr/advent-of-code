@@ -22,10 +22,25 @@ def parseLine(line: str):
 ###########################
 def part1(data):
     print(data)
+    slope = (3,1)
+    print(checkSlope(slope, data))
 
-def testpart1(data):
-    lines = parseInput(data)
-    part1(lines)
+
+def checkSlope(slope, data):
+    slopeRight, slopeDown = slope
+    numRows = len(data)
+    numCols = len(data[0])
+    print(numRows, "x", numCols)
+    currRow = 0
+    currCol = 0
+    numTrees = 0
+    while currRow < numRows:
+        # print(currRow, currCol)
+        if data[currRow][currCol] == '#':
+            numTrees += 1
+        currRow += slopeDown
+        currCol = (currCol + slopeRight) % numCols
+    return numTrees
 
 def runpart1():
     part1(parseInputFile())
@@ -34,11 +49,14 @@ def runpart1():
 # part2
 ###########################
 def part2(data):
-    print(data)
 
-def testpart2(data):
-    lines = parseInput(data)
-    part2(lines)
+    answers = (checkSlope((1,1), data), checkSlope((3,1), data), checkSlope((5,1), data), checkSlope((7,1), data), checkSlope((1,2), data))
+    print(answers)
+
+    result = 1
+    for a in answers:
+        result *= a
+    print(result)
 
 def runpart2():
     part2(parseInputFile())
@@ -47,16 +65,10 @@ def runpart2():
 # run
 ###########################
 if __name__ == '__main__':
-    # print("PART 1 TEST DATA")
-    # testpart1("1111")
-    # testpart1("1234")
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\n\nPART 2 TEST DATA")
-    # testpart2("1122")
-    # testpart2("1111")
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
