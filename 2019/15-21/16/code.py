@@ -1,6 +1,8 @@
 from copy import deepcopy
 import numpy as np
 
+# flawed frequency transmission - fft
+
 ###########################
 # helpers
 ###########################

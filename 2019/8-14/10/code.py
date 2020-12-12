@@ -2,6 +2,8 @@ import copy
 import numpy as np
 import math
 
+# Asteroid problem
+
 ###########################
 # helpers
 ###########################

@@ -1,3 +1,6 @@
+
+# stars move around and print a message
+
 def readInput(path):
     with open(path, 'r') as file:
         return [parseInput(line) for line in file]

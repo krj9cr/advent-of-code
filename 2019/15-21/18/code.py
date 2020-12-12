@@ -1,6 +1,9 @@
 from lib.search import bfs_2d_grid
 from lib.print import print_2d_grid
 
+# keys and doors map
+# part2 in fewest steps
+
 ###########################
 # helpers
 ###########################

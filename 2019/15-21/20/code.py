@@ -2,6 +2,9 @@ import networkx as nx
 from lib.search import bfs_2d_grid
 from lib.print import print_2d_grid
 
+# donut maze
+# part2 has recursive levels
+
 ###########################
 # helpers
 ###########################
