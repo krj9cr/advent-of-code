@@ -1,7 +1,6 @@
 from copy import deepcopy
 from lib.print import print_2d_grid
 import numpy as np
-import math
 
 ###########################
 # helpers
