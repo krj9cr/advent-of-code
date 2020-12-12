@@ -1,5 +1,6 @@
 import copy
 
+# mine carts
 
 def readInput(path):
     with open(path, 'r') as file:

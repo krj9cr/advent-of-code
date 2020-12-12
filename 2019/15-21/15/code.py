@@ -4,6 +4,10 @@ from lib.search import bfs_2d_map
 import plotly.graph_objects as go
 import random
 
+# oxygen system
+# part1 move the droid to the goal
+# part2 fill map with oxygen
+
 ###########################
 # helpers
 ###########################

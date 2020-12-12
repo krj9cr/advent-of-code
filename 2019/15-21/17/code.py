@@ -1,6 +1,8 @@
 from lib.print import print_2d_grid
 from lib.intcode import Intcode, intcodeOutputToAscii
 
+# scaffolding robot
+
 ###########################
 # helpers
 ###########################

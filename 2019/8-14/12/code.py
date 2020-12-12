@@ -1,6 +1,8 @@
 from copy import deepcopy
 import numpy as np
 
+# n-body problem
+
 ###########################
 # helpers
 ###########################

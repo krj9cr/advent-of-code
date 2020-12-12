@@ -1,6 +1,8 @@
 from sortedcontainers import SortedDict
 from collections import deque
 
+# elves vs goblins!
+
 startingHP = 200
 attackPower = 3
 

@@ -1,5 +1,7 @@
 import math
 
+# chemical reaction problem
+
 class Chemical:
     name = ""
     amount = 0
