@@ -1,6 +1,5 @@
 from z3 import *
 
-
 def parseInput(path: str):
     with open(path, 'r') as file:
         return [parseLine(line) for line in file]
