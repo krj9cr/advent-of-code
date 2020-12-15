@@ -1,6 +1,5 @@
 import time
 from copy import deepcopy
-from functools import reduce #python 3
 
 ###########################
 # helpers
@@ -138,13 +137,12 @@ def processLine2(mask, line):
 
 def part2(data):
     print(data)
-    numbits = 36
     mask = "X" * 36
 
     # proess each line
     for line in data:
         mask = processLine2(mask, line)
-        print(mem)
+        # print(mem)
         print()
 
     # result
