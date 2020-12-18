@@ -111,6 +111,7 @@ def part2(data):
 
     possibleFields = {}
 
+    # check which fields are satisfied by each rule
     for name, rule in rules:
         for field in range(0, len(validNearbyTickets[0])):
             allSatisfy = True
@@ -173,6 +174,7 @@ def part2(data):
             fieldIndexes.append(finalFields[name])
     print(fieldIndexes)
 
+    # get the product of those fields from my ticket
     result = 1
     for idx in fieldIndexes:
         result *= myTicket[idx]
