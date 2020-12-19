@@ -104,27 +104,25 @@ def runpart1():
 
 def solveAdd(add):
     res = 0
-    for char in add.split(" "):
-        if char.isdigit():
-            res += int(char)
-    return str(res) + " "
+    for char in add.split("+"):
+        res += int(char)
+    return " " + str(res) + " "
 
 def solveMult(mult):
     res = 1
-    for char in mult.split(" "):
-        if char.isdigit():
-            res *= int(char)
-    return str(res) + " "
+    for char in mult.split("*"):
+        res *= int(char)
+    return " " + str(res) + " "
 
 def doAdds(e):
     newe = deepcopy(e)
     # do obvious adds
-    adds = re.findall("[0-9]+\s*(?:\+\s*[0-9]+\s*)+", e)
+    adds = re.findall("\s*[0-9]+\s*(?:\+\s*[0-9]+\s*)+", e)
     while len(adds) > 0:
         for add in adds:
             newe = newe.replace(add, solveAdd(add))
-        adds = re.findall("[0-9]+\s*(?:\+\s*[0-9]+\s*)+", newe)
         newe = doSingleParens(newe)
+        adds = re.findall("\s*[0-9]+\s*(?:\+\s*[0-9]+\s*)+", newe)
     return newe
 
 def doSingleParens(e):
@@ -137,13 +135,14 @@ def doSingleParens(e):
 def doMultParen(e):
     newe = deepcopy(e)
     # do mults
-    mults = re.findall("\([0-9]+\s*(?:\*\s*[0-9]+\s*)+\)", newe)
+    mults = re.findall("\(\s*[0-9]+\s*(?:\*\s*[0-9]+\s*)+\)", newe)
     while len(mults) > 0:
         for mult in mults:
             # print(mult, solveMult(mult[1:-1]))
             newe = newe.replace(mult, solveMult(mult[1:-1]))
-        newe = doSingleParens(newe)
-        mults = re.findall("\([0-9]+\s*(?:\*\s*[0-9]+\s*)+\)", newe)
+        print(newe)
+        newe = doAdds(newe)
+        mults = re.findall("\(\s*[0-9]+\s*(?:\*\s*[0-9]+\s*)+\)", newe)
     print(newe)
     newe = doAdds(newe)
     return newe
@@ -151,7 +150,7 @@ def doMultParen(e):
 def doMultsOnce(e):
     newe = deepcopy(e)
     # do mults
-    mults = re.findall("[0-9]+\s*\*\s*[0-9]+", newe)
+    mults = re.findall("\s*[0-9]+\s*\*\s*[0-9]+\s*", newe)
     if len(mults) > 0:
         newe = newe.replace(mults[0], solveMult(mults[0]))
     newe = doSingleParens(newe)
@@ -171,9 +170,14 @@ def blarg(e):
         newe = doSingleParens(newe)
         print(newe)
 
+    while "(" in newe:
+        newe = doMultParen(newe)
+        print(newe)
 
     # val = doEquation(newe)
     while "*" in newe:
+        newe = doMultParen(newe)
+        print(newe)
         newe = doMultsOnce(newe)
         print(newe)
 
@@ -192,6 +196,7 @@ def part2(data):
     print("sum", result)
 
 # 285736436889034 too low
+# 381107029777968
 # 381107030035248 too high
 # 381107030035788 too high
 
