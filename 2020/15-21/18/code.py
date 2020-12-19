@@ -101,6 +101,9 @@ def runpart1():
     end = time.perf_counter()
     print(f"Time: {end-start:0.4f}")
 
+###########################
+# part2 helpers
+###########################
 
 def solveAdd(add):
     res = 0
@@ -156,7 +159,6 @@ def doMultsOnce(e):
     newe = doSingleParens(newe)
     return newe
 
-
 def blarg(e):
     newe = deepcopy(e)
 
@@ -174,7 +176,6 @@ def blarg(e):
         newe = doMultParen(newe)
         print(newe)
 
-    # val = doEquation(newe)
     while "*" in newe:
         newe = doMultParen(newe)
         print(newe)
@@ -194,11 +195,6 @@ def part2(data):
         print(equation, "=", val)
         result += val
     print("sum", result)
-
-# 285736436889034 too low
-# 381107029777968
-# 381107030035248 too high
-# 381107030035788 too high
 
 def runpart2():
     start = time.perf_counter()
