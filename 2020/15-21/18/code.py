@@ -1,8 +1,7 @@
 import sys
 import time
-from anytree import AnyNode, RenderTree, PreOrderIter, PostOrderIter
+from anytree import AnyNode, RenderTree, PreOrderIter
 from copy import deepcopy
-import ast
 
 ###########################
 # helpers
@@ -13,51 +12,6 @@ def parseInputFile():
 
 def parseLine(line: str):
     return line.strip()
-
-
-
-class v(ast.NodeVisitor):
-
-    def __init__(self):
-        self.tokens = []
-        self.result = -1
-        self.lastop = None
-
-    def f_continue(self, node):
-        super(v, self).generic_visit(node)
-
-    def visit_Add(self, node):
-        self.tokens.append('+')
-        self.lastop = "+"
-        self.f_continue(node)
-
-    def visit_BinOp(self, node):
-        right = self.visit(node.right).value
-        left = self.visit(node.left).value
-        if type(node.op) is ast.Add:
-            print(left + right)
-        elif type(node.op) is ast.Mult:
-            print(left * right)
-        # self.visit(node.op)
-
-    def visit_Div(self, node):
-        self.tokens.append('/')
-        self.f_continue(node)
-
-    def visit_Expr(self, node):
-        # print('visit_Expr')
-        return self.f_continue(node)
-
-    def visit_Mult(self, node):
-        self.tokens.append('*')
-        self.f_continue(node)
-
-    def visit_Num(self, node):
-        # if self.result == -1:
-        #     self.result = node.n
-        self.tokens.append(node.n)
-        self.f_continue(node)
-        print(node.n)
 
 def idxOfEndParen(equation):
     stack = []
@@ -89,22 +43,16 @@ def parseEquation(equation):
             return AnyNode(children=[AnyNode(type="num", data=num), parseEquation(rest)], type="op", data=op)
         elif char == ")":
             # find matching end paren
-
-            if equation[-1] == "(":
-                return parseEquation(equation[1:-1])
+            idx = idxOfEndParen(equation)
+            blob = equation[1:idx]
+            rest = equation[idx+1:]
+            n = None
+            if len(rest) > 2 and (rest[1] == "*" or rest[1] == "+"):
+                n = AnyNode(children=[parseEquation(blob), parseEquation(rest[3:])], type="op", data=rest[1])
+                print("blob, rest",blob, rest)
             else:
-                idx = -1
-                for i in range(len(equation)-1,1,-1):
-                    if equation[i] == "(":
-                        idx = i
-                        break
-                blob = equation[1:idx]
-                if idx+2 >= len(equation):
-                    print("UH OH")
-                    sys.exit(1)
-                op = equation[idx+2]
-                rest = equation[idx+4:]
-                return AnyNode(children=[parseEquation(blob), parseEquation(rest)], type="op", data=op)
+                n = parseEquation(blob)
+            return n
 
 def solveEquation(root):
     if root.__getattribute__("type") == "num":
@@ -120,22 +68,6 @@ def solveEquation(root):
     print("BADNESS")
     sys.exit(1)
 
-def rrr(tree):
-    if type(tree) is ast.Num:
-        return tree.n
-    elif type(tree) is ast.BinOp:
-        left = rrr(tree.left)
-        right = rrr(tree.right)
-        op = tree.op
-        if type(op) is ast.Add:
-            return left + right
-        elif type(op) is ast.Mult:
-            return left * right
-    elif type(tree) is ast.Expr:
-        return rrr(tree.value)
-    elif type(tree) is ast.Module:
-        return rrr(tree.body[0])
-
 def doEquation(equation):
     # parse
     leaf = parseEquation(equation[::-1])
@@ -149,12 +81,6 @@ def doEquation(equation):
     print(order)
     # solve
     return solveEquation(root)
-
-    # visitor = v()
-    # tree = ast.parse(equation)
-    # print(ast.dump(tree))
-    # print(rrr(tree))
-    # return 0
 
 ###########################
 # part1
