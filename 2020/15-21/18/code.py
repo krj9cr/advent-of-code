@@ -2,6 +2,7 @@ import sys
 import time
 from anytree import AnyNode, RenderTree, PreOrderIter
 from copy import deepcopy
+import re
 
 ###########################
 # helpers
@@ -100,11 +101,99 @@ def runpart1():
     end = time.perf_counter()
     print(f"Time: {end-start:0.4f}")
 
+
+def solveAdd(add):
+    res = 0
+    for char in add.split(" "):
+        if char.isdigit():
+            res += int(char)
+    return str(res) + " "
+
+def solveMult(mult):
+    res = 1
+    for char in mult.split(" "):
+        if char.isdigit():
+            res *= int(char)
+    return str(res) + " "
+
+def doAdds(e):
+    newe = deepcopy(e)
+    # do obvious adds
+    adds = re.findall("[0-9]+\s*(?:\+\s*[0-9]+\s*)+", e)
+    while len(adds) > 0:
+        for add in adds:
+            newe = newe.replace(add, solveAdd(add))
+        adds = re.findall("[0-9]+\s*(?:\+\s*[0-9]+\s*)+", newe)
+        newe = doSingleParens(newe)
+    return newe
+
+def doSingleParens(e):
+    newe = deepcopy(e)
+    simplify = re.findall("\(\s*[0-9]+\s*\)", newe)
+    for s in simplify:
+        newe = newe.replace(s, s[1:-1])
+    return newe
+
+def doMultParen(e):
+    newe = deepcopy(e)
+    # do mults
+    mults = re.findall("\([0-9]+\s*(?:\*\s*[0-9]+\s*)+\)", newe)
+    while len(mults) > 0:
+        for mult in mults:
+            # print(mult, solveMult(mult[1:-1]))
+            newe = newe.replace(mult, solveMult(mult[1:-1]))
+        newe = doSingleParens(newe)
+        mults = re.findall("\([0-9]+\s*(?:\*\s*[0-9]+\s*)+\)", newe)
+    print(newe)
+    newe = doAdds(newe)
+    return newe
+
+def doMultsOnce(e):
+    newe = deepcopy(e)
+    # do mults
+    mults = re.findall("[0-9]+\s*\*\s*[0-9]+", newe)
+    if len(mults) > 0:
+        newe = newe.replace(mults[0], solveMult(mults[0]))
+    newe = doSingleParens(newe)
+    return newe
+
+
+def blarg(e):
+    newe = deepcopy(e)
+
+    while "+" in newe:
+        newe = doAdds(newe)
+        print(newe)
+
+        newe = doMultParen(newe)
+        print(newe)
+
+        newe = doSingleParens(newe)
+        print(newe)
+
+
+    # val = doEquation(newe)
+    while "*" in newe:
+        newe = doMultsOnce(newe)
+        print(newe)
+
+    return int(newe)
+
 ###########################
 # part2
 ###########################
 def part2(data):
     print(data)
+    result = 0
+    for equation in data:
+        val = blarg(equation)
+        print(equation, "=", val)
+        result += val
+    print("sum", result)
+
+# 285736436889034 too low
+# 381107030035248 too high
+# 381107030035788 too high
 
 def runpart2():
     start = time.perf_counter()
@@ -117,8 +206,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
