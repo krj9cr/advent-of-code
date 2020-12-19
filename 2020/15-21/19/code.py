@@ -1,5 +1,6 @@
 import time
 import sys
+from copy import deepcopy
 
 ###########################
 # helpers
@@ -48,35 +49,54 @@ def parseLine(line: str):
     return line.strip()
 
 def match(rules, message, rule):
-    print("evaluating",message,"against",rule)
+    # print("evaluating",message,"against",rule)
+    if len(message) == 0:
+        return True, ""
     # single character rule
     if isinstance(rule, str):
-        if message == rule:
-            return True
+        if len(message) > 0:
+            return message[0] == rule, message[1:]
         else:
-            return False
+            return False, ""
     # just a rule idx
     elif isinstance(rule, int):
         return match(rules, message, rules[rule])
     # no OR in rule
     elif isinstance(rule, list):
-        m = True
-        div = len(message) // len(rule)
-        # more chars than we can match
-        if div * len(rule) != len(message):
-            return False
+        nextMessage = deepcopy(message)
         for i in range(len(rule)):
-            first = i * div
-            last = (i+1)*div
-            print(first, last, message[first:last])
-            m = m and match(rules, message[first:last], rule[i])
-        return m
+            nextRule = rule[i]
+            nextRuleMatch, nextMessage = match(rules, nextMessage, nextRule)
+            if not nextRuleMatch:
+                return False, ""
+        return True, nextMessage
     # OR in rule
     elif isinstance(rule, tuple):
-        m = False
-        for subrule in rule:
-            m = m or match(rules, message, subrule)
-        return m
+        firstRule = rule[0]
+        secondRule = rule[1]
+
+        # there's only ever 2 rules, so check both
+        firstMatch, firstMessage = match(rules, message, firstRule)
+        secondMatch, secondMessage = match(rules, message, secondRule)
+
+        if firstMatch and secondMatch:
+            # print(message, "on",firstRule,"now",firstMessage)
+            # print(message, "on", secondRule,"now",secondMessage)
+            # print("BOTH MATCH???")
+            # if we match but both end up empty, that bad
+            if firstMessage == "" and secondMessage == "":
+                return False, ""
+            # return whichever match is not empty to continue with
+            if firstMessage == "":
+                return secondMatch, secondMessage
+            if secondMessage == "":
+                return firstMatch, firstMessage
+        # return whichever one actually matched
+        if firstMatch:
+            return True, firstMessage
+        if secondMatch:
+            return True, secondMessage
+        return False, ""
     else:
         print("IDK")
         sys.exit(1)
@@ -90,7 +110,8 @@ def part1(data):
 
     result = 0
     for message in messages:
-        if match(rules, message, rules[0]):
+        messageMatch, messageRes = match(rules, message, rules[0])
+        if len(messageRes) == 0 and messageMatch:
             print("Matches", message)
             result += 1
         else:
@@ -108,6 +129,21 @@ def runpart1():
 ###########################
 def part2(data):
     print(data)
+    rules, messages = data
+
+    # 8: 42 | 42 8
+    # 11: 42 31 | 42 11 31
+    rules[8] = tuple([[42], [42, 8]])
+    rules[11] = tuple([[42, 31], [42, 11, 31]])
+
+    result = 0
+    for message in messages:
+        messageMatch, messageRes = match(rules, message, rules[0])
+        if len(messageRes) == 0 and messageMatch:
+            print("Matches", message)
+            result += 1
+    print("Result: ", result, "of",len(messages))
+
 
 def runpart2():
     start = time.perf_counter()
@@ -120,8 +156,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
