@@ -1,6 +1,7 @@
 import time
 from copy import deepcopy
 from collections import deque
+from lib.linkedlist import Node, LinkedList
 
 ###########################
 # helpers
@@ -53,35 +54,80 @@ def move(cups, lenCups):
 
     return cups
 
+
+def move2(cups, lenCups, currentCup):
+    minCup = 1
+    maxCup = lenCups
+
+    # print("cups:", cups)
+    # currentCup = cups.head
+    pickup1 = currentCup.next
+    if not pickup1:
+        pickup1 = cups.head
+    pickup2 = pickup1.next
+    if not pickup2:
+        pickup2 = cups.head
+    pickup3 = pickup2.next
+    if not pickup3:
+        pickup3 = cups.head
+
+    pickupNodes = [pickup1, pickup2, pickup3]
+    pickupData = [pickup1.data, pickup2.data, pickup3.data]
+    # destination cup: the cup with a label equal to the current cup's label minus one
+    destinationCup = currentCup.data - 1
+    # If this would select one of the cups that was just picked up,
+    # the crab will keep subtracting one until it finds a cup that wasn't just picked up
+    while destinationCup in pickupData:
+        destinationCup -= 1
+    # If at any point in this process the value goes below the lowest value on any cup's label,
+    # it wraps around to the highest value on any cup's label instead
+    if destinationCup < minCup:
+        destinationCup = maxCup
+
+    # move picked up cups after destination cup
+    for i in range(len(pickupNodes)):
+        cups.remove_node(pickupNodes[i])
+        cups.add_after(destinationCup, pickupNodes[i])
+
+    destinationNode = cups.find(destinationCup)
+    currentCup = destinationNode.next
+
+    return cups, currentCup
+
 ###########################
 # part1
 ###########################
 def part1(data):
-    # cups = deepcopy(data)
-    #
-    # numMoves = 100
-    # for i in range(numMoves):
-    #     print("move ", i)
-    #     cups = move(cups)
-    #     print()
-    #
-    # print("Final cups", cups)
-    # res = getLabelsAfterOne(cups)
-    # print("result", res)
     numCups = len(data)
-    cups = deque(data)
 
-    currentCup = data[0]
+    cups = LinkedList(data)
+    print(cups)
 
+    currentCup = cups.head
     numMoves = 100
     for i in range(numMoves):
         # print("move ", i)
-        cups = move(cups, numCups)#, currentCup, numCups)
+        cups, currentCup = move2(cups, numCups, currentCup)
         # print()
 
     print("Final cups", cups)
     res = getLabelsAfterOne(cups)
     print("result", res)
+
+
+    # cups = deque(data)
+    #
+    # currentCup = data[0]
+    #
+    # numMoves = 100
+    # for i in range(numMoves):
+    #     # print("move ", i)
+    #     cups = move(cups, numCups)#, currentCup, numCups)
+    #     # print()
+    #
+    # print("Final cups", cups)
+    # res = getLabelsAfterOne(cups)
+    # print("result", res)
 
 
 
@@ -94,24 +140,23 @@ def runpart1():
 ###########################
 # part2
 ###########################
-def getTwoCupsAfterOne(cups):
-    idx = cups.index(1)
-    one = cups[idx+1]
-    two = cups[idx+2]
-    print(one, "and", two)
-    return one * two
+def getTwoCupsAfterOne(indexes):
+    idx = indexes[1]
+    vals = []
+    for cup in indexes:
+        if indexes[cup] == idx + 1 or indexes[cup] == idx + 2:
+            vals.append(cup)
+    print("vals",vals)
+    return vals[0] * vals[1]
 
 
-def moveWithIndexes(cups, currentCup, cupsLen):
+def moveWithIndexes(cups, lenCups, indexes):
     minCup = 1
-    maxCup = cupsLen-1 #1000000
+    maxCup = lenCups
 
-    print("cups:", cups)
-    currentCupIdx = cups[currentCup]
-    pickup = [cups[currentCupIdx+1], cups[currentCupIdx+2], cups[currentCupIdx+3]]
-    nextCurrentCup = cups[currentCupIdx+4]
-    print("pickup:" ,pickup)
-    # newCups = cups[4:]
+    # print("cups:", cups)
+    currentCup = cups.popleft()
+    pickup = [cups.popleft(), cups.popleft(), cups.popleft()]
 
     # destination cup: the cup with a label equal to the current cup's label minus one
     destinationCup = currentCup - 1
@@ -123,44 +168,40 @@ def moveWithIndexes(cups, currentCup, cupsLen):
     # it wraps around to the highest value on any cup's label instead
     if destinationCup < minCup:
         destinationCup = maxCup
-    print("desination:",destinationCup)
 
-    # find index of destination
-    destinationIdx = cups[destinationCup]
+    try:
+        destinationIdx = cups.index(destinationCup)
+    except:
+        destinationCup = max(cups)
+        destinationIdx = cups.index(destinationCup)
+        pass
+
     for i in range(len(pickup)):
-        cups[pickup[i]] = destinationIdx + i + 1
-    # for everything after, update their places
+        cups.insert(destinationIdx+i+1, pickup[i])
 
-    print("cups", cups)
-    return cups, nextCurrentCup
+    cups.append(currentCup)
+
+    return cups
 
 def part2(data):
     print(data)
     m = max(data)
-    numCups = len(data)
-    cups = deque(data[:] + [ i for i in range(m+1, 1000000+1)])
+    numCups = 1000000
+    cups = deque(data[:] + [ i for i in range(m+1, numCups+1)])
 
-    currentCup = data[0]
+    indexes = {}
+    for i in range(numCups):
+        indexes[cups[i]] = i
 
-    numMoves = 100
+    currentCup = cups[0]
+
+    # numMoves = 100
+    numMoves = 10000000 # ten million
     for i in range(numMoves):
-        # print("move ", i)
-        cups = move(cups, numCups)#, currentCup, numCups)
-        # print()
+        cups = moveWithIndexes(cups, numCups, indexes)#, currentCup, numCups)
 
     print("Final cups", cups)
-    res = getLabelsAfterOne(cups)
-    print("result", res)
-
-
-    numMoves = 10
-    for i in range(numMoves):
-        # print("move ", i)
-        cups = move(cups)
-        # print()
-
-    print("Final cups", cups)
-    res = getTwoCupsAfterOne(cups)
+    res = getTwoCupsAfterOne(indexes)
     print("result", res)
 
 def runpart2():
