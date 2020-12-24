@@ -2,6 +2,7 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
 import numpy as np
+from copy import deepcopy
 
 ###########################
 # helpers
@@ -29,10 +30,10 @@ def parseLine(line: str):
 
 
 class Hex:
-    def __init__(self, q=0, r=0):
+    def __init__(self, q=0, r=0, color=0):
         self.r = r # row
         self.q = q # column
-        self.color = 0 # 0 for white, 1 for black
+        self.color = color # 0 for white, 1 for black
 
     def flipColor(self):
         if self.color == 0:
@@ -83,6 +84,14 @@ class HexGrid:
         plt.autoscale(enable = True)
         plt.show()
 
+    def count_adj_black(self, h):
+        neighbors = self.get_all_existing_neighbors(h)
+        count = 0
+        for n in neighbors:
+            if n.color == 1:
+                count += 1
+        return count
+
     def hex_neighbor(self, h, ordinal_direction):
         q, r = ordinal_directions[ordinal_direction]
         # print("adding", h.q, "+", q, "and", h.r, "+",r)
@@ -94,8 +103,22 @@ class HexGrid:
             self.hexes[(newq, newr)] = newHex
         return newHex
 
-    def get_all_neighbors(self, h):
-        return [self.hex_neighbor(h, d) for d in ordinal_directions]
+    def hex_existing_neighbor(self, h, ordinal_direction):
+        q, r = ordinal_directions[ordinal_direction]
+        newq = h.q + q
+        newr = h.r + r
+        return self.hexes.get((newq, newr))
+
+    def get_all_existing_neighbors(self, h):
+        res = []
+        for d in ordinal_directions:
+            n = self.hex_existing_neighbor(h, d)
+            if n is not None:
+                res.append(n)
+        return res
+
+    def get_all_possible_neighbors(self, h):
+        return [ self.hex_neighbor(h, o) for o in ordinal_directions]
 
     def count_black(self):
         count = 0
@@ -105,31 +128,36 @@ class HexGrid:
                 count += 1
         return count
 
+    def grow_from_black(self):
+        origKeys = list(self.hexes.keys())[:]
+        for coord in origKeys:
+            h = self.hexes[coord]
+            if h.color == 1:
+                self.get_all_possible_neighbors(h)
+
 ###########################
 # part1
 ###########################
 def part1(data):
-    print(data)
+    # print(data)
     grid = HexGrid()
-    print([ str(h) for h in grid.hexes])
+    # print([ str(h) for h in grid.hexes])
 
     for line in data:
         currHex = grid.hexes[(0,0)]
-        print("starting", line, "from",currHex)
+        # print("starting", line, "from",currHex)
         for ordinal_direction in line:
-            print(currHex)
+            # print(currHex)
             # axial_direction = ordinal_directions[ordinal_direction]
             nextHex = grid.hex_neighbor(currHex, ordinal_direction)
             currHex = nextHex
         currHex.flipColor()
-        print("ended at", currHex)
-
-        print(currHex)
+        # print("ended at", currHex)
 
     print("num black:",grid.count_black())
 
-    grid.plot()
-
+    # grid.plot()
+    return grid
 
 
 def runpart1():
@@ -142,7 +170,37 @@ def runpart1():
 # part2
 ###########################
 def part2(data):
-    print(data)
+    grid = part1(data)
+
+    # expand out from black tiles if necessary
+    grid.grow_from_black()
+
+    # grid.plot()
+    # pass days
+    for i in range(1,101):
+        newGrid = HexGrid()
+        # print(grid.hexes)
+        for tileCoord in grid.hexes:
+            tile = grid.hexes[tileCoord]
+            black_neighbors = grid.count_adj_black(tile)
+            if tile.color == 1: # black
+                if black_neighbors == 0 or black_neighbors > 2:
+                    newGrid.hexes[tileCoord] = Hex(tile.q, tile.r, 0)
+                else:
+                    newGrid.hexes[tileCoord] = tile
+            else: # white
+                if black_neighbors == 2:
+                    newGrid.hexes[tileCoord] = Hex(tile.q, tile.r, 1)
+                else:
+                    newGrid.hexes[tileCoord] = tile
+        grid = newGrid
+        # expand out from black tiles if necessary
+        grid.grow_from_black()
+        # grid.plot()
+        print("Day ", i, ":", grid.count_black())
+
+
+
 
 def runpart2():
     start = time.perf_counter()
@@ -155,8 +213,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
