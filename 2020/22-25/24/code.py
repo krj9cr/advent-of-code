@@ -2,7 +2,6 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
 import numpy as np
-from copy import deepcopy
 
 ###########################
 # helpers
@@ -25,10 +24,7 @@ def parseLine(line: str):
             l = l[2:]
     return dirs
 
-# using odd-r from
 # https://www.redblobgames.com/grids/hexagons/#coordinates
-
-
 class Hex:
     def __init__(self, q=0, r=0, color=0):
         self.r = r # row
@@ -59,10 +55,13 @@ ordinal_directions = {
     'se': (0, 1),
 }
 
+# lots of good source from:
+# https://www.redblobgames.com/grids/hexagons/implementation.html#hex
 class HexGrid:
     def __init__(self):
         self.hexes = {(0,0): Hex(0,0)}
 
+    # source: https://stackoverflow.com/questions/59042139/how-to-properly-draw-hexagons-with-offset-coordinates
     def plot(self):
         fig, ax = plt.subplots(1)
         ax.set_aspect('equal')
@@ -198,9 +197,6 @@ def part2(data):
         grid.grow_from_black()
         # grid.plot()
         print("Day ", i, ":", grid.count_black())
-
-
-
 
 def runpart2():
     start = time.perf_counter()
