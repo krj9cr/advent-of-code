@@ -1,7 +1,138 @@
 import time
-from copy import deepcopy
-from collections import deque
-from lib.linkedlist import Node, CircularLinkedList
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+    def __repr__(self):
+        return "Node(" + str(self.data) + ") -> " + str(self.next.data)
+
+def remove_three_after_node(target_node):
+    one = target_node.next
+    two = one.next
+    three = two.next
+    four = three.next
+    target_node.next = four
+
+# A "smart" circular linked list
+# https://www.javatpoint.com/python-program-to-create-and-display-a-circular-linked-list
+class CircularLinkedList:
+    def __init__(self, nodes=None):
+        self.head = None
+        # a dict of data -> node
+        # helps with faster lookups for extremely long chains
+        self.nodePointers = {}
+        if nodes is not None:
+            elem = nodes.pop(0)
+            node = Node(data=elem)
+            self.nodePointers[elem] = node
+            self.head = node
+            for elem in nodes:
+                n = Node(data=elem)
+                node.next = n
+                self.nodePointers[elem] = n
+                node = node.next
+            node.next = self.head
+
+    # This function will add the new node at the end of the list.
+    def add(self, data):
+        newNode = Node(data)
+        self.nodePointers[data] = newNode
+        # Checks if the list is empty.
+        if self.head is None:
+            # If list is empty, both head and tail would point to new node.
+            self.head = newNode
+            newNode.next = self.head
+        else:
+            node = None
+            for n in self:
+                node = n
+            node.next = newNode
+            newNode.next = self.head
+
+    # Displays all the nodes in the list
+    def display(self):
+        current = self.head
+        if not self.head:
+            raise Exception("List is empty")
+        else:
+            print("Nodes of the circular linked list: ")
+            #Prints each node by incrementing pointer.
+            print(current.data),
+            while current.next != self.head:
+                current = current.next
+                print(current.data),
+
+    def add_after(self, target_node_data, new_node):
+        if not self.head:
+            raise Exception("List is empty")
+        node = self.find(target_node_data)
+        new_node.next = node.next
+        node.next = new_node
+        self.nodePointers[new_node.data] = new_node
+
+    def add_three_after(self, target_node_data, one, two, three):
+        if not self.head:
+            raise Exception("List is empty")
+        node = self.find(target_node_data)
+        one.next = two
+        two.next = three
+        three.next = node.next
+        node.next = one
+        self.nodePointers[one.data] = one
+        self.nodePointers[two.data] = two
+        self.nodePointers[three.data] = three
+
+    def __iter__(self):
+        node = self.head
+        while node is not None:
+            yield node
+            node = node.next
+            if node == self.head:
+                break
+
+    def __repr__(self):
+        nodes = []
+        for node in self:
+            nodes.append(str(node.data))
+        return " -> ".join(nodes)
+
+    def find(self, target_node_data):
+        if not self.head:
+            raise Exception("List is empty")
+        # try to lookup
+        node = self.nodePointers.get(target_node_data)
+        if node is not None:
+            return node
+        # otherwise hunt for it SLOWLY
+        for node in self:
+            if node.data == target_node_data:
+                return node
+        raise Exception("Node with data '%s' not found" % target_node_data)
+
+    # don't use this
+    def remove_node_with_data(self, target_node_data):
+        if not self.head:
+            raise Exception("List is empty")
+        # BAD, slow
+        if self.head.data == target_node_data:
+            # find whatever was pointing to head :/
+            for node in self:
+                if node.next == self.head:
+                    node.next = self.head.next
+                    break
+            self.head = self.head.next
+
+        # node = self.find(target_node_data)
+        # SLOW
+        previous_node = self.head
+        for node in self:
+            if node.data == target_node_data:
+                previous_node.next = node.next
+            previous_node = node
+
+        raise Exception("Node with data '%s' not found" % str(target_node_data))
 
 ###########################
 # helpers
@@ -22,20 +153,20 @@ def getLabelsAfterOne(cups):
     l.pop(0) # remove one
     return "".join(l)
 
-def move2(cups, lenCups, currentCup):
+def move(cups, lenCups, currentCup):
     minCup = 1
     maxCup = lenCups
 
     cups.head = currentCup
-    print("current cup:", currentCup)
-    print("cups:", cups)
+    # print("current cup:", currentCup)
+    # print("cups:", cups)
     # currentCup = cups.head
     pickup1 = currentCup.next
     pickup2 = pickup1.next
     pickup3 = pickup2.next
 
-    pickupData = list(reversed([pickup1.data, pickup2.data, pickup3.data]))
-    print("pickup:", pickupData)
+    pickupData = [pickup1.data, pickup2.data, pickup3.data]
+    # print("pickup:", pickupData)
     # destination cup: the cup with a label equal to the current cup's label minus one
     destinationCup = currentCup.data - 1
     # If this would select one of the cups that was just picked up,
@@ -48,14 +179,12 @@ def move2(cups, lenCups, currentCup):
         destinationCup = maxCup
     while destinationCup in pickupData:
         destinationCup -= 1
-    print("desintation:", destinationCup)
+    # print("desintation:", destinationCup)
 
     # move picked up cups after destination cup
-    for i in range(len(pickupData)):
-        cups.remove_node_with_data(pickupData[i])
-        cups.add_after(destinationCup, Node(pickupData[i]))
+    remove_three_after_node(currentCup)
+    cups.add_three_after(destinationCup, Node(pickupData[0]), Node(pickupData[1]), Node(pickupData[2]))
 
-    destinationNode = cups.find(destinationCup)
     currentCup = currentCup.next
 
     return cups, currentCup
@@ -73,28 +202,12 @@ def part1(data):
     numMoves = 100
     for i in range(numMoves):
         print("move ", i)
-        cups, currentCup = move2(cups, numCups, currentCup)
+        cups, currentCup = move(cups, numCups, currentCup)
         print()
 
     print("Final cups", cups)
     res = getLabelsAfterOne(cups)
     print("result", res)
-
-
-    # cups = deque(data)
-    #
-    # currentCup = data[0]
-    #
-    # numMoves = 100
-    # for i in range(numMoves):
-    #     # print("move ", i)
-    #     cups = move(cups, numCups)#, currentCup, numCups)
-    #     # print()
-    #
-    # print("Final cups", cups)
-    # res = getLabelsAfterOne(cups)
-    # print("result", res)
-
 
 
 def runpart1():
@@ -106,68 +219,26 @@ def runpart1():
 ###########################
 # part2
 ###########################
-def getTwoCupsAfterOne(indexes):
-    idx = indexes[1]
-    vals = []
-    for cup in indexes:
-        if indexes[cup] == idx + 1 or indexes[cup] == idx + 2:
-            vals.append(cup)
-    print("vals",vals)
-    return vals[0] * vals[1]
-
-
-def moveWithIndexes(cups, lenCups, indexes):
-    minCup = 1
-    maxCup = lenCups
-
-    # print("cups:", cups)
-    currentCup = cups.popleft()
-    pickup = [cups.popleft(), cups.popleft(), cups.popleft()]
-
-    # destination cup: the cup with a label equal to the current cup's label minus one
-    destinationCup = currentCup - 1
-    # If this would select one of the cups that was just picked up,
-    # the crab will keep subtracting one until it finds a cup that wasn't just picked up
-    while destinationCup in pickup:
-        destinationCup -= 1
-    # If at any point in this process the value goes below the lowest value on any cup's label,
-    # it wraps around to the highest value on any cup's label instead
-    if destinationCup < minCup:
-        destinationCup = maxCup
-
-    try:
-        destinationIdx = cups.index(destinationCup)
-    except:
-        destinationCup = max(cups)
-        destinationIdx = cups.index(destinationCup)
-        pass
-
-    for i in range(len(pickup)):
-        cups.insert(destinationIdx+i+1, pickup[i])
-
-    cups.append(currentCup)
-
-    return cups
+def getTwoCupsAfterOne(cups):
+    oneNode = cups.find(1)
+    val1 = oneNode.next
+    val2 = val1.next
+    print("vals",val1.data, val2.data)
+    return val1.data * val2.data
 
 def part2(data):
-    print(data)
     m = max(data)
-    numCups = 1000000
-    cups = deque(data[:] + [ i for i in range(m+1, numCups+1)])
+    numCups = 1000000 # one million
+    cups = CircularLinkedList(data[:] + [ i for i in range(m+1, numCups+1)])
 
-    indexes = {}
-    for i in range(numCups):
-        indexes[cups[i]] = i
-
-    currentCup = cups[0]
-
-    # numMoves = 100
+    currentCup = cups.head
     numMoves = 10000000 # ten million
     for i in range(numMoves):
-        cups = moveWithIndexes(cups, numCups, indexes)#, currentCup, numCups)
+        print("move ", i)
+        cups, currentCup = move(cups, numCups, currentCup)
 
     print("Final cups", cups)
-    res = getTwoCupsAfterOne(indexes)
+    res = getTwoCupsAfterOne(cups)
     print("result", res)
 
 def runpart2():
