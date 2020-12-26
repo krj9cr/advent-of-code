@@ -5,6 +5,7 @@ from copy import deepcopy
 import math
 import random
 from lib.print import print_2d_grid
+import part2_helpers
 
 ###########################
 # helpers
@@ -267,18 +268,33 @@ def part2(data):
     t = np.fliplr(np.rot90(np.array(tileGrid), k=2))
     print(b)
 
+    # for row in t:
+    #     for tile in row:
+    #         print_2d_grid(tile)
+    #         print()
+
+    # one = t[0][0]
+    # two = t[0][1]
+    #
+    # print_2d_grid(np.concatenate([one, two], axis=1))
+
+    # print_2d_grid(t)
     resultGrid = tileGridToSingleGrid(t)
     print_2d_grid(resultGrid)
+
+    # find and mark the dragons!
+    part2_helpers.findSeaMonstersAndGetCount(resultGrid)
 
 def tileGridToSingleGrid(tileGrid):
     grid = []
     for row in tileGrid:
         trimmedRow = []
         for tile in row:
-            t1= np.delete(tile, [0,len(tile)-1], 0)
-            t2= np.delete(tile, [0,len(t1)-1], 1)
+            t1 = tile[1:-1, :] # remove first and last row
+            t2 = t1[:, 1:-1] # remove first and las col
             trimmedRow.append(t2)
         newRow = np.concatenate(trimmedRow, axis=1)
+        # newRow = np.concatenate(row, axis=1)
         grid.append(newRow)
     grid = np.concatenate(grid, axis=0)
     return grid
@@ -328,18 +344,6 @@ def fillNeighbors(tileNum, x, y, matches, tiles, biggoGriddo, tileGrid):
 # 6 - flipped rotate left 180   6 - bottom flipped
 # 7 - flipped rotat left 270    7 - left flipped
 
-# biggoGriddo = [[(1889, 0), (1861, 0), (1427, 3), (1481, 5), (2549, 0), None, None, None, None, None, None, None],
-#                [(3661, 3), (1787, 0), (2017, 1), (3259, 1), None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None],
-#                [None, None, None, None, None, None, None, None, None, None, None, None]]
 
 def runpart2():
     start = time.perf_counter()
