@@ -1,6 +1,5 @@
 import numpy as np
 import sys
-from copy import deepcopy
 from lib.print import print_2d_grid
 
 ###########################
@@ -76,12 +75,12 @@ def countGridHashes(grid):
     return count
 
 def rotateGridUntilMatches(grid, maskGrid):
-
     spots = getGridSpotsMatchingMask(grid, maskGrid)
     if len(spots) > 0:
         return spots, grid
 
     i = 1
+    grid2 = None
     while len(spots) == 0 and i < 4:
         grid2 = np.rot90(grid, k=i)
         spots = getGridSpotsMatchingMask(grid2, maskGrid)
@@ -95,6 +94,7 @@ def rotateGridUntilMatches(grid, maskGrid):
         return spots, grid2
 
     i = 1
+    grid3 = None
     while len(spots) == 0 and i < 4:
         grid3 = np.rot90(grid2, k=i)
         spots = getGridSpotsMatchingMask(grid3, maskGrid)
@@ -120,10 +120,5 @@ def findSeaMonstersAndGetCount(grid):
 # test
 ###########################
 if __name__ == '__main__':
-    # mask = parseMaskFile()
-    # print(mask)
     example = np.array(parseExampleFile())
-    # print(example)
     findSeaMonstersAndGetCount(example)
-
-
