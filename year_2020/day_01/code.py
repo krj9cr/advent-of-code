@@ -28,7 +28,10 @@ def part1(data):
                 return
 
 def runpart1():
+    start = time.perf_counter()
     part1(parseInputFile())
+    end = time.perf_counter()
+    print(f"Time: {end-start:0.4f}")
 
 
 ###########################
@@ -37,14 +40,19 @@ def runpart1():
 def part2(data):
     for num1 in data:
         for num2 in data:
+            if num1 == num2 or num1 + num2 >= 2020:
+                continue
             for num3 in data:
-                if num1 != num2 and num2 != num3 and num1 != num3 and num1 + num2 + num3 == 2020:
+                if num2 != num3 and num1 != num3 and num1 + num2 + num3 == 2020:
                     print("num1: ", num1, "num2: ", num2, "num3: ", num3, "answer: ", num1*num2*num3)
                     return
 
 
 def runpart2():
+    start = time.perf_counter()
     part2(parseInputFile())
+    end = time.perf_counter()
+    print(f"Time: {end-start:0.4f}")
 
 ###########################
 # run
