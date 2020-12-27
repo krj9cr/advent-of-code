@@ -1,3 +1,4 @@
+import time
 
 ###########################
 # helpers
@@ -30,8 +31,8 @@ def parseLine(line: str):
 ###########################
 def findpath(start, d, goal):
     result = 0
-    if d.get(start) is not None:
-        nodes = d[start]
+    nodes = d.get(start)
+    if nodes is not None:
         for n in nodes:
             if n == goal:
                 return 1
@@ -40,7 +41,7 @@ def findpath(start, d, goal):
     return min(result, 1)
 
 def part1(data):
-    print(data)
+    # print(data)
 
     result = 0
     for root in data:
@@ -49,28 +50,34 @@ def part1(data):
     print(result)
 
 def runpart1():
+    start = time.perf_counter()
     part1(parseInputFile())
+    end = time.perf_counter()
+    print(f"Time: {end-start:0.4f}")
 
 ###########################
 # part2
 ###########################
 def lookup(bag, d):
     result = 0
-    if d.get(bag) is not None:
+    nexts = d.get(bag)
+    if nexts is not None:
         result += 1
-        nexts = d[bag]
         for item in nexts:
             result += nexts[item] * lookup(item, d)
     return result
 
 def part2(data):
-    print(data)
+    # print(data)
 
     result = lookup("shiny gold", data)
     print(result-1) # minus one to not count "shiny gold"
 
 def runpart2():
+    start = time.perf_counter()
     part2(parseInputFile())
+    end = time.perf_counter()
+    print(f"Time: {end-start:0.4f}")
 
 ###########################
 # run
