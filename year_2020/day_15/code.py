@@ -11,33 +11,38 @@ def parseLine(line: str):
     l = line.strip().split(",")
     return [ int(s) for s in l ]
 
+def runGame(data, endTurn):
+    # print(data)
+    turn = 1
+    spoken = {}
+    last = None
+    for num in data:
+        spoken[num] = turn
+        last = num
+        # print(last)
+        turn += 1
+    while turn <= endTurn:
+        # if turn % 10000 == 0:
+        #     print(turn)
+        prev = last
+        lastturn = spoken.get(last)
+        if lastturn is not None:
+            last = turn - 1 - lastturn
+            # print("turn", turn,"lastturn", lastturn)
+        else:
+            last = 0
+        spoken[prev] = turn - 1
+        # print(spoken)
+        # print(spokentwice)
+        # print("speak",last)
+        turn += 1
+    print(last)
+
 ###########################
 # part1
 ###########################
 def part1(data):
-    print(data)
-    turn = 0
-    spoken = []
-    for num in data:
-        spoken.append(num)
-        turn += 1
-    while turn < 2020:
-        print(turn)
-        last = spoken[-1]
-        if last not in spoken[:-1]:
-            spoken.append(0)
-        else:
-            lastturn = -1
-            for i in range(len(spoken)-2, -1, -1):
-                if spoken[i] == last:
-                    lastturn = i
-                    break
-            print(lastturn)
-            val = turn - lastturn - 1
-            spoken.append(val)
-        print(spoken)
-        turn += 1
-    print(spoken[-1])
+    runGame(data, 2020)
 
 def runpart1():
     start = time.perf_counter()
@@ -51,34 +56,7 @@ def runpart1():
 # almost same algorithm as part one, but use dicts
 # instead of a long list that would prob eat up memory
 def part2(data):
-    print(data)
-    turn = 1
-    spoken = {}
-    spokentwice = {}
-    last = None
-    for num in data:
-        spoken[num] = turn
-        last = num
-        # print(last)
-        turn += 1
-    while turn <= 30000000:
-        # if turn % 10000 == 0:
-        #     print(turn)
-        if last in spokentwice:
-            lastturn = spokentwice[last]
-            last = turn - 1 - lastturn
-            # print("turn", turn,"lastturn", lastturn)
-        else:
-            last = 0
-        # update spokentwice and spoken
-        if last in spoken:
-            spokentwice[last] = spoken[last]
-        spoken[last] = turn
-        # print(spoken)
-        # print(spokentwice)
-        # print("speak",last)
-        turn += 1
-    print(last)
+    runGame(data, 30000000)
 
 def runpart2():
     start = time.perf_counter()
@@ -91,8 +69,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    # print("\nPART 1 RESULT")
-    # runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
     print("\nPART 2 RESULT")
     runpart2()
