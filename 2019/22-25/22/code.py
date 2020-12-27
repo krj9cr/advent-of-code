@@ -65,11 +65,11 @@ def part2(data, size, cardIdx=2020, numShuffles=101741582076661):
     Ma = pow(a, numShuffles, size)
     Mb = (b * (Ma - 1) * inv(a - 1, size)) % size
 
-    # This computes "where does 2020 end up", but I want "what is at 2020".
+    # This computes "where does year_2020 end up", but I want "what is at year_2020".
     # print((Ma * c + Mb) % n)
 
-    # So need to invert (2020 - MB) * inv(Ma)
-    print("location of 2020",((cardIdx - Mb) * inv(Ma, size)) % size)
+    # So need to invert (year_2020 - MB) * inv(Ma)
+    print("location of year_2020",((cardIdx - Mb) * inv(Ma, size)) % size)
 
 
 def testpart2(data):
