@@ -8,13 +8,15 @@ if __name__ == '__main__':
     days = []
     part1Times = []
     part2Times = []
-    for i in range(1, 20):
-        if i == 11:
-            continue
+    for i in range(1, 26):
         day = "{:02d}".format(i)
         days.append(day)
 
         module = importlib.import_module(f"year_2020.day_{day}.code")
+        try:
+            helpers = importlib.import_module(f"year_2020.day_{day}.helpers")
+        except:
+            pass
 
         start = time.perf_counter()
         module.runpart1()

@@ -6,11 +6,11 @@ from lib.print import print_2d_grid
 # helpers
 ###########################
 def parseMaskFile():
-    with open((__file__.rstrip("part2_helpers.py") + "mask.txt"), 'r') as file:
+    with open((__file__.rstrip("helpers.py") + "mask.txt"), 'r') as file:
         return [[ c for c in line.strip('\n')] for line in file]
 
 def parseExampleFile():
-    with open((__file__.rstrip("part2_helpers.py") + "example.txt"), 'r') as file:
+    with open((__file__.rstrip("helpers.py") + "example.txt"), 'r') as file:
         return [[ c for c in line.strip('\n')] for line in file]
 
 def getGridSpotsMatchingMask(grid, maskGrid):
