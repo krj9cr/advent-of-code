@@ -1,6 +1,7 @@
 from copy import deepcopy
 from lib.print import print_2d_grid
 import numpy as np
+import time
 
 ###########################
 # helpers
@@ -14,7 +15,6 @@ def parseLine(line: str):
 
 
 def countAdj(data, i , j):
-    item = data[i][j]
     count = 0
     for i2, j2 in ((i - 1, j - 1), (i - 1, j), (i - 1, j + 1), (i, j - 1), (i, j + 1), (i + 1, j - 1), (i + 1, j), (i + 1, j + 1)):
         if 0 <= i2 < len(data) and 0 <= j2 < len(data[0]):
@@ -63,21 +63,24 @@ def countOccupied(data):
 # part1
 ###########################
 def part1(data):
-    print_2d_grid(data)
-    prev = deepcopy(data)
+    # print_2d_grid(data)
+    prev = data
     i = 0
     while True:
-        print("Round", i)
+        # print("Round", i)
         newdata = doRound(prev)
         if compareGrids(prev, newdata):
             result = countOccupied(newdata)
             print(result)
             return
-        prev = deepcopy(newdata)
+        prev = newdata
         i +=1
 
 def runpart1():
+    start = time.perf_counter()
     part1(parseInputFile())
+    end = time.perf_counter()
+    print(f"Time: {end-start:0.4f}")
 
 ###########################
 # part2
@@ -85,7 +88,6 @@ def runpart1():
 
 def countVisible(data, i, j):
     return numAsteriodsDetected(data, i, j)
-
 
 def numAsteriodsDetected(data, x, y):
     h = len(data[0])
@@ -177,7 +179,7 @@ def doRound2(data):
 
 def part2(data):
     # print_2d_grid(data)
-    prev = deepcopy(data)
+    prev = data[:]
     i = 0
     # while i < 1:
     while True:
@@ -188,20 +190,23 @@ def part2(data):
             result = countOccupied(newdata)
             print(result)
             return
-        prev = deepcopy(newdata)
+        prev = newdata[:]
         i +=1
     # print(len(data[0]),len(data))
 
 def runpart2():
+    start = time.perf_counter()
     part2(parseInputFile())
+    end = time.perf_counter()
+    print(f"Time: {end-start:0.4f}")
 
 ###########################
 # run
 ###########################
 if __name__ == '__main__':
 
-    # print("\nPART 1 RESULT")
-    # runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
-    print("\nPART 2 RESULT")
-    runpart2()
+    # print("\nPART 2 RESULT")
+    # runpart2()

@@ -5,13 +5,14 @@ from copy import deepcopy
 import math
 import random
 from lib.print import print_2d_grid
-import part2_helpers
+from year_2020.day_20 import helpers
 
 # puzzle problem with finding a pattern
 
 ###########################
 # helpers
 ###########################
+
 def parseInputFile():
     with open((__file__.rstrip("code.py") + "input.txt"), 'r') as file:
         # read lines
@@ -233,7 +234,7 @@ def part2(data):
 
     # find and mark the dragons!
     # this prints the result
-    part2_helpers.findSeaMonstersAndGetCount(resultGrid)
+    helpers.findSeaMonstersAndGetCount(resultGrid)
 
 def runpart2():
     start = time.perf_counter()
