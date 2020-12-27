@@ -1,5 +1,4 @@
 import time
-from copy import deepcopy
 
 ###########################
 # helpers
@@ -17,7 +16,6 @@ def parseLine(line: str):
 ###########################
 def part1(data):
     print(data)
-    twice = set()
     turn = 0
     spoken = []
     for num in data:
@@ -54,7 +52,6 @@ def runpart1():
 # instead of a long list that would prob eat up memory
 def part2(data):
     print(data)
-    twice = set()
     turn = 1
     spoken = {}
     spokentwice = {}
@@ -62,24 +59,21 @@ def part2(data):
     for num in data:
         spoken[num] = turn
         last = num
-        print(last)
+        # print(last)
         turn += 1
     while turn <= 30000000:
-        if turn % 10000 == 0:
-            print(turn)
+        # if turn % 10000 == 0:
+        #     print(turn)
         if last in spokentwice:
             lastturn = spokentwice[last]
-            speak = turn - 1 - lastturn
-            last = speak
-            if last in spoken:
-                spokentwice[last] = deepcopy(spoken[last])
-            spoken[last] = turn
+            last = turn - 1 - lastturn
             # print("turn", turn,"lastturn", lastturn)
         else:
             last = 0
-            if last in spoken:
-                spokentwice[last] = deepcopy(spoken[last])
-            spoken[last] = turn
+        # update spokentwice and spoken
+        if last in spoken:
+            spokentwice[last] = spoken[last]
+        spoken[last] = turn
         # print(spoken)
         # print(spokentwice)
         # print("speak",last)
@@ -91,8 +85,6 @@ def runpart2():
     part2(parseInputFile())
     end = time.perf_counter()
     print(f"Time: {end-start:0.4f}")
-
-# not 0 lol
 
 ###########################
 # run
