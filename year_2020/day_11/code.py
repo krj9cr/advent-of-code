@@ -1,5 +1,4 @@
 from copy import deepcopy
-from lib.print import print_2d_grid
 import numpy as np
 import time
 
@@ -8,70 +7,70 @@ import time
 ###########################
 def parseInputFile():
     with open((__file__.rstrip("code.py") + "input.txt"), 'r') as file:
-        return [parseLine(line) for line in file]
+        return [ [ c for c in line.strip() ] for line in file ]
 
-def parseLine(line: str):
-    return [ char for char in line.strip() ]
-
-
-def countAdj(data, i , j):
+def countAdjSet(occupied, i , j):
     count = 0
     for i2, j2 in ((i - 1, j - 1), (i - 1, j), (i - 1, j + 1), (i, j - 1), (i, j + 1), (i + 1, j - 1), (i + 1, j), (i + 1, j + 1)):
-        if 0 <= i2 < len(data) and 0 <= j2 < len(data[0]):
-            newitem = data[i2][j2]
-            if newitem == "#":
-                count += 1
+        if (i2, j2) in occupied:
+            count += 1
     return count
 
-def doRound(data):
-    newdata = deepcopy(data)
-    for i in range(len(data)):
+def doRound(data, occupied, rows, cols):
+    newdata = [[ item for item in row ] for row in data]
+    for i in range(rows):
         row = data[i]
-        for j in range(len(row)):
+        newrow = newdata[i]
+        for j in range(cols):
             item = row[j]
+            if item == ".": # quicker out
+                continue
+            numAdj = countAdjSet(occupied, i, j)
             if item == "L":
-                if countAdj(data, i, j) == 0:
-                    newdata[i][j] = "#"
+                if numAdj == 0:
+                   newrow[j] = "#"
             elif item == "#":
-                if countAdj(data, i, j) >= 4:
-                    newdata[i][j] = "L"
+                if numAdj >= 4:
+                    newrow[j] = "L"
     return newdata
 
 # assumes they are the same size
-def compareGrids(data1, data2):
-    for i in range(len(data1)):
+def compareGrids(data1, data2, rows, cols):
+    for i in range(rows):
         row = data1[i]
         row2 = data2[i]
-        for j in range(len(row)):
+        for j in range(cols):
             item = row[j]
             item2 = row2[j]
             if item != item2:
                 return False
     return True
 
-def countOccupied(data):
-    count = 0
-    for i in range(len(data)):
+def getOccupied(data, rows, cols):
+    occupied = set()
+    for i in range(rows):
         row = data[i]
-        for j in range(len(row)):
+        for j in range(cols):
             item = row[j]
             if item == "#":
-                count += 1
-    return count
+                occupied.add(tuple([i,j]))
+    return occupied
 
 ###########################
 # part1
 ###########################
 def part1(data):
-    # print_2d_grid(data)
     prev = data
+    rows = len(data)
+    cols = len(data[0])
+    occupied = set()
     i = 0
     while True:
         # print("Round", i)
-        newdata = doRound(prev)
-        if compareGrids(prev, newdata):
-            result = countOccupied(newdata)
-            print(result)
+        newdata = doRound(prev, occupied, rows, cols)
+        occupied = getOccupied(newdata, rows, cols)
+        if compareGrids(prev, newdata, rows, cols):
+            print(len(occupied))
             return
         prev = newdata
         i +=1
