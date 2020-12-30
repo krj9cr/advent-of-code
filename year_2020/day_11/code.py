@@ -1,6 +1,3 @@
-from copy import deepcopy
-import numpy as np
-from lib.print import print_2d_grid
 import time
 
 ###########################
@@ -15,6 +12,8 @@ def countAdjSet(occupied, i , j):
     for i2, j2 in ((i - 1, j - 1), (i - 1, j), (i - 1, j + 1), (i, j - 1), (i, j + 1), (i + 1, j - 1), (i + 1, j), (i + 1, j + 1)):
         if (i2, j2) in occupied:
             count += 1
+            if count >= 4: # early out
+                return count
     return count
 
 def doRound(data, occupied, rows, cols):
@@ -86,24 +85,25 @@ def runpart1():
 # part2
 ###########################
 
+storage = {}
+
 def countVisible(data, x, y, h, w):
     count = 0
-    # down
-    count += goDirectionSet(data, [(x, y2) for y2 in range(y + 1, h, 1)])
-    # up
-    count += goDirectionSet(data, [(x, y2) for y2 in range(y - 1, -1, -1)])
-    # left
-    count += goDirectionSet(data, [(x2, y) for x2 in range(x - 1, -1, -1)])
-    # right
-    count += goDirectionSet(data, [(x2, y) for x2 in range(x + 1, w, 1)])
-    # down right
-    count += goDirectionSet(data, [(x2, y2) for (x2, y2) in zip(range(x + 1, w, 1), range(y + 1, h, 1))])
-    # up right
-    count += goDirectionSet(data, [(x2, y2) for (x2, y2) in zip(range(x - 1, -1, -1), range(y + 1, h, 1))])
-    # down left
-    count += goDirectionSet(data, [(x2, y2) for (x2, y2) in zip(range(x + 1, w, 1), range(y - 1, -1, -1))])
-    # down left
-    count += goDirectionSet(data, [(x2, y2) for (x2, y2) in zip(range(x - 1, -1, -1), range(y - 1, -1, -1))])
+    # store the directions so we dont have to generate them every time
+    directions = storage.get((x,y))
+    if directions is None:
+        directions = [[(x, y2) for y2 in range(y + 1, h, 1)], [(x, y2) for y2 in range(y - 1, -1, -1)],
+                      [(x2, y) for x2 in range(x - 1, -1, -1)], [(x2, y) for x2 in range(x + 1, w, 1)],
+                      [(x2, y2) for (x2, y2) in zip(range(x + 1, w, 1), range(y + 1, h, 1))],
+                      [(x2, y2) for (x2, y2) in zip(range(x - 1, -1, -1), range(y + 1, h, 1))],
+                      [(x2, y2) for (x2, y2) in zip(range(x + 1, w, 1), range(y - 1, -1, -1))],
+                      [(x2, y2) for (x2, y2) in zip(range(x - 1, -1, -1), range(y - 1, -1, -1))]]
+        storage[(x,y)] = directions
+
+    for direction in directions:
+        count += goDirectionSet(data, direction)
+        if count >= 5: # early out
+            return count
 
     return count
 
@@ -158,8 +158,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    # print("\nPART 1 RESULT")
-    # runpart1()
+    print("\nPART 1 RESULT")
+    runpart1()
 
     print("\nPART 2 RESULT")
     runpart2()
