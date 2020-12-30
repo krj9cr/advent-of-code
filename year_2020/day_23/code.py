@@ -11,8 +11,7 @@ class Node:
 def move_three_nodes_after_to(from_after_node, to_after_node):
     # remove
     one = from_after_node.next
-    two = one.next
-    three = two.next
+    three = one.next.next
     from_after_node.next = three.next
     # add
     prev = to_after_node.next
@@ -40,6 +39,7 @@ class CircularLinkedList:
             node.next = self.head
 
     # assumes list is not empty
+    # return the last cup
     def append(self, nodes):
         # find last node
         node = None
@@ -51,6 +51,7 @@ class CircularLinkedList:
             self.nodePointers[elem] = n
             node = node.next
         node.next = self.head
+        return node
 
     # This function will add the new node at the end of the list.
     def add(self, data):
@@ -109,6 +110,37 @@ class CircularLinkedList:
                 return node
         raise Exception("Node with data '%s' not found" % target_node_data)
 
+    def move(self, lenCups, prevCup, currentCup):
+        # self.head = currentCup
+        pickup1 = currentCup.next
+        pickup2 = pickup1.next
+        pickup3 = pickup2.next
+
+        # destination cup: the cup with a label equal to the current cup's label minus one
+        destinationCup = currentCup.data - 1
+        # If this would select one of the cups that was just picked up,
+        # the crab will keep subtracting one until it finds a cup that wasn't just picked up
+        while destinationCup == pickup1.data or destinationCup == pickup2.data or destinationCup == pickup3.data:
+            destinationCup -= 1
+        # If at any point in this process the value goes below the lowest value on any cup's label,
+        # it wraps around to the highest value on any cup's label instead
+        if destinationCup < 1:
+            destinationCup = lenCups
+        while destinationCup == pickup1.data or destinationCup == pickup2.data or destinationCup == pickup3.data:
+            destinationCup -= 1
+        # print("desintation:", destinationCup)
+
+        # move picked up cups after destination cup
+        destinationNode = prevCup
+        if prevCup.data != destinationCup:
+            destinationNode = self.find(destinationCup)
+        move_three_nodes_after_to(currentCup, destinationNode)
+
+
+        currentCup = currentCup.next
+
+        return currentCup
+
 ###########################
 # helpers
 ###########################
@@ -128,40 +160,6 @@ def getLabelsAfterOne(cups):
     l.pop(0) # remove one
     return "".join(l)
 
-def move(cups, lenCups, currentCup):
-    cups.head = currentCup
-    # print("current cup:", currentCup)
-    # print("cups:", cups)
-    # currentCup = cups.head
-    pickup1 = currentCup.next
-    pickup2 = pickup1.next
-    pickup3 = pickup2.next
-
-    # pickupData = [pickup1.data, pickup2.data, pickup3.data]
-    # print("pickup:", pickupData)
-    # destination cup: the cup with a label equal to the current cup's label minus one
-    destinationCup = currentCup.data - 1
-    # If this would select one of the cups that was just picked up,
-    # the crab will keep subtracting one until it finds a cup that wasn't just picked up
-    while destinationCup == pickup1.data or destinationCup == pickup2.data or destinationCup == pickup3.data:
-        destinationCup -= 1
-    # If at any point in this process the value goes below the lowest value on any cup's label,
-    # it wraps around to the highest value on any cup's label instead
-    if destinationCup < 1:
-        destinationCup = lenCups
-    while destinationCup == pickup1.data or destinationCup == pickup2.data or destinationCup == pickup3.data:
-        destinationCup -= 1
-    # print("desintation:", destinationCup)
-
-    # move picked up cups after destination cup
-    # remove_three_after_node(currentCup)
-    # cups.add_three_after(destinationCup, Node(pickupData[0]), Node(pickupData[1]), Node(pickupData[2]))
-    move_three_nodes_after_to(currentCup, cups.find(destinationCup))
-
-
-    currentCup = currentCup.next
-
-    return cups, currentCup
 
 ###########################
 # part1
@@ -169,17 +167,21 @@ def move(cups, lenCups, currentCup):
 def part1(data):
     m = max(data)
     numCups = len(data)
+    # numCups = 1000000
     cups = CircularLinkedList(data[:])
-    cups.append(range(m+1, numCups+1))
+    prevCup = cups.append(range(m+1, numCups+1))
 
     print("cups:", cups)
     currentCup = cups.head
+    # numMoves = numCups
     numMoves = 100
     for i in range(numMoves):
         print("move ", i)
-        cups, currentCup = move(cups, numCups, currentCup)
+        newCup = cups.move(cups, numCups, prevCup, currentCup)
+        prevCup = currentCup
+        currentCup = newCup
         print("current cup:", currentCup)
-        print("cups:", cups)
+        # print("cups:", cups)
         print()
 
     print("Final cups", cups)
@@ -208,13 +210,15 @@ def part2(data):
     m = max(data)
     numCups = 1000000 # one million
     cups = CircularLinkedList(data[:])
-    cups.append(range(m+1, numCups+1))
+    prevCup = cups.append(range(m+1, numCups+1))
 
     currentCup = cups.head
     numMoves = 10000000 # ten million
     for i in range(numMoves):
         # print("move ", i)
-        cups, currentCup = move(cups, numCups, currentCup)
+        newCup = cups.move(numCups, prevCup, currentCup)
+        prevCup = currentCup
+        currentCup = newCup
 
     # print("Final cups", cups)
     res = getTwoCupsAfterOne(cups)
@@ -231,8 +235,8 @@ def runpart2():
 ###########################
 if __name__ == '__main__':
 
-    print("\nPART 1 RESULT")
-    runpart1()
+    # print("\nPART 1 RESULT")
+    # runpart1()
 
-    # print("\nPART 2 RESULT")
-    # runpart2()
+    print("\nPART 2 RESULT")
+    runpart2()
