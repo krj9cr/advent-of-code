@@ -171,18 +171,18 @@ def part1(data):
     cups = CircularLinkedList(data[:])
     prevCup = cups.append(range(m+1, numCups+1))
 
-    print("cups:", cups)
+    # print("cups:", cups)
     currentCup = cups.head
     # numMoves = numCups
     numMoves = 100
     for i in range(numMoves):
-        print("move ", i)
-        newCup = cups.move(cups, numCups, prevCup, currentCup)
+        # print("move ", i)
+        newCup = cups.move(numCups, prevCup, currentCup)
         prevCup = currentCup
         currentCup = newCup
-        print("current cup:", currentCup)
+        # print("current cup:", currentCup)
         # print("cups:", cups)
-        print()
+        # print()
 
     print("Final cups", cups)
     res = getLabelsAfterOne(cups)
