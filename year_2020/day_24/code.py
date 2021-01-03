@@ -196,7 +196,7 @@ def part2(data):
         # expand out from black tiles if necessary
         grid.grow_from_black()
         # grid.plot()
-        print("Day ", i, ":", grid.count_black())
+    print("Res", grid.count_black())
 
 def runpart2():
     start = time.perf_counter()
