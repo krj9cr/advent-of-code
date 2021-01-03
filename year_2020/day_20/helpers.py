@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-from lib.print import print_2d_grid
+# from lib.print import print_2d_grid
 
 ###########################
 # helpers
@@ -13,12 +13,7 @@ def parseExampleFile():
     with open((__file__.rstrip("helpers.py") + "example.txt"), 'r') as file:
         return [[ c for c in line.strip('\n')] for line in file]
 
-def getGridSpotsMatchingMask(grid, maskGrid):
-    rows = len(grid)
-    columns = len(grid[0])
-
-    maskRows = len(maskGrid)
-    maskCols = len(maskGrid[0])
+def getGridSpotsMatchingMask(grid, rows, columns, maskGrid, maskRows, maskCols):
 
     spotMatches = []
 
@@ -30,9 +25,12 @@ def getGridSpotsMatchingMask(grid, maskGrid):
             # Level 2: traversing the window (3x3 size)
             for mask_y in range(0, maskRows):
                 win_y = mask_y + y
+                if win_y >= columns:
+                    spotMatchesMask = False
+                    break
                 for mask_x in range(0, maskCols):
                     win_x = mask_x + x
-                    if win_y >= columns or win_x >= rows:
+                    if win_x >= rows:
                         spotMatchesMask = False
                         break
                     gridItem = grid[win_y][win_x]
@@ -47,9 +45,7 @@ def getGridSpotsMatchingMask(grid, maskGrid):
                 spotMatches.append(tuple([x, y]))
     return spotMatches
 
-def markMatchingSpots(grid, maskGrid, spots):
-    maskRows = len(maskGrid)
-    maskCols = len(maskGrid[0])
+def markMatchingSpots(grid, maskGrid, maskRows, maskCols, spots):
 
     # Level 1: traversing the matrix
     for (x, y) in spots:
@@ -63,19 +59,17 @@ def markMatchingSpots(grid, maskGrid, spots):
                 if maskItem == "#" and gridItem == "#":
                     grid[win_y][win_x] = "O"
 
-def countGridHashes(grid):
+def countGridHashes(grid, rows, cols):
     count = 0
-    rows = len(grid)
-    columns = len(grid[0])
 
     for y in range(rows):
-        for x in range(columns):
+        for x in range(cols):
             if grid[y][x] == "#":
                 count += 1
     return count
 
-def rotateGridUntilMatches(grid, maskGrid):
-    spots = getGridSpotsMatchingMask(grid, maskGrid)
+def rotateGridUntilMatches(grid, rows, cols, mask, maskRows, maskCols):
+    spots = getGridSpotsMatchingMask(grid, rows, cols, mask, maskRows, maskCols)
     if len(spots) > 0:
         return spots, grid
 
@@ -83,13 +77,13 @@ def rotateGridUntilMatches(grid, maskGrid):
     grid2 = None
     while len(spots) == 0 and i < 4:
         grid2 = np.rot90(grid, k=i)
-        spots = getGridSpotsMatchingMask(grid2, maskGrid)
+        spots = getGridSpotsMatchingMask(grid2, rows, cols, mask, maskRows, maskCols)
         i += 1
     if len(spots) > 0:
         return spots, grid2
 
     grid2 = np.fliplr(grid)
-    spots = getGridSpotsMatchingMask(grid2, maskGrid)
+    spots = getGridSpotsMatchingMask(grid2, rows, cols, mask, maskRows, maskCols)
     if len(spots) > 0:
         return spots, grid2
 
@@ -97,7 +91,7 @@ def rotateGridUntilMatches(grid, maskGrid):
     grid3 = None
     while len(spots) == 0 and i < 4:
         grid3 = np.rot90(grid2, k=i)
-        spots = getGridSpotsMatchingMask(grid3, maskGrid)
+        spots = getGridSpotsMatchingMask(grid3, rows, cols, mask, maskRows, maskCols)
         i += 1
 
     if len(spots) > 0:
@@ -108,11 +102,17 @@ def rotateGridUntilMatches(grid, maskGrid):
 
 def findSeaMonstersAndGetCount(grid):
     mask = [['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#', '.'], ['#', '.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '#', '#', '#'], ['.', '#', '.', '.', '#', '.', '.', '#', '.', '.', '#', '.', '.', '#', '.', '.', '#', '.', '.', '.']]
-    matchingCoords, newGrid = rotateGridUntilMatches(grid, mask)
+
+    rows = len(grid)
+    cols = len(grid[0])
+    maskRows = len(mask)
+    maskCols = len(mask[0])
+
+    matchingCoords, newGrid = rotateGridUntilMatches(grid, rows, cols, mask, maskRows, maskCols)
     # print(matchingCoords)
-    markMatchingSpots(newGrid, mask, matchingCoords)
-    print_2d_grid(newGrid)
-    res = countGridHashes(newGrid)
+    markMatchingSpots(newGrid, mask, maskRows, maskCols, matchingCoords)
+    # print_2d_grid(newGrid)
+    res = countGridHashes(newGrid, rows, cols)
     print("res", res)
     return res
 

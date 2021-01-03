@@ -1,11 +1,9 @@
 import time
 import sys
 import numpy as np
-from copy import deepcopy
 import math
-import random
-from lib.print import print_2d_grid
-from year_2020.day_20 import helpers
+# from lib.print import print_2d_grid
+import helpers
 
 # puzzle problem with finding a pattern
 
@@ -38,7 +36,7 @@ def parseInputFile():
 
         return batchedlines
 
-def parseLine(line: str):
+def parseLine(line):
     return line.strip()
 
 def getTileConfigurations(tile):
@@ -75,8 +73,9 @@ def part1(data):
     # for each tile, store its 4 borders
     for tileNum, grid in data:
         # top, right, bottom, left
-        tileBorders[tileNum] = [grid[0,:], grid[:,-1], grid[-1,:], grid[:,0]]
-    print(tileBorders)
+        tileBorders[tileNum] = [grid[0,:], grid[:,-1], grid[-1,:], grid[:,0],
+                                np.flip(grid[0,:]), np.flip(grid[:,-1]), np.flip(grid[-1,:]), np.flip(grid[:,0]) ]
+    # print(tileBorders)
 
     matches = {}
     # init matches
@@ -90,21 +89,22 @@ def part1(data):
         for tileNum2 in tileBorders:
             if tileNum2 == tileNum:
                 continue
-            borders2 = tileBorders[tileNum2]
-            for b1 in range(len(borders)):
-                for b2 in range(len(borders2)):
-                    if (borders[b1] == borders2[b2]).all():
-                        # print(tileNum, b1, "matches", tileNum2, b2)
-                        matches[tileNum][b1] = tileNum2
-                        # print(borders[b1], borders2[b2])
-                        # print()
-                    # check flipped matches
-                    if (borders[b1] == np.flip(borders2[b2])).all():
-                        # print(tileNum, b1, "matches flip", tileNum2, b2+4)
-                        matches[tileNum][b1] = tileNum2
-                        # print(borders[b1], borders2[b2])
-                        # print()
-    print(matches)
+            for b1 in range(0, 4): # only check 4 sides, assume thie tile is upright
+                if matches[tileNum][b1] is None: # check this to perform fewer border checks
+                    borders2 = tileBorders[tileNum2]
+                    for b2 in range(len(borders2)):
+                        theyMatch = True
+                        # assume borders are the same length and check each item in them
+                        for b in range(len(borders[b1])):
+                            if borders[b1][b] != borders2[b2][b]:
+                                theyMatch = False
+                                break
+                        if theyMatch:
+                            # print(tileNum, b1, "matches", tileNum2, b2)
+                            matches[tileNum][b1] = tileNum2
+                            # add a match for the other tile, too
+                            matches[tileNum2][b2%4] = tileNum
+    # print(matches)
 
     # find corners... the 4 tiles with exactly 2 matches for 2 adjacent sides
     corners = []
@@ -120,7 +120,7 @@ def part1(data):
     # add corner id nums
     res = 1
     for corner in corners:
-        print(corner, matches[corner])
+        # print(corner, matches[corner])
         res *= corner
     print("PROD", res)
     return matches, corners
@@ -211,7 +211,7 @@ def part2(data):
         for i in range(dim):
             row.append(None)
         biggoGriddo.append(row)
-        tileGrid.append(deepcopy(row))
+        tileGrid.append(row[:])
 
     # pick upper left corner, where tile is upright
     for corner in corners:
