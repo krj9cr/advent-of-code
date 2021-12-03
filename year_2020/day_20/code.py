@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import math
 # from lib.print import print_2d_grid
-import helpers
+from year_2020.day_20 import helpers
 
 # puzzle problem with finding a pattern
 
