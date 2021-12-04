@@ -34,8 +34,8 @@ func main() {
 		binaryLines = append(binaryLines, introw)
 	}
 
-	gamma := day03.CommonBit(binaryLines, true)
-	epsilon := day03.CommonBit(binaryLines, false)
+	gamma := day03.GetCommonBitBinaryNum(binaryLines, true)
+	epsilon := day03.GetCommonBitBinaryNum(binaryLines, false)
 
 	fmt.Printf("\nGamma: %v, Epsilon: %v, Result: %v\n", gamma, epsilon, gamma*epsilon)
 }
