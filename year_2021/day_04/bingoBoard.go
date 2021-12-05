@@ -100,36 +100,8 @@ func (board BingoBoard) IsWinner() (bool, int) {
 		}
 	}
 
-	// check left to right diagonal
-	winner = true
-	for i := 0; i < h; i++ {
-		for j := 0; j < w; j++ {
-			if i == j {
-				item := board.Board[i][j]
-				if !item.Marked {
-					winner = false
-					break
-				}
-			}
-		}
-	}
-	if winner {
-		return true, board.SumUnmarked()
-	}
+	// DIRECTIONS SAY DIAGONALS DON'T COUNT!!!
 
-	// check right to left diagonal
-	winner = true
-	for i := 0; i < h; i++ {
-		for j := w - 1; j >= 0; j-- {
-			if i == (j+w)%w {
-				item := board.Board[i][j]
-				if !item.Marked {
-					winner = false
-					break
-				}
-			}
-		}
-	}
 	if winner {
 		return true, board.SumUnmarked()
 	}
