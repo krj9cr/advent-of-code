@@ -1,3 +1,5 @@
+github.com/MindorksOpenSource/gogeom v0.0.0-20190206120254-bbbf10fd0352 h1:65GRhychReIMwBAWsdTGxa58pn8+tHY3TPu9Fhzs7PY=
+github.com/MindorksOpenSource/gogeom v0.0.0-20190206120254-bbbf10fd0352/go.mod h1:AhgrlR/l6BwGFMtHHj3jjA5k9YQ0wQszIS7w0b/vWe0=
 github.com/fatih/color v1.13.0 h1:8LOYc1KYPPmyKMuN8QV2DNRWNbLo6LZ0iLs8+mlH53w=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/mattn/go-colorable v0.1.9 h1:sqDoxXbdeALODt0DAeJCVp38ps9ZogZEAXjus69YV3U=

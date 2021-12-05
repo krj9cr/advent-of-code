@@ -60,6 +60,16 @@ func PrintIntSlice(slice []int) {
 	}
 }
 
+func PrintGrid(slice [][]int) {
+	for _, row := range slice {
+		for _, item := range row {
+			fmt.Printf("%v ", item)
+		}
+		fmt.Print("\n")
+	}
+	fmt.Print("\n")
+}
+
 // writeLines writes the lines to the given file.
 func WriteLines(lines []string, path string) error {
 	file, err := os.Create(path)
