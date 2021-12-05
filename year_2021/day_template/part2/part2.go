@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"year_2021/utils"
+	day0X "year_2021/day_template"
 )
 
 func main() {
@@ -13,13 +12,10 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines, err := utils.ReadLinesToInts(os.Args[1])
-	if err != nil {
-		log.Fatalf("readLines: %s", err)
-	}
-	utils.PrintIntSlice(lines)
+	lines := day0X.ReadInput(os.Args[1])
+	fmt.Printf("Input: %v\n", lines)
 
 	// DO STUFF
 
-	//fmt.Printf("Result: %v\n", result)
+	// fmt.Printf("Result: %v\n", result)
 }
