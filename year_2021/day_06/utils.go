@@ -1,11 +1,13 @@
-package day0X
+package day06
 
 import (
 	"bufio"
 	"os"
+	"strconv"
+	"strings"
 )
 
-func ReadInput(path string) []string {
+func ReadInput(path string) []int {
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -21,5 +23,15 @@ func ReadInput(path string) []string {
 		panic(scanner.Err())
 	}
 
-	return lines
+	var ints []int
+	strs := strings.Split(lines[0], ",")
+	for _, str := range strs {
+		intval, err := strconv.Atoi(str)
+		if err != nil {
+			panic(err)
+		}
+		ints = append(ints, intval)
+	}
+
+	return ints
 }
