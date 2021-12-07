@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	day0X "year_2021/day_template"
+	day06 "year_2021/day_06"
 )
 
 func main() {
@@ -12,10 +12,26 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day0X.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	fish := day06.ReadInput(os.Args[1])
+	fmt.Printf("Input: %v\n", fish)
 
-	// DO STUFF
+	numDays := 80
+	spawnDays := 6
+	initialDays := 8
 
-	// fmt.Printf("Result: %v\n", result)
+	for day := 1; day <= numDays; day++ {
+		for i := range fish {
+			f := fish[i]
+			// check if spawn
+			if f == 0 {
+				fish = append(fish, initialDays)
+				fish[i] = spawnDays
+			} else {
+				fish[i] -= 1
+			}
+		}
+		fmt.Printf("After %v day: %v\n", day, fish)
+	}
+
+	fmt.Printf("Result: %v\n", len(fish))
 }
