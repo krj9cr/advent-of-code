@@ -60,7 +60,7 @@ func PrintIntSlice(slice []int) {
 	}
 }
 
-func PrintGrid(slice [][]int) {
+func PrintIntGrid(slice [][]int) {
 	for _, row := range slice {
 		for _, item := range row {
 			fmt.Printf("%v ", item)
@@ -70,17 +70,12 @@ func PrintGrid(slice [][]int) {
 	fmt.Print("\n")
 }
 
-// writeLines writes the lines to the given file.
-func WriteLines(lines []string, path string) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
+func PrintStringGrid(slice [][]string) {
+	for _, row := range slice {
+		for _, item := range row {
+			fmt.Printf("%v ", item)
+		}
+		fmt.Print("\n")
 	}
-	defer file.Close()
-
-	w := bufio.NewWriter(file)
-	for _, line := range lines {
-		fmt.Fprintln(w, line)
-	}
-	return w.Flush()
+	fmt.Print("\n")
 }
