@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func ReadInput(path string) []string {
+func ReadInput(path string) [][]int {
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -21,5 +21,15 @@ func ReadInput(path string) []string {
 		panic(scanner.Err())
 	}
 
-	return lines
+	var grid [][]int
+	for _, line := range lines {
+		var gridRow []int
+		for _, char := range line {
+			intval := int(char - '0')
+			gridRow = append(gridRow, intval)
+		}
+		grid = append(grid, gridRow)
+	}
+
+	return grid
 }
