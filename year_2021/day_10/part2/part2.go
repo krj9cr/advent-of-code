@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
-	day0X "year_2021/day_template"
+	"sort"
+	day10 "year_2021/day_10"
 )
 
 func main() {
@@ -12,10 +13,38 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day0X.ReadInput(os.Args[1])
+	lines := day10.ReadInput(os.Args[1])
 	fmt.Printf("Input: %v\n", lines)
 
-	// DO STUFF
+	lookup := map[rune]int{
+		')': 1,
+		']': 2,
+		'}': 3,
+		'>': 4,
+	}
 
-	// fmt.Printf("Result: %v\n", result)
+	var scores []int
+	// For each line, find corrupted lines
+	for i, line := range lines {
+		err, _, stack := day10.CheckLineSyntax(line)
+		if err != nil &&  fmt.Sprint(err) == "stack still contains values" {
+
+			runes := day10.AutocompleteStack(stack)
+			score := 0
+			for _, r := range runes {
+				score = (score * 5) + lookup[r]
+			}
+
+			fmt.Printf("%v: %v - %v: ", i, line, err)
+			for _, s := range runes {
+				fmt.Printf("%v", string(s))
+			}
+			fmt.Printf(" score: %v\n", score)
+			scores = append(scores, score)
+		}
+	}
+
+	sort.Ints(scores)
+	fmt.Printf("Scores: %v, result: %v\n", scores, scores[len(scores)/2])
+
 }

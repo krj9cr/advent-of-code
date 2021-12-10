@@ -15,13 +15,22 @@ func main() {
 	lines := day10.ReadInput(os.Args[1])
 	fmt.Printf("Input: %v\n", lines)
 
+	lookup := map[rune]int{
+		')': 3,
+		']': 57,
+		'}': 1197,
+		'>': 25137,
+	}
+
+	points := 0
 	// For each line, find corrupted lines
 	for i, line := range lines {
-		err, index := day10.CheckLineSyntax(line)
+		err, char, _ := day10.CheckLineSyntax(line)
 		if err != nil {
-			fmt.Printf("%v: %v - %v at %v\n", i, line, err, string(index))
+			fmt.Printf("%v: %v - %v\n", i, line, err)
+			points += lookup[char]
 		}
 	}
 
-	// fmt.Printf("Result: %v\n", result)
+	fmt.Printf("Result: %v\n", points)
 }

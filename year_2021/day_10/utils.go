@@ -22,7 +22,7 @@ func (s Stack) Pop() (Stack, *rune) {
 
 // Return error if line is bad
 // return the character the line is bad on, too, only if error
-func CheckLineSyntax(line string) (error, int) {
+func CheckLineSyntax(line string) (error, rune, Stack) {
 	stack := make(Stack, 0)
 	for i, char := range line {
 
@@ -40,21 +40,44 @@ func CheckLineSyntax(line string) (error, int) {
 				panic(fmt.Errorf("uh oh, stack is empty"))
 			}
 			if char == ')' && *lastPtr != '(' {
-				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string('('), string(*lastPtr), i), i
+				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string(*lastPtr), string(char), i), char, stack
 			} else if char == ']' && *lastPtr != '[' {
-				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string('['), string(*lastPtr), i), i
+				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string(*lastPtr), string(char), i), char, stack
 			} else if char == '}' && *lastPtr != '{' {
-				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string('{'), string(*lastPtr), i), i
+				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string(*lastPtr), string(char), i), char, stack
 			} else if char == '>' && *lastPtr != '<' {
-				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string('<'), string(*lastPtr), i), i
+				return fmt.Errorf("expected match for %v, but found %v instead (index %v)", string(*lastPtr), string(char), i), char, stack
 			}
 			stack = s
 		}
 	}
 	if len(stack) > 0 {
-		return fmt.Errorf("stack still contains values"), 0
+		return fmt.Errorf("stack still contains values"), 0, stack
 	}
-	return nil, 0
+	return nil, 0, stack
+}
+
+func AutocompleteStack(stack Stack) []rune {
+	var runes []rune
+	for ok := true; ok; ok = len(stack) > 0 {
+		s, item := stack.Pop()
+		if item == nil {
+			panic(fmt.Errorf("uh oh, somehow we popped but the stack was empty"))
+		}
+		stack = s
+		if *item == '(' {
+			runes = append(runes, ')')
+		} else if *item == '[' {
+			runes = append(runes, ']')
+		} else if *item == '{' {
+			runes = append(runes, '}')
+		} else if *item == '<' {
+			runes = append(runes, '>')
+		} else {
+			panic(fmt.Errorf("uh oh, unknown item: %v", string(*item)))
+		}
+	}
+	return runes
 }
 
 func ReadInput(path string) []string {
