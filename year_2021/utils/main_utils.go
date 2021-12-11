@@ -79,3 +79,70 @@ func PrintStringGrid(slice [][]string) {
 	}
 	fmt.Print("\n")
 }
+
+type Coord struct {
+	I int
+	J int
+}
+
+// Returns list of neighbor values (not coords)
+func GetCardinalNeighbors(grid [][]int, i int, j int) []Coord {
+	up := j - 1
+	down := j + 1
+	left := i - 1
+	right := i + 1
+	height := len(grid)
+	width := len(grid[0])
+
+	var neighbors []Coord
+	if up >= 0 {
+		neighbors = append(neighbors, Coord{i, up})
+	}
+	if left >= 0 {
+		neighbors = append(neighbors, Coord{left, j})
+	}
+	if down < height {
+		neighbors = append(neighbors, Coord{i, down})
+	}
+	if right < width {
+		neighbors = append(neighbors, Coord{right, j})
+	}
+	return neighbors
+}
+
+// Returns list of neighbor coordinates, including diagonals
+func GetAllNeighbors(grid [][]int, i int, j int) []Coord {
+	up := j - 1
+	down := j + 1
+	left := i - 1
+	right := i + 1
+	height := len(grid)
+	width := len(grid[0])
+
+	var neighbors []Coord
+	if up >= 0 {
+		neighbors = append(neighbors, Coord{i, up})
+		if left >= 0 {
+			neighbors = append(neighbors, Coord{left, up})
+		}
+		if right < width {
+			neighbors = append(neighbors, Coord{right, up})
+		}
+	}
+	if left >= 0 {
+		neighbors = append(neighbors, Coord{left, j})
+	}
+	if down < height {
+		neighbors = append(neighbors, Coord{i, down})
+		if left >= 0 {
+			neighbors = append(neighbors, Coord{left, down})
+		}
+		if right < width {
+			neighbors = append(neighbors, Coord{right, down})
+		}
+	}
+	if right < width {
+		neighbors = append(neighbors, Coord{right, j})
+	}
+	return neighbors
+}
