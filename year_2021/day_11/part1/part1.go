@@ -12,10 +12,52 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day11.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	octopuses := day11.ReadInput(os.Args[1])
 
-	// DO STUFF
+	// Print
+	fmt.Printf("Before any steps\n")
+	for i := range octopuses {
+		row := octopuses[i]
+		for j := range row {
+			fmt.Printf("%v", row[j])
+		}
+		fmt.Print("\n")
+	}
+	fmt.Print("\n")
 
-	// fmt.Printf("Result: %v\n", result)
+	steps := 100
+	numFlashes := 0
+	// For each step
+	for step := 1; step <= steps; step++ {
+		// Increase every octopus level by 1
+		for i := range octopuses {
+			row := octopuses[i]
+			for j := range row {
+				row[j] += 1
+			}
+		}
+
+		// Check for flashes, recurse if there is one
+		for j := range octopuses {
+			row := octopuses[j]
+			for i := range row {
+				if row[i] > 9 {
+					// Flash and affect neighbors
+					numFlashes += day11.Flash(octopuses, i, j)
+				}
+			}
+		}
+		// Print
+		fmt.Printf("After step %v: \n", step)
+		for i := range octopuses {
+			row := octopuses[i]
+			for j := range row {
+				fmt.Printf("%v", row[j])
+			}
+			fmt.Print("\n")
+		}
+		fmt.Print("\n")
+	}
+
+	fmt.Printf("Total flashes: %v\n", numFlashes)
 }
