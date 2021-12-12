@@ -12,10 +12,10 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day12.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	graph := day12.ReadInput(os.Args[1])
+	fmt.Printf("GRAPH:\n%v\n", graph)
 
-	// DO STUFF
+	numPaths := graph.CountPaths("start", "end")
 
-	// fmt.Printf("Result: %v\n", result)
+	fmt.Printf("Result: %v\n", numPaths)
 }
