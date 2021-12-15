@@ -15,56 +15,73 @@ func main() {
 	start, polymers := day14.ReadInput(os.Args[1])
 	fmt.Printf("Input: %v, polymers: %v\n", start, polymers)
 
+	// convert polymers to a map
+	polymersMap := make(map[string]string)
+	for _, polymer := range polymers {
+		polymersMap[polymer.Pair] = polymer.Insert
+	}
+
 	curr := start
-	steps := 40 // should be 10
+	// create map of counts of letters
+	letterCounts := make(map[string]int, 0)
+	for _, char := range curr {
+		letterCounts[string(char)] += 1
+	}
+
+	// create map of counts of pairs
+	pairCounts := make(map[string]int, 0)
+	// Iterate through pairs
+	for i := range curr {
+		if i+1 < len(curr) {
+			pair := curr[i : i+2]
+			pairCounts[pair] += 1
+		}
+	}
+
+	steps := 40 // should be 40
 	for step := 1; step <= steps; step++ {
-		var updatedPairs []string
+		newPairCounts := make(map[string]int, 0)
+		for pair, pairCount := range pairCounts {
+			newPairCounts[pair] = pairCount
+		}
 		// Iterate through pairs
-		for i := range curr {
-			if i+1 < len(curr) {
-				pair := curr[i : i+2]
-				fmt.Printf("pair: %v\n", pair)
-				// see if any polymers match
-				for _, polymer := range polymers {
-					if polymer.Pair == pair {
-						fmt.Printf("matching poly: %v\n", polymer)
-						// Add to updated list
-						updatedPairs = append(updatedPairs, string(pair[0])+polymer.Insert+string(pair[1]))
-					}
+		for pair, pairCount := range pairCounts {
+			//for p := 0; p < pairCount; p++ {
+				// Find matching polymer
+				if insert, ok := polymersMap[pair]; ok {
+					// Update pair counts
+					newPairCounts[pair] -= pairCount
+					pairA := string(pair[0]) + insert
+					pairB := insert + string(pair[1])
+					newPairCounts[pairA] += pairCount
+					newPairCounts[pairB] += pairCount
+					// Add to letter counts
+					letterCounts[insert] += pairCount
+					//fmt.Printf("pair: %v; adding %v and %v\n", pair, pairA, pairB)
 				}
 			}
+		//}
+		pairCounts = newPairCounts
+		// Sum letter counts to get length?
+		length := 0
+		for _, letterCount := range letterCounts {
+			length += letterCount
 		}
-		// Join list of updated pairs
-		fmt.Printf("Updated pairs: %v\n", updatedPairs)
-		curr = ""
-		for i, pair := range updatedPairs {
-			if i == 0 {
-				curr += string(pair[0]) + string(pair[1])
-			} else if i == len(updatedPairs)-1 {
-				curr += pair
-			} else {
-				curr += string(pair[0]) + string(pair[1])
-			}
-		}
-		fmt.Printf("After step %v: length: %v; %v\n", step, len(curr), curr)
+		fmt.Printf("After step %v: length: %v\n letterCounts: %v\n pairCounts: %v\n", step, length, letterCounts, pairCounts)
 	}
 
-	// Count letters
-	counts := make(map[rune]int, 0)
-	for _, char := range curr {
-		counts[char] += 1
-	}
+	// Get max and min letter
 	maxc := 0
-	minc := 999999999
-	for _, val := range counts {
-		if val > maxc {
-			maxc = val
+	const MaxUint = ^uint(0)
+	minc := int(MaxUint >> 1)
+	for _, letterCount := range letterCounts {
+		if letterCount > maxc {
+			maxc = letterCount
 		}
-		if val < minc {
-			minc = val
+		if letterCount < minc {
+			minc = letterCount
 		}
 	}
 
-	fmt.Printf("Counts: %v\n", counts)
 	fmt.Printf("Result: %v - %v = %v", maxc, minc, maxc-minc)
 }
