@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	day15 "year_2021/day_15"
+	"year_2021/utils"
 )
 
 func main() {
@@ -12,10 +13,25 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day15.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	grid := utils.ReadLinesToIntGrid(os.Args[1], "")
+	utils.PrintIntGrid(grid)
 
-	// DO STUFF
+	start := day15.Coord{0, 0}
+	end := day15.Coord{len(grid) - 1, len(grid[0]) - 1}
 
-	// fmt.Printf("Result: %v\n", result)
+	cameFrom, cost := day15.Astar(grid, start, end)
+
+	// Figure out the path
+	curr := end
+	fmt.Printf("Path?: %v ", curr)
+	for {
+		next, ok := cameFrom[curr]
+		if next == nil || !ok {
+			break
+		}
+		curr = *next
+		fmt.Printf("%v ", curr)
+	}
+
+	fmt.Printf("\nCost: %v\n", cost)
 }
