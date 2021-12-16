@@ -14,16 +14,13 @@ func main() {
 		return
 	}
 	grid := utils.ReadLinesToIntGrid(os.Args[1], "")
-	// utils.PrintIntGrid(grid)
 
 	w := len(grid[0])
-	// h := len(grid)
 
 	multiplier := 4
 	// expand board for part2 horizontally
 	var bigBoard [][]int
 	for _, row := range grid {
-		//   newRow := row[:]
 		var newRow []int
 		for s := 0; s <= multiplier; s++ {
 			for i := 0; i < w; i++ {
@@ -57,22 +54,12 @@ func main() {
 	}
 	grid = append(grid, newRows...)
 
-	start := day15.Coord{0, 0}
-	end := day15.Coord{len(grid) - 1, len(grid[0]) - 1}
+	utils.PrintIntGrid(grid)
 
-	cameFrom, cost := day15.Astar(grid, start, end)
+	start := utils.Coord{I: 0, J: 0}
+	end := utils.Coord{I: len(grid) - 1, J: len(grid[0]) - 1}
 
-	// Figure out the path
-	curr := end
-	fmt.Printf("Path?: %v ", curr)
-	for {
-		next, ok := cameFrom[curr]
-		if next == nil || !ok {
-			break
-		}
-		curr = *next
-		fmt.Printf("%v ", curr)
-	}
+	cost := day15.Astar(grid, start, end)
 
 	fmt.Printf("\nend cost: %v\n", cost[end])
 }
