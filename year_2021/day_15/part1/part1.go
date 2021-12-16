@@ -33,5 +33,5 @@ func main() {
 		fmt.Printf("%v ", curr)
 	}
 
-	fmt.Printf("\nCost: %v\n", cost)
+	fmt.Printf("\nend cost: %v\n", cost[end])
 }
