@@ -1,4 +1,4 @@
-package day15
+package utils
 
 // An Item is something we manage in a priority queue.
 type Item struct {
