@@ -14,7 +14,7 @@ func main() {
 		return
 	}
 	grid := utils.ReadLinesToIntGrid(os.Args[1], "")
-	utils.PrintIntGrid(grid)
+	// utils.PrintIntGrid(grid)
 
 	start := utils.Coord{I: 0, J: 0}
 	end := utils.Coord{I: len(grid) - 1, J: len(grid[0]) - 1}

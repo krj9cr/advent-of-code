@@ -75,7 +75,7 @@ def a_star_search(board, start, goal):
 
 def part1(board):
 
-    print("board: ", board)
+    # print("board: ", board)
     # init vars
     start = (0, 0)
     targetX = len(board)-1
@@ -84,7 +84,7 @@ def part1(board):
 
     # run pathfinding
     came_from, cost_so_far = a_star_search(board, start, end)
-    print("came from: ", came_from)
+    # print("came from: ", came_from)
     print("end cost:", cost_so_far[(targetX, targetY)])
 
 def runpart1():
