@@ -15,27 +15,37 @@ func main() {
 	trees := day18.ReadInput(os.Args[1])
 
 	tree := trees[0]
+
+	// adjArr := tree.Root.AdjacencyArrayWithDepth(0)
+	// fmt.Printf("Adjarr: %v\n", adjArr)
+
 	for i := 1; i < len(trees); i++ {
 		// Add the next tree
 		newTree := day18.CombineTwoTrees(tree, trees[i])
 		tree = newTree
 		// Print it
 		day18.PrintPostOrder(tree.Root)
-		fmt.Print("\n")
+		fmt.Print("\n\n")
 
 		// Loop until we can't explode or split
 		for {
-			explodeNode := tree.Root.CanExplode(0)
-			splitNode := tree.Root.CanSplit()
+			// Recompute adj list
+			adjArr := tree.Root.AdjacencyArrayWithDepth(0)
+			fmt.Printf("Adjarr: %v\n", adjArr)
+
+			// Check if we can explode or split
+			explodeNode := day18.CanExplode(adjArr)
+			splitNode := day18.CanSplit(adjArr)
+			fmt.Printf("ExplodeNode: %v, splitNode: %v\n", explodeNode, splitNode)
 			if explodeNode == nil && splitNode == nil {
 				break
 			}
 			// Prioritize exploding
 			if explodeNode != nil {
 				fmt.Printf("Exploding: %v -> ", explodeNode)
-				explodeNode.Explode()
+				explodeNode.Explode(adjArr)
 				day18.PrintPostOrder(tree.Root)
-				fmt.Print("\n")
+				fmt.Print("\n\n")
 				continue
 			}
 			if splitNode != nil {
@@ -43,7 +53,7 @@ func main() {
 				splitNode.Split()
 			}
 			day18.PrintPostOrder(tree.Root)
-			fmt.Print("\n")
+			fmt.Print("\n\n")
 		}
 	}
 	fmt.Print("Final sum: ")

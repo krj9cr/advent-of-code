@@ -3,6 +3,7 @@ package day18
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"math"
 	"os"
 	"strconv"
@@ -68,136 +69,63 @@ func Magnitude(node *BinaryNode) int {
 	return result
 }
 
-// Check through a "Tree" if it can explode, return the node that can
-func (node *BinaryNode) CanExplode(depth int) *BinaryNode {
-	if node == nil {
-		return nil
-	}
-	if depth >= 4 && node.NodeIsPair() {
-		return node
-	}
-	var explode *BinaryNode
-	if node.Left != nil {
-		explode = node.Left.CanExplode(depth + 1)
-		if explode != nil && explode.NodeIsPair() {
-			return explode
-		}
-	}
-	if node.Right != nil {
-		explode = node.Right.CanExplode(depth + 1)
-		if explode != nil && explode.NodeIsPair() {
-			return explode
+func CanExplode(adjArr []AdjacencyNode) *BinaryNode {
+	for _, a := range adjArr {
+		if a.Depth >= 5 {
+			fmt.Printf("Depth for: %v, parent: %v\n", a.Node, a.Node.Parent)
+			return a.Node.Parent
 		}
 	}
 	return nil
 }
 
-// Check through a "Tree" if it can split, return the first left node that can
-func (node *BinaryNode) CanSplit() *BinaryNode {
-	if node == nil {
-		return nil
-	}
-	if node.NodeIsNumber() && *node.Data >= 10 {
-		return node
-	}
-	var left *BinaryNode
-	if node.Left != nil {
-		left = node.Left.CanSplit()
-	}
-	if left != nil {
-		return left
-	} else {
-		if node.Right != nil {
-			return node.Right.CanSplit()
+func CanSplit(adjArr []AdjacencyNode) *BinaryNode {
+	for _, a := range adjArr {
+		if *a.Node.Data >= 10 {
+			return a.Node
 		}
 	}
 	return nil
 }
 
-func (node *BinaryNode) FindFirstLeaf(left bool, cameFrom *BinaryNode, timesGone int) *BinaryNode {
-	if node.Data != nil && timesGone > 0 {
-		return node
-	}
-	if node.Left != nil && node.Left != cameFrom {
-		if left {
-			timesGone += 1
+// Find the index of a node in the adjacency list
+func (node *BinaryNode) AdjIndex(adjNodes []AdjacencyNode) int {
+	for i, a := range adjNodes {
+		if a.Node == node {
+			return i
 		}
-		return node.Left.FindFirstLeaf(left, node, timesGone)
 	}
-	if node.Right != nil && node.Left != cameFrom {
-		if !left {
-			timesGone += 1
-		}
-		return node.Right.FindFirstLeaf(left, node, timesGone)
-	}
-
-	return nil
+	return -1
 }
 
-func (node *BinaryNode) FindFirstRegular(left bool, cameFrom *BinaryNode, timesGone int) *BinaryNode {
-	if node.Parent != nil {
-		goingUpLeft := false
-		if node.Parent.Left == node {
-			goingUpLeft = false
-		}
-		if left {
-			if node.Parent.Left != nil {
-				if node.Parent.Left != node && node.Parent.Left.Data != nil {
-					return node.Parent.Left
-				}
-			}
-			if goingUpLeft {
-				timesGone += 1
-			}
-			return node.Parent.FindFirstRegular(left, node, timesGone)
-		} else {
-			if node.Parent.Right != nil {
-				if node.Parent.Right != node && node.Parent.Right.Data != nil {
-					return node.Parent.Right
-				}
-			}
-			if !goingUpLeft {
-				timesGone += 1
-			}
-			return node.Parent.FindFirstRegular(left, node, timesGone)
-		}
-	} else { // start coming back down, unless we just came from that way?
-		// timesGone := 0
-		if node.Left != cameFrom {
-			fmt.Printf("going down left\n")
-			if left {
-				timesGone += 1
-				return node.Left.FindFirstLeaf(left, node, timesGone)
-			}
-		}
-		if node.Right != cameFrom {
-			fmt.Printf("going down right\n")
-			if !left {
-				timesGone += 1
-				return node.Right.FindFirstLeaf(left, node, timesGone)
-			}
-		}
-	}
-	return nil
-}
-
-func (node *BinaryNode) Explode() {
+func (node *BinaryNode) Explode(adjNodes []AdjacencyNode) {
 	zero := 0
 	if node != nil {
-		// Go up the tree, looking for first regular number on the left
-		leftRegular := node.FindFirstRegular(true, nil, 0)
-		// fmt.Printf("left reg: %v\n", leftRegular)
-		// If any, collapse and add it in the Left
-		if leftRegular != nil {
-			newLeft := *node.Left.Data + *leftRegular.Data
-			leftRegular.Data = &newLeft
+		if !node.NodeIsPair() {
+			log.Panicf("trying to explode non-pair node: %v\n", node)
 		}
-		// Go up the right tree
-		rightRegular := node.FindFirstRegular(false, nil, 0)
-		fmt.Printf("right reg: %v\n", rightRegular)
-		if rightRegular != nil {
-			newRight := *node.Right.Data + *rightRegular.Data
-			rightRegular.Data = &newRight
+		adjIndex := node.Left.AdjIndex(adjNodes)
+		if adjIndex == -1 {
+			log.Panicf("could not find node: %v in adj nodes\n", node.Left)
+		}
+		// Get the node to the left
+		if adjIndex-1 >= 0 {
+			leftRegular := adjNodes[adjIndex-1]
+			fmt.Printf("left reg: %v\n", leftRegular)
+			// If any, collapse and add it in the Left
+			newLeft := *node.Left.Data + *leftRegular.Node.Data
+			leftRegular.Node.Data = &newLeft
+		}
+		adjIndex = node.Right.AdjIndex(adjNodes)
+		if adjIndex == -1 {
+			log.Panicf("could not find node: %v in adj nodes\n", node.Right)
+		}
+		// Get the node to the right
+		if adjIndex+1 < len(adjNodes) {
+			rightRegular := adjNodes[adjIndex+1]
+			fmt.Printf("right reg: %v\n", rightRegular)
+			newRight := *node.Right.Data + *rightRegular.Node.Data
+			rightRegular.Node.Data = &newRight
 		}
 		// Remove the children from this node
 		node.Left = nil
@@ -325,4 +253,29 @@ func CombineTrees(trees []*Tree) *Tree {
 func CombineTwoTrees(a *Tree, b *Tree) *Tree {
 	currNode := &BinaryNode{Parent: nil, Left: a.Root, Right: b.Root, Data: nil}
 	return &Tree{Root: currNode}
+}
+
+type AdjacencyNode struct {
+	Node  *BinaryNode
+	Depth int
+}
+
+func (a AdjacencyNode) String() string {
+	return fmt.Sprintf("{node: %v, depth: %v}", a.Node, a.Depth)
+}
+
+func (node *BinaryNode) AdjacencyArrayWithDepth(depth int) []AdjacencyNode {
+	var result []AdjacencyNode
+	if node != nil {
+		if node.Left != nil {
+			result = append(result, node.Left.AdjacencyArrayWithDepth(depth+1)...)
+		}
+		if node.Right != nil {
+			result = append(result, node.Right.AdjacencyArrayWithDepth(depth+1)...)
+		}
+		if node.Data != nil {
+			result = append(result, AdjacencyNode{node, depth})
+		}
+	}
+	return result
 }
