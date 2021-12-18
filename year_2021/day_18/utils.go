@@ -3,6 +3,7 @@ package day18
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 )
@@ -16,6 +17,213 @@ type BinaryNode struct {
 	Left   *BinaryNode
 	Right  *BinaryNode
 	Data   *int
+}
+
+func (node *BinaryNode) NodeIsPair() bool {
+	if node == nil {
+		return false
+	} else {
+		if node.Left != nil && node.Left.Data != nil && node.Right != nil && node.Right.Data != nil {
+			return true
+		} else {
+			return false
+		}
+	}
+}
+
+func (node *BinaryNode) String() string {
+	if node.NodeIsNumber() {
+		return fmt.Sprintf("%v", *node.Data)
+	}
+	if node.NodeIsPair() {
+		return fmt.Sprintf("[%v, %v]", *node.Left.Data, *node.Right.Data)
+	}
+	return "branchNode"
+}
+
+func (node *BinaryNode) NodeIsNumber() bool {
+	if node == nil {
+		return false
+	} else {
+		if node.Data != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func Magnitude(node *BinaryNode) int {
+	result := 0
+	if node != nil {
+		if node.Left != nil {
+			result += 3 * Magnitude(node.Left)
+		}
+		if node.Right != nil {
+			result += 2 * Magnitude(node.Right)
+		}
+		if node.Data != nil {
+			return *node.Data
+		}
+	}
+	return result
+}
+
+// Check through a "Tree" if it can explode, return the node that can
+func (node *BinaryNode) CanExplode(depth int) *BinaryNode {
+	if node == nil {
+		return nil
+	}
+	if depth >= 4 && node.NodeIsPair() {
+		return node
+	}
+	var explode *BinaryNode
+	if node.Left != nil {
+		explode = node.Left.CanExplode(depth + 1)
+		if explode != nil && explode.NodeIsPair() {
+			return explode
+		}
+	}
+	if node.Right != nil {
+		explode = node.Right.CanExplode(depth + 1)
+		if explode != nil && explode.NodeIsPair() {
+			return explode
+		}
+	}
+	return nil
+}
+
+// Check through a "Tree" if it can split, return the first left node that can
+func (node *BinaryNode) CanSplit() *BinaryNode {
+	if node == nil {
+		return nil
+	}
+	if node.NodeIsNumber() && *node.Data >= 10 {
+		return node
+	}
+	var left *BinaryNode
+	if node.Left != nil {
+		left = node.Left.CanSplit()
+	}
+	if left != nil {
+		return left
+	} else {
+		if node.Right != nil {
+			return node.Right.CanSplit()
+		}
+	}
+	return nil
+}
+
+func (node *BinaryNode) FindFirstLeaf(left bool, cameFrom *BinaryNode, timesGone int) *BinaryNode {
+	if node.Data != nil && timesGone > 0 {
+		return node
+	}
+	if node.Left != nil && node.Left != cameFrom {
+		if left {
+			timesGone += 1
+		}
+		return node.Left.FindFirstLeaf(left, node, timesGone)
+	}
+	if node.Right != nil && node.Left != cameFrom {
+		if !left {
+			timesGone += 1
+		}
+		return node.Right.FindFirstLeaf(left, node, timesGone)
+	}
+
+	return nil
+}
+
+func (node *BinaryNode) FindFirstRegular(left bool, cameFrom *BinaryNode, timesGone int) *BinaryNode {
+	if node.Parent != nil {
+		goingUpLeft := false
+		if node.Parent.Left == node {
+			goingUpLeft = false
+		}
+		if left {
+			if node.Parent.Left != nil {
+				if node.Parent.Left != node && node.Parent.Left.Data != nil {
+					return node.Parent.Left
+				}
+			}
+			if goingUpLeft {
+				timesGone += 1
+			}
+			return node.Parent.FindFirstRegular(left, node, timesGone)
+		} else {
+			if node.Parent.Right != nil {
+				if node.Parent.Right != node && node.Parent.Right.Data != nil {
+					return node.Parent.Right
+				}
+			}
+			if !goingUpLeft {
+				timesGone += 1
+			}
+			return node.Parent.FindFirstRegular(left, node, timesGone)
+		}
+	} else { // start coming back down, unless we just came from that way?
+		// timesGone := 0
+		if node.Left != cameFrom {
+			fmt.Printf("going down left\n")
+			if left {
+				timesGone += 1
+				return node.Left.FindFirstLeaf(left, node, timesGone)
+			}
+		}
+		if node.Right != cameFrom {
+			fmt.Printf("going down right\n")
+			if !left {
+				timesGone += 1
+				return node.Right.FindFirstLeaf(left, node, timesGone)
+			}
+		}
+	}
+	return nil
+}
+
+func (node *BinaryNode) Explode() {
+	zero := 0
+	if node != nil {
+		// Go up the tree, looking for first regular number on the left
+		leftRegular := node.FindFirstRegular(true, nil, 0)
+		// fmt.Printf("left reg: %v\n", leftRegular)
+		// If any, collapse and add it in the Left
+		if leftRegular != nil {
+			newLeft := *node.Left.Data + *leftRegular.Data
+			leftRegular.Data = &newLeft
+		}
+		// Go up the right tree
+		rightRegular := node.FindFirstRegular(false, nil, 0)
+		fmt.Printf("right reg: %v\n", rightRegular)
+		if rightRegular != nil {
+			newRight := *node.Right.Data + *rightRegular.Data
+			rightRegular.Data = &newRight
+		}
+		// Remove the children from this node
+		node.Left = nil
+		node.Right = nil
+		node.Data = &zero
+	}
+}
+
+func (node *BinaryNode) Split() {
+	if node.Data == nil {
+		fmt.Printf("can't split node\n")
+		return
+	} else {
+		if *node.Data >= 10 {
+			half := float64(*node.Data) / 2.0
+			newLeft := int(math.Floor(half))
+			newRight := int(math.Ceil(half))
+
+			left := &BinaryNode{Parent: node, Left: nil, Right: nil, Data: &newLeft}
+			right := &BinaryNode{Parent: node, Left: nil, Right: nil, Data: &newRight}
+
+			node.Left = left
+			node.Right = right
+			node.Data = nil
+		}
+	}
 }
 
 func PrintPostOrder(node *BinaryNode) {
@@ -65,7 +273,7 @@ func ParseExpr(parent *BinaryNode, expr string) {
 	}
 }
 
-func ReadInput(path string) *Tree {
+func ReadInput(path string) []*Tree {
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -89,7 +297,10 @@ func ReadInput(path string) *Tree {
 		ParseExpr(root, line)
 		trees = append(trees, tree)
 	}
+	return trees
+}
 
+func CombineTrees(trees []*Tree) *Tree {
 	if len(trees) >= 2 {
 		// Combine first two trees
 		currNode := &BinaryNode{Parent: nil, Left: trees[0].Root, Right: trees[1].Root, Data: nil}
@@ -109,4 +320,9 @@ func ReadInput(path string) *Tree {
 	} else {
 		return nil
 	}
+}
+
+func CombineTwoTrees(a *Tree, b *Tree) *Tree {
+	currNode := &BinaryNode{Parent: nil, Left: a.Root, Right: b.Root, Data: nil}
+	return &Tree{Root: currNode}
 }
