@@ -76,11 +76,10 @@ func ReadInput(path string) map[int][]Coord3d {
 }
 
 func FindOverlappingBeacons(scanner1 int, scanner2 int, scanners map[int][]Coord3d) *Coord3d {
-	// var result []Coord3d
-	for _, b1 := range scanners[scanner1] {
-		scannerRots := GetAllScannerRotations(scanners[scanner2])
-		distances := make(map[Coord3d]int, 0)
-		for _, coords := range scannerRots {
+	scannerRots := GetAllScannerRotations(scanners[scanner2])
+	distances := make(map[Coord3d]int, 0)
+	for _, coords := range scannerRots {
+		for _, b1 := range scanners[scanner1] {
 			for _, b2 := range coords {
 				fmt.Printf("Cecking: %v, %v\n", b1, b2)
 
