@@ -2,7 +2,6 @@ package day19
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +11,10 @@ type Coord3d struct {
 	X int
 	Y int
 	Z int
+}
+
+func (coordA Coord3d) Add(coordB Coord3d) Coord3d {
+	return Coord3d{X: coordA.X + coordB.X, Y: coordA.Y + coordB.Y, Z: coordA.Z + coordB.Z}
 }
 
 func (coordA Coord3d) Dist(coordB Coord3d) Coord3d {
@@ -75,26 +78,64 @@ func ReadInput(path string) map[int][]Coord3d {
 	return scanners
 }
 
-func FindOverlappingBeacons(scanner1 int, scanner2 int, scanners map[int][]Coord3d) *Coord3d {
-	scannerRots := GetAllScannerRotations(scanners[scanner2])
+func FindTranlationIfOverlap(scannerA []Coord3d, scannerB []Coord3d) *Coord3d {
 	distances := make(map[Coord3d]int, 0)
-	for _, coords := range scannerRots {
-		for _, b1 := range scanners[scanner1] {
-			for _, b2 := range coords {
-				fmt.Printf("Cecking: %v, %v\n", b1, b2)
-
-				dist := b1.Dist(b2)
-				distances[dist] += 1
-			}
-		}
-		fmt.Printf("distances: %v\n", distances)
-		for dist, count := range distances {
-			if count >= 12 {
+	for _, b1 := range scannerA {
+		for _, b2 := range scannerB {
+			// fmt.Printf("Cecking: %v, %v\n", b1, b2)
+			dist := b1.Dist(b2)
+			currDist := distances[dist]
+			newDist := currDist + 1
+			distances[dist] = newDist
+			// Terminate early if we can
+			if newDist >= 12 {
 				return &dist
 			}
 		}
 	}
+	// fmt.Printf("distances: %v\n", distances)
+	for dist, count := range distances {
+		if count >= 12 {
+			return &dist
+		}
+	}
 	return nil
+}
+
+// func FindOverlappingBeacons(scanner1 int, scanner2 int, scanners map[int][]Coord3d) *Coord3d {
+// 	scannerRots := GetAllScannerRotations(scanners[scanner2])
+// 	distances := make(map[Coord3d]int, 0)
+// 	for _, coords := range scannerRots {
+// 		for _, b1 := range scanners[scanner1] {
+// 			for _, b2 := range coords {
+// 				fmt.Printf("Cecking: %v, %v\n", b1, b2)
+
+// 				dist := b1.Dist(b2)
+// 				distances[dist] += 1
+// 			}
+// 		}
+// 		fmt.Printf("distances: %v\n", distances)
+// 		for dist, count := range distances {
+// 			if count >= 12 {
+// 				return &dist
+// 			}
+// 		}
+// 	}
+// 	return nil
+// }
+
+// Add translated coords from scanner2 to scanner1, remove scanner2
+func CombineScanners(scanner1 int, scanner2 int, translation Coord3d, scanners map[int][]Coord3d) {
+	scanners[scanner1] = append(scanners[scanner1], TranslateScannerBeacons(scanners[scanner2], translation)...)
+	delete(scanners, scanner2)
+}
+
+func TranslateScannerBeacons(beacons []Coord3d, translation Coord3d) []Coord3d {
+	var result []Coord3d
+	for _, coord := range beacons {
+		result = append(result, coord.Add(translation))
+	}
+	return result
 }
 
 func GetAllCoordRotations(coord Coord3d) []Coord3d {
@@ -137,38 +178,7 @@ func GetAllCoordRotations(coord Coord3d) []Coord3d {
 func GetAllScannerRotations(coords []Coord3d) map[int][]Coord3d {
 	result := make(map[int][]Coord3d)
 	for _, coord := range coords {
-		rots := []Coord3d{
-			// positive x
-			{X: +coord.X, Y: +coord.Y, Z: +coord.Z},
-			{X: +coord.X, Y: -coord.Z, Z: +coord.Y},
-			{X: +coord.X, Y: -coord.Y, Z: -coord.Z},
-			{X: +coord.X, Y: +coord.Z, Z: -coord.Y},
-			// negative x
-			{X: -coord.X, Y: -coord.Y, Z: +coord.Z},
-			{X: -coord.X, Y: +coord.Z, Z: +coord.Y},
-			{X: -coord.X, Y: +coord.Y, Z: -coord.Z},
-			{X: -coord.X, Y: -coord.Z, Z: -coord.Y},
-			// positive y
-			{X: +coord.Y, Y: +coord.Z, Z: +coord.X},
-			{X: +coord.Y, Y: -coord.X, Z: +coord.Z},
-			{X: +coord.Y, Y: -coord.Z, Z: -coord.X},
-			{X: +coord.Y, Y: +coord.X, Z: -coord.Z},
-			// negative y
-			{X: -coord.Y, Y: -coord.Z, Z: +coord.X},
-			{X: -coord.Y, Y: +coord.X, Z: +coord.Z},
-			{X: -coord.Y, Y: +coord.Z, Z: -coord.X},
-			{X: -coord.Y, Y: -coord.X, Z: -coord.Z},
-			// positive z
-			{X: +coord.Z, Y: +coord.X, Z: +coord.Y},
-			{X: +coord.Z, Y: -coord.Y, Z: +coord.X},
-			{X: +coord.Z, Y: -coord.X, Z: -coord.Y},
-			{X: +coord.Z, Y: +coord.Y, Z: -coord.X},
-			// negative z
-			{X: -coord.Y, Y: -coord.X, Z: +coord.Y},
-			{X: -coord.Y, Y: +coord.Y, Z: +coord.X},
-			{X: -coord.Y, Y: +coord.X, Z: -coord.Y},
-			{X: -coord.Y, Y: -coord.Y, Z: -coord.X},
-		}
+		rots := GetAllCoordRotations(coord)
 		// For each direction
 		for i := 0; i < 24; i++ {
 			result[i] = append(result[i], rots[i])
