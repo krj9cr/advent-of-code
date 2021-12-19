@@ -24,11 +24,17 @@ func main() {
 		newTree := day18.CombineTwoTrees(tree, trees[i])
 		tree = newTree
 		// Print it
-		day18.PrintPostOrder(tree.Root)
-		fmt.Print("\n\n")
+		// day18.PrintPostOrder(tree.Root)
+		fmt.Printf("%v\n\n", tree)
 
 		// Loop until we can't explode or split
 		for {
+			// Reparse tree bc i stink at pointers
+			root := &day18.BinaryNode{Parent: nil, Left: nil, Right: nil, Data: nil}
+			newTree := &day18.Tree{Root: root}
+			day18.ParseExpr(root, fmt.Sprintf("%v", tree))
+			tree = newTree
+
 			// Recompute adj list
 			adjArr := tree.Root.AdjacencyArrayWithDepth(0)
 			fmt.Printf("Adjarr: %v\n", adjArr)
@@ -52,13 +58,10 @@ func main() {
 				fmt.Printf("Splitting: %v     -> ", splitNode)
 				splitNode.Split()
 			}
-			day18.PrintPostOrder(tree.Root)
-			fmt.Print("\n\n")
+			fmt.Printf("%v\n\n", tree)
 		}
 	}
-	fmt.Print("Final sum: ")
-	day18.PrintPostOrder(tree.Root)
-	fmt.Print("\n")
+	fmt.Printf("Final sum: %v\n\n", tree)
 	// Check magnitude
 	fmt.Printf("Magnitude: %v\n", day18.Magnitude(tree.Root))
 }

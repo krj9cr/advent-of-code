@@ -40,6 +40,7 @@ func (node *BinaryNode) String() string {
 		return fmt.Sprintf("[%v, %v]", *node.Left.Data, *node.Right.Data)
 	}
 	return "branchNode"
+	// return fmt.Sprintf("Branch; left: %v, right: %v\n", node.Left, node.Right)
 }
 
 func (node *BinaryNode) NodeIsNumber() bool {
@@ -69,17 +70,19 @@ func Magnitude(node *BinaryNode) int {
 	return result
 }
 
-func CanExplode(adjArr []AdjacencyNode) *BinaryNode {
+func CanExplode(adjArr []*AdjacencyNode) *BinaryNode {
 	for _, a := range adjArr {
 		if a.Depth >= 5 {
 			fmt.Printf("Depth for: %v, parent: %v\n", a.Node, a.Node.Parent)
-			return a.Node.Parent
+			if a.Node.Parent.NodeIsPair() {
+				return a.Node.Parent
+			}
 		}
 	}
 	return nil
 }
 
-func CanSplit(adjArr []AdjacencyNode) *BinaryNode {
+func CanSplit(adjArr []*AdjacencyNode) *BinaryNode {
 	for _, a := range adjArr {
 		if *a.Node.Data >= 10 {
 			return a.Node
@@ -89,7 +92,7 @@ func CanSplit(adjArr []AdjacencyNode) *BinaryNode {
 }
 
 // Find the index of a node in the adjacency list
-func (node *BinaryNode) AdjIndex(adjNodes []AdjacencyNode) int {
+func (node *BinaryNode) AdjIndex(adjNodes []*AdjacencyNode) int {
 	for i, a := range adjNodes {
 		if a.Node == node {
 			return i
@@ -98,9 +101,10 @@ func (node *BinaryNode) AdjIndex(adjNodes []AdjacencyNode) int {
 	return -1
 }
 
-func (node *BinaryNode) Explode(adjNodes []AdjacencyNode) {
+func (node *BinaryNode) Explode(adjNodes []*AdjacencyNode) {
 	zero := 0
 	if node != nil {
+		parent := node.Parent
 		if !node.NodeIsPair() {
 			log.Panicf("trying to explode non-pair node: %v\n", node)
 		}
@@ -131,6 +135,9 @@ func (node *BinaryNode) Explode(adjNodes []AdjacencyNode) {
 		node.Left = nil
 		node.Right = nil
 		node.Data = &zero
+		node.Parent = parent
+		// Check if we did this right?
+		fmt.Printf("Parent node: %v is pair: %v\n", node.Parent, node.Parent.NodeIsPair())
 	}
 }
 
@@ -154,21 +161,39 @@ func (node *BinaryNode) Split() {
 	}
 }
 
+func (tree *Tree) String() string {
+	return StringPostOrder(tree.Root)
+}
+
+func StringPostOrder(node *BinaryNode) string {
+	result := ""
+	if node != nil {
+		if node.Left != nil {
+			result += "["
+			result += StringPostOrder(node.Left)
+		}
+		if node.Right != nil {
+			result += ","
+			result += StringPostOrder(node.Right)
+			result += "]"
+		}
+		if node.Data != nil {
+			result += fmt.Sprintf("%v", *node.Data)
+		}
+	}
+	return result
+}
+
 func PrintPostOrder(node *BinaryNode) {
 	if node != nil {
 		if node.Left != nil {
 			fmt.Printf("[")
 			PrintPostOrder(node.Left)
-			if node.Left != nil && node.Left.Data != nil {
-				fmt.Printf(",")
-			}
 		}
 		if node.Right != nil {
+			fmt.Printf(",")
 			PrintPostOrder(node.Right)
 			fmt.Printf("]")
-			if node.Right != nil && node.Right.Data != nil {
-				fmt.Printf(",")
-			}
 		}
 		if node.Data != nil {
 			fmt.Printf("%v", *node.Data)
@@ -176,7 +201,7 @@ func PrintPostOrder(node *BinaryNode) {
 	}
 }
 
-func ParseExpr(parent *BinaryNode, expr string) {
+func ParseExpr(node *BinaryNode, expr string) {
 	if len(expr) == 0 {
 		return
 	}
@@ -185,19 +210,32 @@ func ParseExpr(parent *BinaryNode, expr string) {
 	intval, err := strconv.Atoi(string(first))
 	if err != nil { // it's another expression
 		if first == '[' { // create and go to LEFT child
-			child := &BinaryNode{Parent: parent, Left: nil, Right: nil, Data: nil}
-			parent.Left = child
+			child := &BinaryNode{Parent: node, Left: nil, Right: nil, Data: nil}
+			node.Left = child
 			ParseExpr(child, expr[1:])
 		} else if first == ',' { // create and go to RIGHT child
-			child := &BinaryNode{Parent: parent, Left: nil, Right: nil, Data: nil}
-			parent.Right = child
+			child := &BinaryNode{Parent: node, Left: nil, Right: nil, Data: nil}
+			node.Right = child
 			ParseExpr(child, expr[1:])
 		} else if first == ']' { // move up to the PARENT
-			ParseExpr(parent.Parent, expr[1:])
+			// fmt.Printf("Remainging exrp: %v\n", expr)
+			ParseExpr(node.Parent, expr[1:])
 		}
 	} else { // it's an int, stay
-		parent.Data = &intval
-		ParseExpr(parent.Parent, expr[1:])
+		remainingExpr := expr[1:]
+		// Double check if it's a 2-digit int
+		if len(expr) >= 2 {
+			intstr := expr[0:2]
+			twoDigitVal, err := strconv.Atoi(string(intstr))
+			if err == nil { // it's 2-digit
+				// fmt.Printf("two digit val: %v\n", twoDigitVal)
+				intval = twoDigitVal
+				remainingExpr = expr[2:]
+			}
+		}
+		node.Data = &intval
+		// fmt.Printf("Remainging exrp: %v\n", expr)
+		ParseExpr(node.Parent, remainingExpr)
 	}
 }
 
@@ -251,8 +289,7 @@ func CombineTrees(trees []*Tree) *Tree {
 }
 
 func CombineTwoTrees(a *Tree, b *Tree) *Tree {
-	currNode := &BinaryNode{Parent: nil, Left: a.Root, Right: b.Root, Data: nil}
-	return &Tree{Root: currNode}
+	return &Tree{Root: &BinaryNode{Parent: nil, Left: a.Root, Right: b.Root, Data: nil}}
 }
 
 type AdjacencyNode struct {
@@ -264,8 +301,8 @@ func (a AdjacencyNode) String() string {
 	return fmt.Sprintf("{node: %v, depth: %v}", a.Node, a.Depth)
 }
 
-func (node *BinaryNode) AdjacencyArrayWithDepth(depth int) []AdjacencyNode {
-	var result []AdjacencyNode
+func (node *BinaryNode) AdjacencyArrayWithDepth(depth int) []*AdjacencyNode {
+	var result []*AdjacencyNode
 	if node != nil {
 		if node.Left != nil {
 			result = append(result, node.Left.AdjacencyArrayWithDepth(depth+1)...)
@@ -274,7 +311,7 @@ func (node *BinaryNode) AdjacencyArrayWithDepth(depth int) []AdjacencyNode {
 			result = append(result, node.Right.AdjacencyArrayWithDepth(depth+1)...)
 		}
 		if node.Data != nil {
-			result = append(result, AdjacencyNode{node, depth})
+			result = append(result, &AdjacencyNode{node, depth})
 		}
 	}
 	return result
