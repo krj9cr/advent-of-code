@@ -2,6 +2,7 @@ package day19
 
 import (
 	"bufio"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -19,6 +20,12 @@ func (coordA Coord3d) Add(coordB Coord3d) Coord3d {
 
 func (coordA Coord3d) Dist(coordB Coord3d) Coord3d {
 	return Coord3d{X: coordA.X - coordB.X, Y: coordA.Y - coordB.Y, Z: coordA.Z - coordB.Z}
+}
+
+func (coordA Coord3d) ManattanDist(coordB Coord3d) int {
+	return int(math.Abs(float64(coordA.X)-float64(coordB.X))) +
+		int(math.Abs(float64(coordA.Y)-float64(coordB.Y))) +
+		int(math.Abs(float64(coordA.Z)-float64(coordB.Z)))
 }
 
 func ReadInput(path string) map[int][]Coord3d {
