@@ -102,28 +102,6 @@ func FindTranlationIfOverlap(scannerA []Coord3d, scannerB []Coord3d) *Coord3d {
 	return nil
 }
 
-// func FindOverlappingBeacons(scanner1 int, scanner2 int, scanners map[int][]Coord3d) *Coord3d {
-// 	scannerRots := GetAllScannerRotations(scanners[scanner2])
-// 	distances := make(map[Coord3d]int, 0)
-// 	for _, coords := range scannerRots {
-// 		for _, b1 := range scanners[scanner1] {
-// 			for _, b2 := range coords {
-// 				fmt.Printf("Cecking: %v, %v\n", b1, b2)
-
-// 				dist := b1.Dist(b2)
-// 				distances[dist] += 1
-// 			}
-// 		}
-// 		fmt.Printf("distances: %v\n", distances)
-// 		for dist, count := range distances {
-// 			if count >= 12 {
-// 				return &dist
-// 			}
-// 		}
-// 	}
-// 	return nil
-// }
-
 // Add translated coords from scanner2 to scanner1, remove scanner2
 func CombineScanners(scanner1 int, scanner2 int, translation Coord3d, scanners map[int][]Coord3d) {
 	scanners[scanner1] = append(scanners[scanner1], TranslateScannerBeacons(scanners[scanner2], translation)...)
