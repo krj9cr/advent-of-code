@@ -20,6 +20,12 @@ func main() {
 	// Add scanner 0 coords to base
 	baseCoords = append(baseCoords, scanners[0]...)
 
+	// Save off all scanner rotations for reuse
+	scannerRotations := make(map[int]map[int][]day19.Coord3d)
+	for i := range scanners {
+		scannerRotations[i] = day19.GetAllScannerRotations(scanners[i])
+	}
+
 	// Until we've exhausted all the scanners
 	for {
 		if len(scanners) <= 0 {
@@ -28,7 +34,7 @@ func main() {
 		// For each remaining scanner
 		for i := range scanners {
 			// Get all the rotations
-			scannerRotations := day19.GetAllScannerRotations(scanners[i])
+			scannerRotations := scannerRotations[i]
 			// For each rotation
 			for _, rotation := range scannerRotations {
 				// Try to find the translation if there are 12 overlapping distances
