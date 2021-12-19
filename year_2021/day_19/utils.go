@@ -94,11 +94,11 @@ func FindTranlationIfOverlap(scannerA []Coord3d, scannerB []Coord3d) *Coord3d {
 		}
 	}
 	// fmt.Printf("distances: %v\n", distances)
-	for dist, count := range distances {
-		if count >= 12 {
-			return &dist
-		}
-	}
+	// for dist, count := range distances {
+	// 	if count >= 12 {
+	// 		return &dist
+	// 	}
+	// }
 	return nil
 }
 
