@@ -12,10 +12,11 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day19.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	scanners := day19.ReadInput(os.Args[1])
+	// fmt.Printf("Input: %v\n", scanners)
 
-	// DO STUFF
+	overlap := day19.FindOverlappingBeacons(0, 1, scanners)
+	fmt.Printf("overlap 0,1: %v", overlap)
 
 	// fmt.Printf("Result: %v\n", result)
 }
