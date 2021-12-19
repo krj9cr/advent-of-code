@@ -19,6 +19,7 @@ func main() {
 
 	// Add scanner 0 coords to base
 	baseCoords = append(baseCoords, scanners[0]...)
+	delete(scanners, 0)
 
 	// Save off all scanner rotations for reuse
 	scannerRotations := make(map[int]map[int][]day19.Coord3d)
@@ -33,15 +34,16 @@ func main() {
 		}
 		// For each remaining scanner
 		for i := range scanners {
+			fmt.Printf("scanner: %v\n", i)
 			// Get all the rotations
 			scannerRotations := scannerRotations[i]
 			// For each rotation
 			for _, rotation := range scannerRotations {
 				// Try to find the translation if there are 12 overlapping distances
 				translation := day19.FindTranlationIfOverlap(baseCoords, rotation)
-				// fmt.Printf("translation between base with %v: %v", i, translation)
 				// If there is one, add the translated coords to the base
 				if translation != nil {
+					fmt.Printf("translation between base with %v: %v\n", i, translation)
 					baseCoords = append(baseCoords, day19.TranslateScannerBeacons(rotation, *translation)...)
 					delete(scanners, i)
 				}
