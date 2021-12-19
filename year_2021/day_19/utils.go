@@ -151,10 +151,10 @@ func GetAllCoordRotations(coord Coord3d) []Coord3d {
 		{X: +coord.Z, Y: -coord.X, Z: -coord.Y},
 		{X: +coord.Z, Y: +coord.Y, Z: -coord.X},
 		// negative z
-		{X: -coord.Y, Y: -coord.X, Z: +coord.Y},
-		{X: -coord.Y, Y: +coord.Y, Z: +coord.X},
-		{X: -coord.Y, Y: +coord.X, Z: -coord.Y},
-		{X: -coord.Y, Y: -coord.Y, Z: -coord.X},
+		{X: -coord.Z, Y: -coord.X, Z: +coord.Y},
+		{X: -coord.Z, Y: +coord.Y, Z: +coord.X},
+		{X: -coord.Z, Y: +coord.X, Z: -coord.Y},
+		{X: -coord.Z, Y: -coord.Y, Z: -coord.X},
 	}
 }
 
