@@ -12,10 +12,28 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day22.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	cubes := day22.ReadInput(os.Args[1])
 
-	// DO STUFF
+	var onAreas []day22.Cube
 
-	// fmt.Printf("Result: %v\n", result)
+	// For each input cube
+	for _, cube := range cubes {
+		// For each previous ON cube
+		for j := range onAreas {
+			c2 := onAreas[j]
+			// if there's overlap, don't double count the volume
+			// or, the cube is off, so we remove volume
+			onAreas[j] = c2.Combine(cube)
+		}
+		if cube.On {
+			onAreas = append(onAreas, cube)
+		}
+	}
+	numOn := 0
+	fmt.Printf("On areas: %v\n", onAreas)
+	for _, area := range onAreas {
+		numOn += area.Volume()
+	}
+
+	fmt.Printf("Result: %v\n", numOn)
 }
