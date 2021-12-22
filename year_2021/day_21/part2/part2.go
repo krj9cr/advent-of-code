@@ -39,7 +39,7 @@ type Wins struct {
 	r1, r2 int
 }
 
-var possibleDiceRolls = map[int]int{3: 1, 4: 3, 5: 4, 6: 7, 7: 4, 8: 3, 9: 1}
+var possibleDiceRolls = map[int]int{3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1}
 
 var cache map[State]Wins = make(map[State]Wins)
 
@@ -58,11 +58,11 @@ func play(state State) (int, int) {
 	}
 	p1Wins := 0
 	p2Wins := 0
-	for sum, occurrence := range possibleDiceRolls {
+	for diceSum, occurrence := range possibleDiceRolls {
 		nextState := state
 		// Move whoever's turn it is
 		if state.p1Turn {
-			nextState.p1 += sum
+			nextState.p1 += diceSum
 			nextState.p1 %= boardSize
 			if nextState.p1 == 0 {
 				nextState.p1 = boardSize
@@ -70,7 +70,7 @@ func play(state State) (int, int) {
 			nextState.p1Score += nextState.p1
 			nextState.p1Turn = false
 		} else {
-			nextState.p2 += sum
+			nextState.p2 += diceSum
 			nextState.p2 %= boardSize
 			if nextState.p2 == 0 {
 				nextState.p2 = boardSize
