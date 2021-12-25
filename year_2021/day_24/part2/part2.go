@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	day0X "year_2021/day_template"
+	day24 "year_2021/day_24"
 )
 
 func main() {
@@ -12,10 +12,17 @@ func main() {
 		fmt.Println("Missing param, provide input file path")
 		return
 	}
-	lines := day0X.ReadInput(os.Args[1])
+	lines := day24.ReadInput(os.Args[1])
 	fmt.Printf("Input: %v\n", lines)
 
-	// DO STUFF
+	input := 10
+	variables := map[string]int{"w": 0, "x": 0, "y": 0, "z": 0}
+
+	for _, line := range lines {
+		day24.ProcessLine(line, variables, &input)
+	}
+
+	fmt.Printf("end: %v\n", variables)
 
 	// fmt.Printf("Result: %v\n", result)
 }
