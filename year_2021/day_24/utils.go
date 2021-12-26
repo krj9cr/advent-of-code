@@ -39,7 +39,8 @@ func NumToInput(in int) []int {
 func RandomInput() []int {
 	result := make([]int, inputLen)
 	result[0] = 9
-	for i := 1; i < inputLen-1; i++ {
+	result[1] = 9
+	for i := 2; i < inputLen; i++ {
 		result[i] = rand.Intn(10-1) + 1
 	}
 	return result
