@@ -6,7 +6,8 @@ import (
 	day23 "year_2021/day_23"
 )
 
-// Was able to solve manually, but need to write something for part 2
+// Solved MANUALLY LOL
+// This code currently has a stack overflow
 func main() {
 
 	if len(os.Args) < 2 {

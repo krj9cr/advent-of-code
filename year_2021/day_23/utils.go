@@ -128,18 +128,64 @@ func (state State) GetOpenLetterHomes(roomCoord utils.Coord, room Room) []utils.
 	return result2
 }
 
-func (state State) GetOpenHallways() []utils.Coord {
+func (state State) GetOpenHallways(start utils.Coord) []utils.Coord {
 	var result []utils.Coord
 	for coord, room := range state.Rooms {
 		if room.Rtype == Hallway && room.Value == "." {
 			result = append(result, coord)
 		}
 	}
-	// Prioritize right to left *shrug*
+	// Prioritize order closest to coord
 	sort.SliceStable(result, func(i, j int) bool {
-		return result[i].I > result[j].I
+		return start.ManattanDist(result[i]) < start.ManattanDist(result[j])
 	})
 	return result
+}
+
+func (state State) TryMoving(start utils.Coord, end utils.Coord) *State {
+	startRoom, ok := state.Rooms[start]
+	if !ok {
+		log.Panicf("could not find room: %v\n", start)
+	}
+	endRoom, ok := state.Rooms[end]
+	if !ok {
+		log.Panicf("could not find room: %v\n", end)
+	}
+	// Try a path, return that state if it works
+	cost := Astar(state, start, end)
+	val, ok := cost[end]
+	if ok { // there is a path
+		// Copy state and recurse
+		nextRooms := make(map[utils.Coord]Room)
+		for key, val := range state.Rooms {
+			nextRooms[key] = val
+		}
+		// move the letter from coord to home
+		emptyRoom := Room{Rtype: startRoom.Rtype, Value: "."}
+		nextRooms[start] = emptyRoom
+		letterRoom := Room{Rtype: endRoom.Rtype, Value: startRoom.Value}
+		nextRooms[end] = letterRoom
+
+		nextCost := state.Cost + val
+
+		if nextCost < StateCosts[FinalStateStr] {
+			nextState := State{Rooms: nextRooms, Cost: nextCost}
+
+			nextStateStr := nextState.RoomsToString()
+			prevStateCost, ok := StateCosts[nextStateStr]
+			if ok {
+				if prevStateCost > nextCost {
+					StateCosts[nextStateStr] = nextCost
+				} else {
+					nextState.Cost = prevStateCost
+				}
+			} else {
+				StateCosts[nextStateStr] = nextCost
+			}
+			return &nextState
+		}
+	} // there is no path
+	return nil
 }
 
 var StateCosts = make(map[string]int)
@@ -168,8 +214,8 @@ func Step(state State) {
 		return
 	}
 
-	fmt.Printf("Stepping with state with cost: %v\n", state.Cost)
-	state.PrintRooms()
+	// fmt.Printf("Stepping with state with cost: %v\n", state.Cost)
+	// state.PrintRooms()
 
 	// fmt.Printf("Can move: ")
 	// for coord, room := range state.Rooms {
@@ -190,110 +236,37 @@ func Step(state State) {
 			// if room.Value == "D" {
 			// 	fmt.Printf("Open homes for %v: %v\n", room.Value, openHomes)
 			// }
-			// this list is already sorted by lowest room to highest
-			for _, home := range openHomes {
-				homeRoom, ok := state.Rooms[home]
-				if !ok {
-					log.Panicf("could not find room: %v\n", home)
-				}
-				// Try a path, return that state if it works
-				cost := Astar(state, coord, home)
-				val, ok := cost[home]
-				if ok { // there is a path
-					nextRooms := make(map[utils.Coord]Room)
-					for key, val := range state.Rooms {
-						nextRooms[key] = val
-					}
-					// move the letter from coord to home
-					emptyRoom := Room{Rtype: room.Rtype, Value: "."}
-					nextRooms[coord] = emptyRoom
-					letterRoom := Room{Rtype: homeRoom.Rtype, Value: room.Value}
-					nextRooms[home] = letterRoom
-
-					nextCost := state.Cost + val
-
-					if nextCost < StateCosts[FinalStateStr] {
-						nextState := State{Rooms: nextRooms, Cost: nextCost}
-
-						nextStateStr := nextState.RoomsToString()
-						prevStateCost, ok := StateCosts[nextStateStr]
-						if ok {
-							if prevStateCost > nextCost {
-								StateCosts[nextStateStr] = nextCost
-							} else {
-								nextState.Cost = prevStateCost
-							}
-						} else {
-							StateCosts[nextStateStr] = nextCost
-						}
-						// state.PrintRooms()
-						// fmt.Printf("Moving %v home to %v\n", room.Value, home)
-						// nextState.PrintRooms()
-						Step(nextState)
-					}
+			// this list is already sorted by lowest room to highest, just pick the first one
+			if len(openHomes) > 0 {
+				home := openHomes[0]
+				nextState := state.TryMoving(coord, home)
+				if nextState != nil {
+					Step(*nextState)
 				}
 			}
-			// var hallwayStates []State
 			// else, if the letter is NOT already in a Hallway,
+			var hallwayStates []State
 			if room.Rtype != Hallway {
 				// try moving the letter to each of the Hallway spots, creating branching states
-				for _, hallway := range state.GetOpenHallways() {
-					hallwayRoom, ok := state.Rooms[hallway]
-					if !ok {
-						log.Panicf("could not find room: %v\n", hallway)
-					}
-					cost := Astar(state, coord, hallway)
-					val, ok := cost[hallway]
-					if ok { // there is a path
-						nextRooms := make(map[utils.Coord]Room)
-						for key, val := range state.Rooms {
-							nextRooms[key] = val
-						}
-						// move it
-						emptyRoom := Room{Rtype: room.Rtype, Value: "."}
-						nextRooms[coord] = emptyRoom
-						letterRoom := Room{Rtype: hallwayRoom.Rtype, Value: room.Value}
-						nextRooms[hallway] = letterRoom
-
-						// get new cost
-						nextCost := state.Cost + val
-						if nextCost < StateCosts[FinalStateStr] {
-							nextState := State{Rooms: nextRooms, Cost: nextCost}
-							nextStateStr := nextState.RoomsToString()
-
-							prevStateCost, ok := StateCosts[nextStateStr]
-							if ok {
-								if prevStateCost > nextCost {
-									StateCosts[nextStateStr] = nextCost
-								} else {
-									nextState.Cost = prevStateCost
-								}
-							} else {
-								StateCosts[nextStateStr] = nextCost
-							}
-							// Save states and costs
-							//   check if previous state had a lower cost, and use that if so
-							Step(nextState)
-							// hallwayStates = append(hallwayStates, n...)
-							// fmt.Printf("hallway states:\n")
-							// for _, state := range hallwayStates {
-							// 	state.PrintRooms()
-							// }
-						}
+				for _, hallway := range state.GetOpenHallways(coord) {
+					nextState := state.TryMoving(coord, hallway)
+					if nextState != nil {
+						hallwayStates = append(hallwayStates, *nextState)
 					}
 				}
 				// fmt.Printf("state costs: %v\n", StateCosts)
 			}
-			// roomStates = append(roomStates, hallwayStates...)
+			// Sort by cost
+			sort.SliceStable(hallwayStates, func(i, j int) bool {
+				return hallwayStates[i].Cost < hallwayStates[j].Cost
+			})
+			// Recurse
+			for _, hallwayState := range hallwayStates {
+				Step(hallwayState)
+			}
 		} // else, this letter can't move
 	}
-	// fmt.Printf("room states:\n")
-	// for _, state := range roomStates {
-	// 	state.PrintRooms()
-	// }
-	// return roomStates
 	// we get here if no letters can move?
-	// return []State{}
 }
 
 // guesses the cost of going from current position to goal
