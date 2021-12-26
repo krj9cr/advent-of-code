@@ -15,9 +15,9 @@ func main() {
 	}
 	state := day23.ReadInput(os.Args[1])
 	state.PrintRooms()
+	day23.StateCosts[day23.FinalStateStr] = 16000
 
-	// loop until we have a winning state
-	fmt.Printf("Done?: %v\n", day23.Done(rooms))
+	day23.Step(state)
 
-	// fmt.Printf("Result: %v\n", result)
+	fmt.Printf("Result: %v\n", day23.StateCosts[day23.FinalStateStr])
 }
