@@ -2,11 +2,17 @@ package utils
 
 import (
 	"fmt"
+	"math"
 )
 
 type Coord struct {
 	I int
 	J int
+}
+
+func (coordA Coord) ManattanDist(coordB Coord) int {
+	return int(math.Abs(float64(coordA.I)-float64(coordB.I))) +
+		int(math.Abs(float64(coordA.J)-float64(coordB.J)))
 }
 
 func PrintIntGrid(slice [][]int) {
