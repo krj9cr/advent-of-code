@@ -16,8 +16,10 @@ import (
 )
 
 func TimePart(partPath, inputPath string) time.Duration {
+	// Source: https://coderwall.com/p/cp5fya/measuring-execution-time-in-go
 	start := time.Now()
 
+	// Source: https://pkg.go.dev/os/exec#example-Command
 	cmd := exec.Command("go", "run", partPath, inputPath)
 	// cmd.Stdin = strings.NewReader("some input")
 	var out bytes.Buffer
@@ -33,6 +35,7 @@ func TimePart(partPath, inputPath string) time.Duration {
 	return elapsed
 }
 
+// Source: https://github.com/gonum/plot/wiki/Example-plots
 func Chart(dayLabels []string, part1Times []float64, part2Times []float64) {
 	groupA := plotter.Values(part1Times)
 	groupB := plotter.Values(part2Times)
@@ -74,14 +77,14 @@ func Chart(dayLabels []string, part1Times []float64, part2Times []float64) {
 }
 
 func main() {
-
+	// Get current directory
 	basePath, err := os.Getwd()
 	if err != nil {
 		log.Println(err)
 	}
 	basePath = strings.TrimSuffix(basePath, "analysis")
-	// fmt.Println(basePath)
 
+	// How many days to check
 	days := 7
 
 	var dayLabels []string
@@ -89,12 +92,11 @@ func main() {
 	var part2Times []float64
 	for i := 1; i <= days; i++ {
 		dayPath := fmt.Sprintf("%v/day_%02d", basePath, i)
-		// fmt.Println(dayPath)
 		part1Path := fmt.Sprintf("%v/part1/part1.go", dayPath)
 		part2Path := fmt.Sprintf("%v/part2/part2.go", dayPath)
 		inputPath := fmt.Sprintf("%v/input.txt", dayPath)
 
-		// Run part1
+		// Run parts
 		part1Time := TimePart(part1Path, inputPath)
 		part2Time := TimePart(part2Path, inputPath)
 
@@ -104,6 +106,6 @@ func main() {
 
 		fmt.Printf("Day %02d part1: %v, part2: %v\n\n", i, part1Time, part2Time)
 	}
+	// Create chart
 	Chart(dayLabels, part1Times, part2Times)
-
 }
