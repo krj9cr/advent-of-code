@@ -51,8 +51,8 @@ func (board BingoBoard) CheckDrawnNumber(drawnNumber int) {
 }
 
 func (board BingoBoard) SumUnmarked() int {
-	fmt.Print("WINNER: \n")
-	board.PrintBoard()
+	// fmt.Print("WINNER: \n")
+	// board.PrintBoard()
 	sum := 0
 	for _, row := range board.Board {
 		for _, item := range row {

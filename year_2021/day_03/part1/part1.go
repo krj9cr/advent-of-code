@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("readLines: %s", err)
 	}
-	utils.PrintStringSlice(lines)
+	// utils.PrintStringSlice(lines)
 
 	var binaryLines [][]int
 	for _, l := range lines {

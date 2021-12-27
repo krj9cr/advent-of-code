@@ -13,11 +13,11 @@ func main() {
 		return
 	}
 	lines := day05.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	// fmt.Printf("Input: %v\n", lines)
 
 	_, maxx, _, maxy := day05.FindMinMaxCoords(lines)
 
-	fmt.Printf("maxx: %v, maxy: %v", maxx, maxy)
+	// fmt.Printf("maxx: %v, maxy: %v", maxx, maxy)
 	grid := make([][]int, maxx+2)
 	for i := range grid {
 		grid[i] = make([]int, maxy+2)

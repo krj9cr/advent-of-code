@@ -65,7 +65,7 @@ func (l LineSegment) GeneratePoints(includeDiagonal bool) []Point {
 	currX := l.a.x
 	currY := l.a.y
 
-	rise, run, slope, err := l.Slope()
+	_, _, slope, err := l.Slope()
 	if err != nil {
 		// Undefined slope means it's a vertical line
 		if l.b.y-l.a.y < 0 {
@@ -105,14 +105,14 @@ func (l LineSegment) GeneratePoints(includeDiagonal bool) []Point {
 			}
 		}
 	}
-	fmt.Printf("Line segment %v, rise: %v, run: %v, slope: %v-%v\n", l, rise, run, slope, err)
+	// fmt.Printf("Line segment %v, rise: %v, run: %v, slope: %v-%v\n", l, rise, run, slope, err)
 
 	return points
 }
 
 func (l LineSegment) Chart(grid [][]int, includeDiagonal bool) {
 	points := l.GeneratePoints(includeDiagonal)
-	fmt.Printf("Line segment %v; Generated points: %v\n", l, points)
+	// fmt.Printf("Line segment %v; Generated points: %v\n", l, points)
 	for _, point := range points {
 		grid[point.y][point.x] += 1
 	}

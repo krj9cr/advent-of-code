@@ -63,6 +63,8 @@ func Chart(dayLabels []string, part1Times []float64, part2Times []float64) {
 	p.Legend.Add("Part 1", barsA)
 	p.Legend.Add("Part 2", barsB)
 	p.Legend.Top = true
+	p.Legend.TextStyle.Font.Size = 8
+	p.Legend.YOffs = 10
 
 	p.NominalX(dayLabels...)
 
@@ -78,16 +80,16 @@ func main() {
 		log.Println(err)
 	}
 	basePath = strings.TrimSuffix(basePath, "analysis")
-	fmt.Println(basePath)
+	// fmt.Println(basePath)
 
-	days := 1
+	days := 7
 
 	var dayLabels []string
 	var part1Times []float64
 	var part2Times []float64
 	for i := 1; i <= days; i++ {
 		dayPath := fmt.Sprintf("%v/day_%02d", basePath, i)
-		fmt.Println(dayPath)
+		// fmt.Println(dayPath)
 		part1Path := fmt.Sprintf("%v/part1/part1.go", dayPath)
 		part2Path := fmt.Sprintf("%v/part2/part2.go", dayPath)
 		inputPath := fmt.Sprintf("%v/input.txt", dayPath)
@@ -100,7 +102,7 @@ func main() {
 		part1Times = append(part1Times, float64(part1Time.Milliseconds()))
 		part2Times = append(part2Times, float64(part2Time.Milliseconds()))
 
-		fmt.Printf("Day %02d part1: %v, part2: %v\n", i, part1Time, part2Time)
+		fmt.Printf("Day %02d part1: %v, part2: %v\n\n", i, part1Time, part2Time)
 	}
 	Chart(dayLabels, part1Times, part2Times)
 

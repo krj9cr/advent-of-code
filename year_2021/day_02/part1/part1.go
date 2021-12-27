@@ -17,7 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("readLines: %s", err)
 	}
-	day02.PrintCommands(lines)
+	// day02.PrintCommands(lines)
 
 	horizontal := 0
 	vertical := 0
