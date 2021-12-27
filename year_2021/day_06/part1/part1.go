@@ -13,7 +13,7 @@ func main() {
 		return
 	}
 	fish := day06.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", fish)
+	// fmt.Printf("Input: %v\n", fish)
 
 	numDays := 80
 	spawnDays := 6
@@ -30,7 +30,7 @@ func main() {
 				fish[i] -= 1
 			}
 		}
-		fmt.Printf("After %v day: %v\n", day, fish)
+		// fmt.Printf("After %v day: %v\n", day, fish)
 	}
 
 	fmt.Printf("Result: %v\n", len(fish))

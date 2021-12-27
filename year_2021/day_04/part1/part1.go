@@ -15,7 +15,7 @@ func main() {
 
 	// Read input into structs
 	game := day04.ReadInput(os.Args[1])
-	game.PrintGame()
+	// game.PrintGame()
 
 	game.PlayGame()
 }

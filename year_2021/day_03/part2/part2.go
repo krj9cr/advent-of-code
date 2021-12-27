@@ -10,20 +10,20 @@ import (
 )
 
 func getRating(binaryLines [][]int, mostCommon bool) int64 {
-	fmt.Printf("in get rating\n")
-	day03.PrintBinaryLines(binaryLines)
+	// fmt.Printf("in get rating\n")
+	// day03.PrintBinaryLines(binaryLines)
 	cols := len(binaryLines[0])
 	for i := 0; i < cols; i++ {
-		fmt.Printf("i: %v\n", i)
+		// fmt.Printf("i: %v\n", i)
 		if len(binaryLines) <= 1 {
 			return day03.BinaryIntArrToInt64(binaryLines[0])
 		}
 		commonBit := day03.CommonBit(binaryLines, mostCommon, i)
-		fmt.Printf("Common bit: %v\n", commonBit)
+		// fmt.Printf("Common bit: %v\n", commonBit)
 		binaryLines = day03.Keep(binaryLines, int(commonBit), i)
-		fmt.Printf("Keep:\n")
-		day03.PrintBinaryLines(binaryLines)
-		fmt.Print("\n")
+		// fmt.Printf("Keep:\n")
+		// day03.PrintBinaryLines(binaryLines)
+		// fmt.Print("\n")
 	}
 	return day03.BinaryIntArrToInt64(binaryLines[0])
 }
@@ -38,7 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("readLines: %s", err)
 	}
-	utils.PrintStringSlice(lines)
+	// utils.PrintStringSlice(lines)
 
 	var binaryLines [][]int
 	for _, l := range lines {
@@ -52,9 +52,9 @@ func main() {
 		}
 		binaryLines = append(binaryLines, introw)
 	}
-	fmt.Print("Binary lines: \n")
-	day03.PrintBinaryLines(binaryLines)
-	fmt.Print("\n")
+	// fmt.Print("Binary lines: \n")
+	// day03.PrintBinaryLines(binaryLines)
+	// fmt.Print("\n")
 
 	// var oxygenLines [][]int
 	// copy(oxygenLines, binaryLines)

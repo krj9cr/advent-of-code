@@ -21,7 +21,7 @@ func main() {
 		return
 	}
 	fish := day06.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", fish)
+	// fmt.Printf("Input: %v\n", fish)
 
 	numDays := 256
 	spawnDays := 6
@@ -40,8 +40,8 @@ func main() {
 		fishMap[f] += 1
 	}
 
-	fmt.Printf("Spawn keys: %v", spawnKeys)
-	fmt.Printf("Initial size: %v, %v\n", countFish(fishMap), fishMap)
+	// fmt.Printf("Spawn keys: %v", spawnKeys)
+	// fmt.Printf("Initial size: %v, %v\n", countFish(fishMap), fishMap)
 	for day := 1; day <= numDays; day++ {
 		newMap := make(map[int]int)
 		for spawn := range fishMap {

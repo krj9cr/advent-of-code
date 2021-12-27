@@ -11,17 +11,17 @@ type BingoGame struct {
 
 func (game BingoGame) PlayGame() {
 	// For each drawn number, play a round
-	for round, drawnNumber := range game.DrawNumbers {
-		fmt.Printf("Round %v, Drawing: %v\n", round, drawnNumber)
+	for _, drawnNumber := range game.DrawNumbers {
+		// fmt.Printf("Round %v, Drawing: %v\n", round, drawnNumber)
 		done, answer, _ := game.PlayRound(drawnNumber)
 		// If done, print answer, otherwise continue game
 		if done {
 			fmt.Printf("Result: %v\n", answer)
 			return
 		}
-		game.PrintGame()
+		// game.PrintGame()
 	}
-	fmt.Println("NO WINNER")
+	// fmt.Println("NO WINNER")
 }
 
 // Returns (if done or not, answer, winner indexes)
@@ -40,7 +40,7 @@ func (game BingoGame) PlayRound(drawnNumber int) (bool, int, []int) {
 		winner, answer := board.IsWinner()
 		if winner {
 			result = answer * drawnNumber
-			fmt.Printf("Sum: %v, Drawn number: %v, Result: %v\n", answer, drawnNumber, result)
+			// fmt.Printf("Sum: %v, Drawn number: %v, Result: %v\n", answer, drawnNumber, result)
 			boardIndex = append(boardIndex, i)
 			anyWinner = true
 		}
@@ -69,8 +69,8 @@ func (game BingoGame) RemoveBoards(boardsIndexes []int) []BingoBoard {
 func (game BingoGame) PlayForLastWinner() {
 	// initialNumBoards := len(game.Boards)
 	// For each drawn number, play a round
-	for round, drawnNumber := range game.DrawNumbers {
-		fmt.Printf("Round %v, Drawing: %v\n", round, drawnNumber)
+	for _, drawnNumber := range game.DrawNumbers {
+		// fmt.Printf("Round %v, Drawing: %v\n", round, drawnNumber)
 		winner, answer, boardIndexes := game.PlayRound(drawnNumber)
 		// If done, check win conditions, otherwise continue game
 		if winner && len(game.Boards) == 1 {
@@ -78,12 +78,12 @@ func (game BingoGame) PlayForLastWinner() {
 			fmt.Printf("Result: %v\n", answer)
 			return
 		} else if len(boardIndexes) > 0 {
-			fmt.Printf("Removing boards %v\n", boardIndexes)
+			// fmt.Printf("Removing boards %v\n", boardIndexes)
 			game.Boards = game.RemoveBoards(boardIndexes)
 		}
-		game.PrintGame()
+		// game.PrintGame()
 	}
-	fmt.Println("NO WINNER")
+	// fmt.Println("NO WINNER")
 }
 
 func (game BingoGame) PrintGame() {
