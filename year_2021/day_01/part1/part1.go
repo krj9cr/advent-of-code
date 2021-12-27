@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("readLines: %s", err)
 	}
-	utils.PrintIntSlice(lines)
+	// utils.PrintIntSlice(lines)
 
 	var count int = day01.CountIncreasing(lines)
 	fmt.Printf("Count: %v\n", count)
