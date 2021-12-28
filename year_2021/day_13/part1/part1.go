@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	day13 "year_2021/day_13"
-	"year_2021/utils"
 )
 
 // this is really part2
@@ -15,7 +14,7 @@ func main() {
 		return
 	}
 	lines := day13.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", lines)
+	// fmt.Printf("Input: %v\n", lines)
 
 	// Convert to map to remove duplicates
 	currCoords := make(map[day13.Coord]bool)
@@ -29,7 +28,7 @@ func main() {
 		keys[i] = k
 		i++
 	}
-	utils.PrintStringGrid(day13.PlotDots(keys), "")
+	// utils.PrintStringGrid(day13.PlotDots(keys), "")
 
 	// For each fold
 	for _, fold := range lines.Folds {
@@ -40,7 +39,7 @@ func main() {
 			newCoords[day13.Reflect(coord, fold)] = true
 		}
 		currCoords = newCoords
-		fmt.Printf("currCoords: %v\n", currCoords)
+		// fmt.Printf("currCoords: %v\n", currCoords)
 		// Print grid
 		keys := make([]day13.Coord, len(currCoords))
 		i := 0
@@ -48,8 +47,8 @@ func main() {
 			keys[i] = k
 			i++
 		}
-		utils.PrintStringGrid(day13.PlotDots(keys), "")
-		fmt.Printf("Visible dots: %v\n", len(currCoords))
+		// utils.PrintStringGrid(day13.PlotDots(keys), "")
+		// fmt.Printf("Visible dots: %v\n", len(currCoords))
 	}
 
 	// THIS IS FOR PART 2

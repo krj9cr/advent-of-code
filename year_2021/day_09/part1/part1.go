@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	day09 "year_2021/day_09"
-	"year_2021/utils"
 )
 
 func main() {
@@ -14,7 +13,7 @@ func main() {
 		return
 	}
 	grid := day09.ReadInput(os.Args[1])
-	utils.PrintIntGrid(grid)
+	// utils.PrintIntGrid(grid)
 
 	sum := 0
 	lowPoints := day09.FindLowPoints(grid)

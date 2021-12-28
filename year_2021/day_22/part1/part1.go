@@ -40,7 +40,7 @@ func main() {
 		}
 	}
 	numOn := 0
-	fmt.Printf("On areas: %v\n", onAreas)
+	// fmt.Printf("On areas: %v\n", onAreas)
 	for _, area := range onAreas {
 		numOn += area.Volume()
 	}

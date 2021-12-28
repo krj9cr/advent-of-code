@@ -14,7 +14,7 @@ func main() {
 		return
 	}
 	line := day16.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", line)
+	// fmt.Printf("Input: %v\n", line)
 
 	// Convert hex to binary string
 	hexBytes, err := hex.DecodeString(line)
@@ -26,7 +26,7 @@ func main() {
 		binary += fmt.Sprintf("%08b", n)
 	}
 
-	fmt.Printf("Binary: %v\n", binary)
+	// fmt.Printf("Binary: %v\n", binary)
 
 	binary, res, versionSum := day16.HandlePacket(binary)
 	fmt.Printf("binary: %v; result: %v\n", binary, res)

@@ -65,9 +65,9 @@ func main() {
 		}
 	}
 
-	result := len(baseCoords)
-	fmt.Printf("Result: %v\n", result)
-	fmt.Printf("scanenr dists: %v\n", scannerDists)
+	// result := len(baseCoords)
+	// fmt.Printf("Result: %v\n", result)
+	// fmt.Printf("scanenr dists: %v\n", scannerDists)
 
 	// Find max manhattan dist
 	maxmdist := 0

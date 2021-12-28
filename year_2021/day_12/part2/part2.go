@@ -13,7 +13,7 @@ func main() {
 		return
 	}
 	graph := day12.ReadInput(os.Args[1])
-	fmt.Printf("GRAPH:\n%v\n", graph)
+	// fmt.Printf("GRAPH:\n%v\n", graph)
 
 	numPaths := graph.CountPaths2("start", "end")
 

@@ -15,15 +15,15 @@ func main() {
 	octopuses := day11.ReadInput(os.Args[1])
 
 	// Print
-	fmt.Printf("Before any steps\n")
-	for i := range octopuses {
-		row := octopuses[i]
-		for j := range row {
-			fmt.Printf("%v", row[j])
-		}
-		fmt.Print("\n")
-	}
-	fmt.Print("\n")
+	// fmt.Printf("Before any steps\n")
+	// for i := range octopuses {
+	// 	row := octopuses[i]
+	// 	for j := range row {
+	// 		fmt.Printf("%v", row[j])
+	// 	}
+	// 	fmt.Print("\n")
+	// }
+	// fmt.Print("\n")
 
 	steps := 2000
 	numFlashes := 0
@@ -49,18 +49,18 @@ func main() {
 		}
 		// Print and check if they have all flashed!
 		allFlash := true
-		fmt.Printf("After step %v: \n", step)
-		for i := range octopuses {
-			row := octopuses[i]
-			for j := range row {
-				if row[j] != 0 {
-					allFlash = false
-				}
-				fmt.Printf("%v", row[j])
-			}
-			fmt.Print("\n")
-		}
-		fmt.Print("\n")
+		// fmt.Printf("After step %v: \n", step)
+		// for i := range octopuses {
+		// 	row := octopuses[i]
+		// 	for j := range row {
+		// 		if row[j] != 0 {
+		// 			allFlash = false
+		// 		}
+		// 		fmt.Printf("%v", row[j])
+		// 	}
+		// 	fmt.Print("\n")
+		// }
+		// fmt.Print("\n")
 		// Stop if they all flashed
 		if allFlash {
 			fmt.Printf("ALL FLASHED step: %v\n", step)

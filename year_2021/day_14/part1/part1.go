@@ -13,7 +13,7 @@ func main() {
 		return
 	}
 	start, polymers := day14.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v, polymers: %v\n", start, polymers)
+	// fmt.Printf("Input: %v, polymers: %v\n", start, polymers)
 
 	curr := start
 	steps := 40 // should be 10
@@ -23,11 +23,11 @@ func main() {
 		for i := range curr {
 			if i+1 < len(curr) {
 				pair := curr[i : i+2]
-				fmt.Printf("pair: %v\n", pair)
+				// fmt.Printf("pair: %v\n", pair)
 				// see if any polymers match
 				for _, polymer := range polymers {
 					if polymer.Pair == pair {
-						fmt.Printf("matching poly: %v\n", polymer)
+						// fmt.Printf("matching poly: %v\n", polymer)
 						// Add to updated list
 						updatedPairs = append(updatedPairs, string(pair[0])+polymer.Insert+string(pair[1]))
 					}
@@ -35,7 +35,7 @@ func main() {
 			}
 		}
 		// Join list of updated pairs
-		fmt.Printf("Updated pairs: %v\n", updatedPairs)
+		// fmt.Printf("Updated pairs: %v\n", updatedPairs)
 		curr = ""
 		for i, pair := range updatedPairs {
 			if i == 0 {
@@ -46,7 +46,7 @@ func main() {
 				curr += string(pair[0]) + string(pair[1])
 			}
 		}
-		fmt.Printf("After step %v: length: %v; %v\n", step, len(curr), curr)
+		// fmt.Printf("After step %v: length: %v; %v\n", step, len(curr), curr)
 	}
 
 	// Count letters
@@ -65,6 +65,6 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Counts: %v\n", counts)
+	// fmt.Printf("Counts: %v\n", counts)
 	fmt.Printf("Result: %v - %v = %v", maxc, minc, maxc-minc)
 }
