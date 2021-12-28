@@ -72,8 +72,8 @@ func Chart(dayLabels []string, part1Times []float64, part2Times []float64) {
 
 	p.NominalX(dayLabels...)
 
-	width := font.Length(len(dayLabels) - 2)
-	if err := p.Save(width*vg.Inch, 4*vg.Inch, "barchart.png"); err != nil {
+	width := font.Length(len(dayLabels) - 4)
+	if err := p.Save(width*vg.Inch, 5*vg.Inch, "barchart.png"); err != nil {
 		panic(err)
 	}
 }
@@ -93,15 +93,19 @@ func main() {
 	var part1Times []float64
 	var part2Times []float64
 	for i := 1; i <= days; i++ {
+		dayLabels = append(dayLabels, fmt.Sprintf("%02d", i))
+
 		if i == 14 || i == 23 {
+			part1Times = append(part1Times, 0)
+			part2Times = append(part2Times, 0)
 			continue
 		}
+
 		dayPath := fmt.Sprintf("%v/day_%02d", basePath, i)
 		part1Path := fmt.Sprintf("%v/part1/part1.go", dayPath)
 		part2Path := fmt.Sprintf("%v/part2/part2.go", dayPath)
 		inputPath := fmt.Sprintf("%v/input.txt", dayPath)
 
-		dayLabels = append(dayLabels, fmt.Sprintf("%02d", i))
 		// Run parts
 		part1Time := TimePart(part1Path, inputPath)
 		part1Times = append(part1Times, float64(part1Time.Milliseconds()))
