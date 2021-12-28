@@ -16,11 +16,11 @@ func main() {
 		return
 	}
 	p1, p2 := day21.ReadInput(os.Args[1])
-	fmt.Printf("Player1 start: %v, Player2 start: %v\n", p1, p2)
+	// fmt.Printf("Player1 start: %v, Player2 start: %v\n", p1, p2)
 
 	p1Wins, p2Wins := play(State{p1: p1, p2: p2, p1Score: 0, p2Score: 0, p1Turn: true})
 
-	fmt.Printf("p1Wins: %v\np2Wins: %v\n", p1Wins, p2Wins)
+	// fmt.Printf("p1Wins: %v\np2Wins: %v\n", p1Wins, p2Wins)
 
 	if p1Wins > p2Wins {
 		fmt.Printf("P1 WINNER: %v\n", p1Wins)
@@ -82,7 +82,7 @@ func play(state State) (int, int) {
 		r1, r2 := play(nextState)
 		p1Wins = p1Wins + (r1 * occurrence)
 		p2Wins = p2Wins + (r2 * occurrence)
-		fmt.Printf("Played: %v, p1Wins: %v, p2Wins: %v\n", state, p1Wins, p2Wins)
+		// fmt.Printf("Played: %v, p1Wins: %v, p2Wins: %v\n", state, p1Wins, p2Wins)
 	}
 	cache[state] = Wins{p1Wins, p2Wins}
 	return p1Wins, p2Wins

@@ -15,15 +15,15 @@ func main() {
 	octopuses := day11.ReadInput(os.Args[1])
 
 	// Print
-	fmt.Printf("Before any steps\n")
-	for i := range octopuses {
-		row := octopuses[i]
-		for j := range row {
-			fmt.Printf("%v", row[j])
-		}
-		fmt.Print("\n")
-	}
-	fmt.Print("\n")
+	// fmt.Printf("Before any steps\n")
+	// for i := range octopuses {
+	// 	row := octopuses[i]
+	// 	for j := range row {
+	// 		fmt.Printf("%v", row[j])
+	// 	}
+	// 	fmt.Print("\n")
+	// }
+	// fmt.Print("\n")
 
 	steps := 100
 	numFlashes := 0
@@ -48,15 +48,15 @@ func main() {
 			}
 		}
 		// Print
-		fmt.Printf("After step %v: \n", step)
-		for i := range octopuses {
-			row := octopuses[i]
-			for j := range row {
-				fmt.Printf("%v", row[j])
-			}
-			fmt.Print("\n")
-		}
-		fmt.Print("\n")
+		// fmt.Printf("After step %v: \n", step)
+		// for i := range octopuses {
+		// 	row := octopuses[i]
+		// 	for j := range row {
+		// 		fmt.Printf("%v", row[j])
+		// 	}
+		// 	fmt.Print("\n")
+		// }
+		// fmt.Print("\n")
 	}
 
 	fmt.Printf("Total flashes: %v\n", numFlashes)

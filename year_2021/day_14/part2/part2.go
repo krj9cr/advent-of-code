@@ -13,7 +13,7 @@ func main() {
 		return
 	}
 	start, polymers := day14.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v, polymers: %v\n", start, polymers)
+	// fmt.Printf("Input: %v, polymers: %v\n", start, polymers)
 
 	// convert polymers to a map
 	polymersMap := make(map[string]string)
@@ -47,19 +47,19 @@ func main() {
 		// Iterate through pairs
 		for pair, pairCount := range pairCounts {
 			//for p := 0; p < pairCount; p++ {
-				// Find matching polymer
-				if insert, ok := polymersMap[pair]; ok {
-					// Update pair counts
-					newPairCounts[pair] -= pairCount
-					pairA := string(pair[0]) + insert
-					pairB := insert + string(pair[1])
-					newPairCounts[pairA] += pairCount
-					newPairCounts[pairB] += pairCount
-					// Add to letter counts
-					letterCounts[insert] += pairCount
-					//fmt.Printf("pair: %v; adding %v and %v\n", pair, pairA, pairB)
-				}
+			// Find matching polymer
+			if insert, ok := polymersMap[pair]; ok {
+				// Update pair counts
+				newPairCounts[pair] -= pairCount
+				pairA := string(pair[0]) + insert
+				pairB := insert + string(pair[1])
+				newPairCounts[pairA] += pairCount
+				newPairCounts[pairB] += pairCount
+				// Add to letter counts
+				letterCounts[insert] += pairCount
+				//fmt.Printf("pair: %v; adding %v and %v\n", pair, pairA, pairB)
 			}
+		}
 		//}
 		pairCounts = newPairCounts
 		// Sum letter counts to get length?
@@ -67,7 +67,7 @@ func main() {
 		for _, letterCount := range letterCounts {
 			length += letterCount
 		}
-		fmt.Printf("After step %v: length: %v\n letterCounts: %v\n pairCounts: %v\n", step, length, letterCounts, pairCounts)
+		// fmt.Printf("After step %v: length: %v\n letterCounts: %v\n pairCounts: %v\n", step, length, letterCounts, pairCounts)
 	}
 
 	// Get max and min letter

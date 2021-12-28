@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	day20 "year_2021/day_20"
-	"year_2021/utils"
 )
 
 func main() {
@@ -14,14 +13,14 @@ func main() {
 		return
 	}
 	enhancement, image := day20.ReadInput(os.Args[1])
-	fmt.Printf("Enhancement: \n%v\n\nImage:\n", enhancement)
-	utils.PrintStringSlice(image)
+	// fmt.Printf("Enhancement: \n%v\n\nImage:\n", enhancement)
+	// utils.PrintStringSlice(image)
 
 	steps := 50
 
 	// For num steps
 	for step := 0; step < steps; step++ {
-		fmt.Printf("Step: %v\n", step)
+		// fmt.Printf("Step: %v\n", step)
 		// Get assumed empty char, since the infinite image area
 		// osciallates between black and white pixels based on the enhance algorithm
 		empty := "."
@@ -51,8 +50,8 @@ func main() {
 		// Add 2 rows padding around image
 		image2 := day20.PadImage(image, 1, empty)
 		image = image2
-		utils.PrintStringSlice(image)
-		fmt.Print("\n")
+		// utils.PrintStringSlice(image)
+		// fmt.Print("\n")
 
 		// Make a copy of image for us to update and simultaneously consider pixels
 		var imageCopy []string
@@ -70,8 +69,8 @@ func main() {
 		}
 		// utils.PrintStringSlice(image)
 		image = imageCopy
-		utils.PrintStringSlice(image)
-		fmt.Print("\n")
+		// utils.PrintStringSlice(image)
+		// fmt.Print("\n")
 	}
 
 	count := day20.NumLitPixels(image)

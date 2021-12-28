@@ -24,31 +24,22 @@ func main() {
 	lines := day24.ReadInput(os.Args[1])
 	// fmt.Printf("Input: %v\n", lines)
 
+	// Solved manually using the formulas above
 	input := 59998426997979
-	// tried := make(map[int]bool)
 	maxi := 0
 	steps := 0
 	for {
-		// input := day24.RandomInput()
-		inputNum := input //day24.InputToNum(input)
-		// if _, ok := tried[inputNum]; ok {
-		// 	continue
-		// }
-		// tried[inputNum] = true
+		inputNum := input
 		fmt.Printf("trying: %v\n", input)
 		variables := day24.ProcessLines(lines, day24.NumToInput(input))
 		fmt.Printf("end: %v\n", variables)
 		if variables["z"] == 0 {
-			// fmt.Printf("Valid input: %v\n", modelNumber)
 			if inputNum > maxi {
 				maxi = inputNum
 				fmt.Printf("max: %v\n", maxi)
 				break // for now, stop
 			}
 		}
-		// if steps > 1 {
-		// 	break
-		// }
 		input -= 1
 		steps += 1
 	}

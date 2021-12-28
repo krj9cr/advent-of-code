@@ -2,7 +2,6 @@ package day09
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 )
 
@@ -22,7 +21,7 @@ func BfsBasin(grid [][]int, curr Coord, basin map[Coord]int, basins []map[Coord]
 	for _, b := range basins {
 		//fmt.Printf("Checking other basins: %v\n", basins)
 		if _, ok := b[curr]; ok {
-			fmt.Printf("Found %v in another basin\n",curr)
+			// fmt.Printf("Found %v in another basin\n",curr)
 			return basin
 		}
 	}
@@ -30,13 +29,13 @@ func BfsBasin(grid [][]int, curr Coord, basin map[Coord]int, basins []map[Coord]
 	// Otherwise, add the current location to this basin
 	//fmt.Printf("Adding current location %v to basin %v\n", curr, basin)
 	basin[curr] = 0
-	fmt.Printf("Current val: %v at (%v, %v)\n", currVal, curr.I, curr.J)
+	// fmt.Printf("Current val: %v at (%v, %v)\n", currVal, curr.I, curr.J)
 	neighbors := GetNeighbors(grid, curr.I, curr.J)
 
 	// Check each neighbor
 	for _, neighbor := range neighbors {
 		neighborVal := grid[neighbor.J][neighbor.I]
-		fmt.Printf("  Checking neighbor val: %v\n", neighborVal)
+		// fmt.Printf("  Checking neighbor val: %v\n", neighborVal)
 		// 9s aren't part of basins, so we can continue
 		if neighborVal == 9 {
 			continue
@@ -50,14 +49,14 @@ func BfsBasin(grid [][]int, curr Coord, basin map[Coord]int, basins []map[Coord]
 			for _, b := range basins {
 				//fmt.Printf("Checking other basins: %v\n", basins)
 				if _, ok := b[neighbor]; ok {
-					fmt.Printf("Found %v in another basin\n",neighbor)
+					// fmt.Printf("Found %v in another basin\n",neighbor)
 					found = true
 				}
 			}
 			if !found {
 				// Recurse
 				basin[neighbor] = 0
-				fmt.Printf("  Recursing with basin %v\n",basin)
+				// fmt.Printf("  Recursing with basin %v\n",basin)
 				basin = BfsBasin(grid, neighbor, basin, basins)
 			}
 		}
@@ -105,7 +104,7 @@ func FindLowPoints(grid [][]int) []Coord {
 			}
 			if isLowPoint {
 				//fmt.Printf("Item: %v at (%v,%v) is low with neighbors: %v\n", item, i, j, neighbors)
-				lowPoints = append(lowPoints, Coord{i,j})
+				lowPoints = append(lowPoints, Coord{i, j})
 			}
 		}
 	}

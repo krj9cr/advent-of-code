@@ -13,7 +13,7 @@ func main() {
 		return
 	}
 	p1, p2 := day21.ReadInput(os.Args[1])
-	fmt.Printf("Player1 start: %v, Player2 start: %v\n", p1, p2)
+	// fmt.Printf("Player1 start: %v, Player2 start: %v\n", p1, p2)
 
 	boardSize := 10
 
@@ -83,7 +83,7 @@ func main() {
 			break
 		}
 
-		fmt.Printf("Player 1 rolls %v and moves to %v for a total score of %v\n", p1Rolls, p1, p1Score)
-		fmt.Printf("Player 2 rolls %v and moves to %v for a total score of %v\n", p2Rolls, p2, p2Score)
+		// fmt.Printf("Player 1 rolls %v and moves to %v for a total score of %v\n", p1Rolls, p1, p1Score)
+		// fmt.Printf("Player 2 rolls %v and moves to %v for a total score of %v\n", p2Rolls, p2, p2Score)
 	}
 }

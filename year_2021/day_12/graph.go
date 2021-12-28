@@ -1,7 +1,5 @@
 package day12
 
-import "fmt"
-
 type Graph struct {
 	// Vertices describes all vertices contained in the graph
 	// The key will be the Key value of the connected vertice
@@ -107,7 +105,7 @@ func (g Graph) CountPaths(start string, end string) int {
 
 func (g Graph) countPathsUtil(curr string, next string, localPath []string, pathCount int) int {
 	if curr == next {
-		fmt.Printf("localPaths; %v\n", localPath)
+		// fmt.Printf("localPaths; %v\n", localPath)
 		pathCount++
 	} else {
 		// fmt.Printf("Recursing with %v: %v\n", curr, g.Vertices[curr])
@@ -140,7 +138,7 @@ func (g Graph) CountPaths2(start string, end string) int {
 
 func (g Graph) countPathsUtil2(curr string, next string, localPath []string, pathCount int) int {
 	if curr == next {
-		fmt.Printf("localPaths; %v\n", localPath)
+		// fmt.Printf("localPaths; %v\n", localPath)
 		pathCount++
 	} else {
 		for _, v := range g.Vertices[curr] {

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/font"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
@@ -71,7 +72,8 @@ func Chart(dayLabels []string, part1Times []float64, part2Times []float64) {
 
 	p.NominalX(dayLabels...)
 
-	if err := p.Save(5*vg.Inch, 3*vg.Inch, "barchart.png"); err != nil {
+	width := font.Length(len(dayLabels) - 2)
+	if err := p.Save(width*vg.Inch, 4*vg.Inch, "barchart.png"); err != nil {
 		panic(err)
 	}
 }
@@ -85,23 +87,30 @@ func main() {
 	basePath = strings.TrimSuffix(basePath, "analysis")
 
 	// How many days to check
-	days := 7
+	days := 25
 
 	var dayLabels []string
 	var part1Times []float64
 	var part2Times []float64
 	for i := 1; i <= days; i++ {
+		if i == 14 || i == 23 {
+			continue
+		}
 		dayPath := fmt.Sprintf("%v/day_%02d", basePath, i)
 		part1Path := fmt.Sprintf("%v/part1/part1.go", dayPath)
 		part2Path := fmt.Sprintf("%v/part2/part2.go", dayPath)
 		inputPath := fmt.Sprintf("%v/input.txt", dayPath)
 
+		dayLabels = append(dayLabels, fmt.Sprintf("%02d", i))
 		// Run parts
 		part1Time := TimePart(part1Path, inputPath)
-		part2Time := TimePart(part2Path, inputPath)
-
-		dayLabels = append(dayLabels, fmt.Sprintf("%02d", i))
 		part1Times = append(part1Times, float64(part1Time.Milliseconds()))
+
+		part2Time := 0 * time.Millisecond
+		// Day 25 doesn't have a part 2
+		if i != 25 {
+			part2Time = TimePart(part2Path, inputPath)
+		}
 		part2Times = append(part2Times, float64(part2Time.Milliseconds()))
 
 		fmt.Printf("Day %02d part1: %v, part2: %v\n\n", i, part1Time, part2Time)

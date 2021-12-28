@@ -2,7 +2,6 @@ package day16
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -145,7 +144,7 @@ func HandleOperator(binary string, op int) (string, int, int) {
 				break
 			}
 		}
-		fmt.Printf("15-bit literals: %v\n", literals)
+		// fmt.Printf("15-bit literals: %v\n", literals)
 		return binary, EvalOperator(op, literals), versionSum
 	} else if lengthTypeId == '1' { //  11 bit mode
 		binary, numSubPackets := GetBits(binary, 11)
@@ -157,7 +156,7 @@ func HandleOperator(binary string, op int) (string, int, int) {
 			versionSum += version
 			literals = append(literals, literal)
 		}
-		fmt.Printf("11-bit literals: %v\n", literals)
+		// fmt.Printf("11-bit literals: %v\n", literals)
 		return binary, EvalOperator(op, literals), versionSum
 	} else {
 		log.Panicf("unknown lengthTypeId %v\n", lengthTypeId)
@@ -172,7 +171,7 @@ func HandleLiteral(binary string) (string, int) {
 		// Get next 5
 		five := binary[0:5]
 		binary = binary[5:]
-		fmt.Printf("Next five: %v\n", five)
+		// fmt.Printf("Next five: %v\n", five)
 		numBinary += five[1:]
 		if five[0] == '1' {
 			continue

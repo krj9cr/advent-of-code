@@ -13,7 +13,7 @@ func main() {
 		return
 	}
 	targetArea := day17.ReadInput(os.Args[1])
-	fmt.Printf("Input: %v\n", targetArea)
+	// fmt.Printf("Input: %v\n", targetArea)
 
 	velXMax := 1000
 	velYMax := 1000
@@ -23,7 +23,7 @@ func main() {
 		for y := -1000; y < velYMax; y++ {
 			// Run simulations
 			velocity := day17.Velocity{X: x, Y: y}
-			fmt.Printf("Trying velocity: %v\n", velocity)
+			// fmt.Printf("Trying velocity: %v\n", velocity)
 			intersects, _ := day17.RunSim(targetArea, velocity)
 			if intersects {
 				count += 1

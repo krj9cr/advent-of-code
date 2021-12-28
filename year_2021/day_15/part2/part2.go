@@ -54,7 +54,7 @@ func main() {
 	}
 	grid = append(grid, newRows...)
 
-	utils.PrintIntGrid(grid)
+	// utils.PrintIntGrid(grid)
 
 	start := utils.Coord{I: 0, J: 0}
 	end := utils.Coord{I: len(grid) - 1, J: len(grid[0]) - 1}

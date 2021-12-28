@@ -73,7 +73,7 @@ func Magnitude(node *BinaryNode) int {
 func CanExplode(adjArr []*AdjacencyNode) *BinaryNode {
 	for _, a := range adjArr {
 		if a.Depth >= 5 {
-			fmt.Printf("Depth for: %v, parent: %v\n", a.Node, a.Node.Parent)
+			// fmt.Printf("Depth for: %v, parent: %v\n", a.Node, a.Node.Parent)
 			if a.Node.Parent.NodeIsPair() {
 				return a.Node.Parent
 			}
@@ -115,7 +115,7 @@ func (node *BinaryNode) Explode(adjNodes []*AdjacencyNode) {
 		// Get the node to the left
 		if adjIndex-1 >= 0 {
 			leftRegular := adjNodes[adjIndex-1]
-			fmt.Printf("left reg: %v\n", leftRegular)
+			// fmt.Printf("left reg: %v\n", leftRegular)
 			// If any, collapse and add it in the Left
 			newLeft := *node.Left.Data + *leftRegular.Node.Data
 			leftRegular.Node.Data = &newLeft
@@ -127,7 +127,7 @@ func (node *BinaryNode) Explode(adjNodes []*AdjacencyNode) {
 		// Get the node to the right
 		if adjIndex+1 < len(adjNodes) {
 			rightRegular := adjNodes[adjIndex+1]
-			fmt.Printf("right reg: %v\n", rightRegular)
+			// fmt.Printf("right reg: %v\n", rightRegular)
 			newRight := *node.Right.Data + *rightRegular.Node.Data
 			rightRegular.Node.Data = &newRight
 		}
@@ -137,13 +137,13 @@ func (node *BinaryNode) Explode(adjNodes []*AdjacencyNode) {
 		node.Data = &zero
 		node.Parent = parent
 		// Check if we did this right?
-		fmt.Printf("Parent node: %v is pair: %v\n", node.Parent, node.Parent.NodeIsPair())
+		// fmt.Printf("Parent node: %v is pair: %v\n", node.Parent, node.Parent.NodeIsPair())
 	}
 }
 
 func (node *BinaryNode) Split() {
 	if node.Data == nil {
-		fmt.Printf("can't split node\n")
+		// fmt.Printf("can't split node\n")
 		return
 	} else {
 		if *node.Data >= 10 {
