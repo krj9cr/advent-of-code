@@ -7,23 +7,32 @@ object Day1 {
   def main(args: Array[String]): Unit = {
     val t0: Long = System.nanoTime()
     val source: Source = Source.fromFile(s"$inputPrefix/day1.txt")
-    val input = source.getLines().map(_.toInt)
+    val input = source.getLines().mkString("\n")
 
-    println(part1(input))
+    println(input)
+    println(part2(input))
 
     println("Elapsed time: " + (System.nanoTime() - t0) / 1000000 + " ms")
     source.close()
   }
 
-  def part1(lines: Iterator[Int]): Int =
-    lines
-      .sliding(2)
-      .count { case Seq(a, b) => b > a }
+  def part1(lines: String): Int = {
+    val l = lines.split("\n\n")
+    l.map(i => {
+      println("group\n" + i )
+      val sum = i.split("\n").map(s => s.toInt).sum
+      println(s"sum: $sum")
+      sum
+    }).max
+  }
 
-  def part2(lines: Iterator[Int]): Int =
-    lines
-      .sliding(3)
-      .map(a => a.sum)
-      .sliding(2)
-      .count { case Seq(a, b) => b > a }
+  def part2(lines: String): Int = {
+    val l = lines.split("\n\n")
+    l.map(i => {
+      println("group\n" + i)
+      val sum = i.split("\n").map(s => s.toInt).sum
+      println(s"sum: $sum")
+      sum
+    }).sorted.takeRight(3).sum
+  }
 }
