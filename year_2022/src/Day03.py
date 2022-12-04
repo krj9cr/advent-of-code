@@ -1,3 +1,4 @@
+import time
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -8,7 +9,7 @@ def parseInput(day):
 
 def part1():
     lines = parseInput(3)
-    print(lines)
+    # print(lines)
     letters = []
     for line in lines:
         half = len(line) // 2
@@ -24,11 +25,11 @@ def part1():
         if letter.islower():
             o = ord(letter) - 96
             score += o
-            print(letter, o)
+            # print(letter, o)
         else:
             o = ord(letter) - 64 + 27 - 1
             score += o
-            print(letter, o)
+            # print(letter, o)
 
     print(score)
 
@@ -43,7 +44,7 @@ def part2():
     # print(lines)
     letters = []
     for group in groups:
-        print(group)
+        # print(group)
         common = None
         for line in group:
             for char in line:
@@ -64,17 +65,23 @@ def part2():
         if letter.islower():
             o = ord(letter) - 96
             score += o
-            print(letter, o)
+            # print(letter, o)
         else:
             o = ord(letter) - 64 + 27 - 1
             score += o
-            print(letter, o)
+            # print(letter, o)
 
     print(score)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # part1()
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time:", end - start)
 
     print("\nPART 2 RESULT")
+    start = time.perf_counter()
     part2()
+    end = time.perf_counter()
+    print("Time:", end - start)
