@@ -1,8 +1,8 @@
+import time
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
     path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
-    # print("Input file:", path)
     with open(path, 'r') as file:
         lines = [line.strip() for line in file]
         groups = []
@@ -25,7 +25,15 @@ def part2():
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
+    start = time.perf_counter()
     part1()
+    end = time.perf_counter()
+    total = end - start
+    print("Time:", total)
 
     print("\nPART 2 RESULT")
+    start = time.perf_counter()
     part2()
+    end = time.perf_counter()
+    total = end - start
+    print("Time:", total)
