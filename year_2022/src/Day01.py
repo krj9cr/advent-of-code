@@ -1,7 +1,8 @@
 
 def parseInput(day):
-    path = __file__.rstrip(f"Day{day}.py") + f"../input/day{day}.txt"
-    print("Input file:", path)
+    dayf = "{:02d}".format(day)
+    path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
+    # print("Input file:", path)
     with open(path, 'r') as file:
         lines = [line.strip() for line in file]
         groups = []
@@ -14,16 +15,17 @@ def parseInput(day):
                 currGroup += int(line)
         return groups
 
-# def part1():
-#     True
-#
-# def part2():
-#     lines = parseInput(1)
-
-if __name__ == "__main__":
-    print("\nPART 1 RESULT")
+def part1():
     lines = parseInput(1)
     print(max(lines))
 
-    print("\nPART 2 RESULT")
+def part2():
+    lines = parseInput(1)
     print(sum(sorted(lines,reverse=True)[0:3]))
+
+if __name__ == "__main__":
+    print("\nPART 1 RESULT")
+    part1()
+
+    print("\nPART 2 RESULT")
+    part2()

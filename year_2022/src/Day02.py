@@ -1,7 +1,7 @@
 
 def parseInput(day):
-    path = __file__.rstrip(f"Day{day}.py") + f"../input/day{day}.txt"
-    # print("Input file:", path)
+    dayf = "{:02d}".format(day)
+    path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
     with open(path, 'r') as file:
         lines = [line.strip().split(" ") for line in file]
         return lines
