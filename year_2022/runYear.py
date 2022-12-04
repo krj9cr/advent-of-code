@@ -8,16 +8,11 @@ if __name__ == '__main__':
     days = []
     part1Times = []
     part2Times = []
-    for i in range(1, 2):
+    for i in range(1, 4):
         day = "{:02d}".format(i)
         days.append(day)
 
-        module = importlib.import_module(f"src.Day{day}.code")
-        try:
-            helpers = importlib.import_module(f"src.Day{day}.helpers")
-        except:
-            pass
-
+        module = __import__(f"Day{day}", fromlist=["src"])
         start = time.perf_counter()
         module.part1()
         end = time.perf_counter()
@@ -36,7 +31,7 @@ if __name__ == '__main__':
     plt.bar(ind + width, part2Times, width, label='Part 2')
 
     plt.ylabel('Time')
-    plt.title("AoC 2020 Times Python 3.8")
+    plt.title("AoC 2022 Times Python 3.9")
 
     plt.xticks(ind + width / 2, days)
     plt.legend(loc='best')
