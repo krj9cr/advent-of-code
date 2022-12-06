@@ -9,11 +9,11 @@ def parseInput(day):
 
 def part1():
     line = parseInput(6)
-    print(line)
+    # print(line)
 
-    windows = [line[i:i + 4] for i in iter(range(len(line) - 2))]
-    for window in windows:
-        print(window)
+    for i in iter(range(len(line) - 2)):
+        window = line[i:i + 4]
+        # print(window)
         charcount = {}
         for char in window:
             if charcount.get(char) is not None:
@@ -25,33 +25,19 @@ def part1():
             if val > 1:
                 allOnes = False
                 break
-        print(charcount)
+        # print(charcount)
         if allOnes:
             print(window)
             print(line.index(window)+4)
             break
 
-    # acc = ""
-    # for i in range(len(line)):
-    #     char = line[i]
-    #     print(i+1, acc, "char:", char)
-    #     if char not in acc:
-    #         acc += char
-    #     else:
-    #
-    #         acc = acc[1:] + char
-    #     if len(acc) == 4:
-    #         print(acc, i+1)
-    #         break
-
-
 def part2():
     line = parseInput(6)
-    print(line)
+    # print(line)
 
-    windows = [line[i:i + 14] for i in iter(range(len(line) - 2))]
-    for window in windows:
-        print(window)
+    for i in iter(range(len(line) - 2)):
+        window = line[i:i + 14]
+        # print(window)
         charcount = {}
         for char in window:
             if charcount.get(char) is not None:
@@ -63,18 +49,18 @@ def part2():
             if val > 1:
                 allOnes = False
                 break
-        print(charcount)
+        # print(charcount)
         if allOnes:
             print(window)
             print(line.index(window)+14)
             break
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time:", end - start)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time:", end - start)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
