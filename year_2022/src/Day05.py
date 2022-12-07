@@ -80,36 +80,35 @@ def part1():
 
 def part2():
     stacks, commands = parseInput(5)
-    print(stacks, commands)
+    # print(stacks, commands)
     for command in commands:
         move_num = command[0]
         move_from = command[1]
         move_to = command[2]
         move_from_stack = stacks[move_from-1]
         move_to_stack = stacks[move_to-1]
-        print("move num:", move_num)
+        # print("move num:", move_num)
         size = len(move_from_stack)
         moving = move_from_stack[size-move_num:size]
         move_from_stack = move_from_stack[:-move_num]
-        print("moving", moving)
+        # print("moving", moving)
         # print("prev stack", move_from_stack)
         stacks[move_from-1] = move_from_stack
-        for item in moving:
-            move_to_stack.append(item)
-        print(stacks)
+        move_to_stack += moving
+        # print(stacks)
     for stack in stacks:
         print(stack[-1], end="")
     print()
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time:", end - start)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
     part2()
     end = time.perf_counter()
-    print("Time:", end - start)
+    print("Time (ms):", (end - start) * 1000)
