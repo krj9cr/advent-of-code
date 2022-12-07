@@ -29,11 +29,11 @@ if __name__ == "__main__":
     part1()
     end = time.perf_counter()
     total = end - start
-    print("Time:", total)
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
     part2()
     end = time.perf_counter()
     total = end - start
-    print("Time:", total)
+    print("Time (ms):", (end - start) * 1000)
