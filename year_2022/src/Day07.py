@@ -45,7 +45,7 @@ def getAnswer(node):
 
 def part1():
     lines = parseInput(7)[1:] # skip the first line since it's root dir
-    print(lines)
+    # print(lines)
     root = Node(data="/", is_dir=True)
     currNode = root
     for line in lines:
@@ -54,26 +54,23 @@ def part1():
             split = line.split(" ")[1:]
             command = split[0]
             if command == "cd":
-                dir = split[1]
-                print(command, dir)
-                if dir == "..":
+                cd_dir = split[1]
+                # print(command, dir)
+                if cd_dir == "..":
                     currNode = currNode.parent
                 else:
                     # check if child already exists
                     exists = False
                     if currNode.children is not None:
                         for child in currNode.children:
-                            if child.data == dir:
+                            if child.data == cd_dir:
                                 currNode = child
                                 exists = True
                     if not exists:
-                        newNode = Node(data=dir, is_dir=True, parent=currNode)
+                        newNode = Node(data=cd_dir, is_dir=True, parent=currNode)
                         currNode.children.append(newNode)
                         currNode = newNode
-
-            elif command == "ls":
-                # print(command)
-                True # can ignore since we'll just parse the output
+            # elif command == "ls": # can ignore since we'll just parse the output
         # output
         else:
             # print(line)
@@ -82,10 +79,10 @@ def part1():
             if first == "dir":
                 continue # OR make the node as a child but don't move to it?
             else: # it's a file
-                print("Adding ", int(first), "to ", currNode.data)
+                # print("Adding ", int(first), "to ", currNode.data)
                 currNode.size += int(first)
     getSums(root)
-    print(root)
+    # print(root)
     print(getAnswer(root))
     return root
 
@@ -117,11 +114,11 @@ def part2():
 # 98693 too low
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
