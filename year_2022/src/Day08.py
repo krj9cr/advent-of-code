@@ -54,7 +54,7 @@ def isVisible(x, y, grid, width, height):
 
 def part1():
     grid = parseInput(8)
-    print(grid)
+    # print(grid)
     count = 0
     width = len(grid[0])
     height = len(grid)
@@ -63,8 +63,8 @@ def part1():
         for x in range(width):
             # if item is visible
             visible = isVisible(x, y, grid, width, height)
-            print(grid[y][x], "is ", visible)
-            print()
+            # print(grid[y][x], "is ", visible)
+            # print()
             if visible:
                 count += 1
     print(count)
@@ -117,13 +117,13 @@ def scenicScore(x, y, grid, width, height):
                 break
             else:
                 visibleRight += 1
-    print(visibleUp, "*", visibleLeft, "*", visibleRight, "*", visibleDown)
+    # print(visibleUp, "*", visibleLeft, "*", visibleRight, "*", visibleDown)
     return visibleUp * visibleLeft * visibleRight * visibleDown
 
 
 def part2():
     grid = parseInput(8)
-    print(grid)
+    # print(grid)
     count = 0
     width = len(grid[0])
     height = len(grid)
@@ -133,17 +133,17 @@ def part2():
         for x in range(width):
             # if item is visible
             score = scenicScore(x, y, grid, width, height)
-            print(grid[y][x], "score: ", score)
+            # print(grid[y][x], "score: ", score)
             if score > maxScore:
                 maxScore = score
     print(maxScore)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
