@@ -7,7 +7,7 @@ if __name__ == '__main__':
     days = []
     part1Times = []
     part2Times = []
-    for i in range(1, 7):
+    for i in range(1, 9):
         day = "{:02d}".format(i)
         days.append(day)
 
