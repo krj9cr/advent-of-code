@@ -59,23 +59,23 @@ def parseInput(day):
                 for num in starting_items:
                     items.append(Item(item_counter, num))
                     item_counter += 1
-                print(items)
+                # print(items)
                 monkey.items = items
             elif line.startswith("Operation"):
                 operation = "o" + line.strip("Operation: new =") # for some reason this cuts off "o""
-                print(operation)
+                # print(operation)
                 monkey.operation =  operation
             elif line.startswith("Test"):
                 test_divisble = int(line.strip("Test: divisible by ").strip())
-                print(test_divisble)
+                # print(test_divisble)
                 monkey.test_divisible = test_divisble
             elif line.startswith("If true:"):
                 m = int(line.split(" ")[-1])
-                print(m)
+                # print(m)
                 monkey.test_true = m
             elif line.startswith("If false:"):
                 m = int(line.split(" ")[-1])
-                print(m)
+                # print(m)
                 monkey.test_false = m
             elif line == "":
                 monkeys.append(monkey)
@@ -84,7 +84,7 @@ def parseInput(day):
 
 def part1():
     monkeys = parseInput(11)
-    print(monkeys)
+    # print(monkeys)
 
     monkey_inspections = {}
     for i in range(len(monkeys)):
@@ -95,54 +95,53 @@ def part1():
         # each monkey takes a turn
         for j in range(len(monkeys)):
             monkey = monkeys[j]
-            print()
-            print("Turn for Monkey ", monkey.idx)
+            # print()
+            # print("Turn for Monkey ", monkey.idx)
             # for each item it holds
             for item in monkey.items:
-                print("inspecting: ", item)
+                # print("inspecting: ", item)
                 monkey_inspections[j] += 1
-                old = item
+                old = item.worry
                 newitem = eval(monkey.operation)
-                print("operation: ", newitem)
+                # print("operation: ", newitem)
                 # bored
                 newitem = newitem // 3
-                print("bored:", newitem)
+                # print("bored:", newitem)
                 # test
                 m = monkey.test_false
                 if newitem % monkey.test_divisible == 0:
                     m = monkey.test_true
                 # throw it
-                print("throw to monkey ", m)
-                monkeys[m].items.append(newitem)
+                # print("throw to monkey ", m)
+                monkeys[m].items.append(Item(item.idx, newitem))
             monkey.items = []
-            print(monkeys)
-            print()
-    print(monkey_inspections)
+            # print(monkeys)
+            # print()
+    # print(monkey_inspections)
     s = sorted(monkey_inspections.values())
     print(s[-1] * s[-2])
 
 
-
-
 def part2():
     monkeys = parseInput(11)
-    print(monkeys)
+    # print(monkeys)
 
     monkey_inspections = {}
     for i in range(len(monkeys)):
         monkey_inspections[i] = 0
 
+    # to keep the numbers small, we modulo by the product of all the divisors
     biggo = 1
     for monkey in monkeys:
         biggo *= monkey.test_divisible
 
     # for 20 rounds
     for i in range(10000):
-        print("Round:", i)
+        # print("Round:", i)
         # each monkey takes a turn
         for j in range(len(monkeys)):
             monkey = monkeys[j]
-            print()
+            # print()
             # print("Turn for Monkey ", monkey.idx)
             # for each item it holds
             for item in monkey.items:
@@ -164,16 +163,16 @@ def part2():
             monkey.items = []
         # print(monkeys)
         # print()
-    print(monkey_inspections)
+    # print(monkey_inspections)
     s = sorted(monkey_inspections.values())
     print(s[-1] * s[-2])
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
