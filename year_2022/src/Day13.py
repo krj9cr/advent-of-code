@@ -1,3 +1,4 @@
+import functools
 import time
 
 def parseInput(day):
@@ -17,49 +18,28 @@ def parseInput(day):
         pairs.append(pair) # last pair has no blank line
         return pairs
 
-# def compare(left, right, orig_left, orig_right):
-#     print("comparing:", left, right)
-#     if isinstance(left, int):
-#         if isinstance(right, int):
-#             if left <= right:
-#                 return True
-#             else:
-#                 print("Fail on ", left, right)
-#                 return False
-#         else:
-#             return compare([left], right, orig_left, orig_right)
-#     else: # left is a list
-#         if isinstance(right, int):
-#             return compare(left, [right], orig_left, orig_right)
-#         else: # both are lists
-#             left_size = len(left)
-#             right_size = len(right)
-#             if left_size < right_size: # compare all nums
-#                 all_good = False
-#                 for i in range(left_size):
-#                     all_good = compare(left[i], right[i], orig_left, orig_right)
-#                     if all_good:
-#                         return True
-#                 return all_good
-#             else: # right side has more items
-#                 # TODO: compare still, but check which list runs out of items, first
-#                 all_good = False
-#                 for i in range(right_size):
-#                     all_good = compare(left[i], right[i], orig_left, orig_right)
-#                     if all_good:
-#                         return True
-#                 return all_good
+def parseInput2(day):
+    dayf = "{:02d}".format(day)
+    path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
+    with open(path, 'r') as file:
+        lines = [line.strip() for line in file]
+        res = [[[2]], [[6]]] # start with additional packets
+        for line in lines:
+            if line != "":
+                res.append(eval(line))
+        # pairs.append(pair) # last pair has no blank line
+        return res
 
 def compare_lists(left, right):
     left_size = len(left)
     right_size = len(right)
     for i in range(left_size):
         if i >= right_size:
-            print("Right ran out of items")
+            # print("Right ran out of items")
             return False
         left_item = left[i]
         right_item = right[i]
-        print("trying to ", left_item, right_item)
+        # print("trying to ", left_item, right_item)
         res = compare(left_item, right_item)
         if res is None:
             continue
@@ -67,7 +47,7 @@ def compare_lists(left, right):
             return True
         else:
             return False
-    print("Ran out of items")
+    # print("Ran out of items")
     if left_size < right_size:
         return True
     elif left_size == right_size:
@@ -82,7 +62,7 @@ def compare(left, right):
             elif left == right:
                 return None
             else:
-                print("fail on ", left, right)
+                # print("fail on ", left, right)
                 return False
         else:  # right is a list
             return compare_lists([left], right)
@@ -93,8 +73,6 @@ def compare(left, right):
             return compare_lists(left, right)
 
 
-
-
 def part1():
     pairs = parseInput(13)
     # print(lines)
@@ -103,19 +81,38 @@ def part1():
         pair = pairs[i]
         left = pair[0]
         right = pair[1]
-        print("Pair ", i+1)
-        print("Comparing: ", left, "  vs  ",  right)
+        # print("Pair ", i+1)
+        # print("Comparing: ", left, "  vs  ",  right)
         res = compare(left, right)
-        print(res)
-        print()
+        # print(res)
+        # print()
         if res:
             total += i + 1
     print(total)
 
+def compare_sort(left, right):
+    res = compare(left, right)
+    if res is None:
+        return 0
+    if res:
+        return -1
+    return 1
 
 def part2():
-    lines = parseInput(13)
-    print(lines)
+    lines = parseInput2(13)
+    # print(lines)
+    # ref: https://learnpython.com/blog/python-custom-sort-function/
+    res = sorted(lines, key=functools.cmp_to_key(compare_sort))
+
+    # locate divider packets
+    answer = 1
+    for i in range(len(res)):
+        r = res[i]
+        # print(r)
+        if r == [[2]] or r == [[6]]:
+            # print("found ", r, " at: ", i)
+            answer *= (i+1)
+    print(answer)
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
@@ -124,8 +121,8 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
 
-    # print("\nPART 2 RESULT")
-    # start = time.perf_counter()
-    # part2()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
