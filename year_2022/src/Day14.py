@@ -95,47 +95,32 @@ def part1():
     print(sand_start)
 
     sand_count = 0
-    while True:
+    sand_in_bounds = True
+    while sand_in_bounds:
         # move one piece of sand
         (x, y) = deepcopy(sand_start)
-        sand_in_bounds = True
-        while sand_in_bounds:
+        can_move = True
+        while can_move:
             # print_2d_grid(grid)
-            # try straight down
-            # for (x2, y2) in [(x, y+1), (x - 1, y + 1), (x + 1, y + 1)]:
-            (x2, y2) = (x, y+1)
-            if x2 < 0 or x2 >= w or y2 < 0 or y2 >= h:
-                sand_in_bounds = False
+            moved = False
+            for (x2, y2) in [(x, y + 1), (x - 1, y + 1), (x + 1, y + 1)]:
+                if x2 < 0 or x2 >= w or y2 < 0 or y2 >= h:
+                    sand_in_bounds = False
+                    break
+                if grid[y2][x2] == ".":
+                    grid[y][x] = "."
+                    grid[y2][x2] = "o"
+                    (x, y) = (x2, y2)
+                    moved = True
+                    break
+            if not moved:
+                can_move = False
                 break
-            if grid[y2][x2] == ".":
-                grid[y][x] = "."
-                grid[y2][x2] = "o"
-                (x, y) = (x2, y2)
-                continue
-            # try left
-            (x2, y2) = (x - 1, y + 1)
-            if x2 < 0 or x2 >= w or y2 < 0 or y2 >= h:
-                sand_in_bounds = False
+            if not sand_in_bounds:
                 break
-            if grid[y2][x2] == ".":
-                grid[y][x] = "."
-                grid[y2][x2] = "o"
-                (x, y) = (x2, y2)
-                continue
-            # try right
-            (x2, y2) = (x + 1, y + 1)
-            if x2 < 0 or x2 >= w or y2 < 0 or y2 >= h:
-                sand_in_bounds = False
-                break
-            if grid[y2][x2] == ".":
-                grid[y][x] = "."
-                grid[y2][x2] = "o"
-                (x, y) = (x2, y2)
-                continue
-            # sand comes to rest
-            print("sand came to rest at:", x, y)
-            sand_count += 1
-            break
+        # sand comes to rest
+        print("sand came to rest at:", x, y)
+        sand_count += 1
         if not sand_in_bounds:
             print("sand out of bounds at ", x,y)
             break
