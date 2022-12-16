@@ -24,7 +24,7 @@ def get_diamond_neighbors(center, y, n=1):
     ret = []
     for dx in range(-n, n + 1):
         ydiff = n - abs(dx)
-        if center[1]+ -ydiff <= y <= center[1] +ydiff + 1:
+        if center[1] + -ydiff <= y <= center[1] + ydiff + 1:
             ret.append((center[0] + dx, y))
     return ret
 
@@ -37,24 +37,37 @@ def part1():
     for i in range(num_sensors):
         dist = manhattan(sensors[i], beacons[i])
         shortest_dists.append(dist)
-    print(shortest_dists)
+    # print(shortest_dists)
 
     y = 2000000
     y_no_beacons = set()
 
     # generate some diamonds/ranges
     for i in range(num_sensors):
-        print("Sensor ", i, "out of ", num_sensors)
         sensor = sensors[i]
-        neighbors = get_diamond_neighbors(sensor, y, shortest_dists[i])
-        for n in neighbors:
-            if n[1] == y and n not in beacons and n not in sensors:
-                y_no_beacons.add(n)
-    print(sorted(y_no_beacons))
-    print(len(y_no_beacons))
+        dist = shortest_dists[i]
+        print("Sensor ", i, "out of ", num_sensors)
+        # print(sensor, "dist", dist, "checking", sensor[0]+-dist, "to", sensor[0]+dist)
 
-# 4502209 too high
-# 5543957 too high
+        # check "diamond", but only in row y
+
+        # figure out if we're in range of y
+        if sensor[1] - dist <= y <= sensor[1] + dist:
+            # print(sensor, "in range")
+            # figure out which "row" we're in
+            row = abs(y - sensor[1])
+            # print("row", row)
+            xdiff = dist - abs(row)
+            # print("xdiff",xdiff)
+            for dx in range(-xdiff, xdiff + 1):
+                no_beacon = (sensor[0] + dx, y)
+                # print(no_beacon)
+                if no_beacon not in beacons:
+                    y_no_beacons.add(no_beacon[0])
+
+        print()
+    # print(sorted(y_no_beacons))
+    print(len(y_no_beacons))
 
 
 def part2():
