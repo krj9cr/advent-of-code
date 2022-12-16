@@ -20,14 +20,6 @@ def parseInput(day):
 def manhattan(one, two):
     return abs(one[0] - two[0]) + abs(one[1] - two[1])
 
-def get_diamond_neighbors(center, y, n=1):
-    ret = []
-    for dx in range(-n, n + 1):
-        ydiff = n - abs(dx)
-        if center[1] + -ydiff <= y <= center[1] + ydiff + 1:
-            ret.append((center[0] + dx, y))
-    return ret
-
 def part1():
     sensors, beacons = parseInput(15)
     print(sensors)
@@ -50,7 +42,7 @@ def part1():
         # print(sensor, "dist", dist, "checking", sensor[0]+-dist, "to", sensor[0]+dist)
 
         # check "diamond", but only in row y
-
+        # inspired by: https://stackoverflow.com/questions/64823023/determining-neighbours-of-cell-as-diamond-shape-in-python
         # figure out if we're in range of y
         if sensor[1] - dist <= y <= sensor[1] + dist:
             # print(sensor, "in range")
@@ -71,18 +63,55 @@ def part1():
 
 
 def part2():
-    lines = parseInput(15)
-    print(lines)
+    sensors, beacons = parseInput(15)
+    print(sensors)
+    num_sensors = len(sensors)
+    print(beacons)
+    shortest_dists = []
+    for i in range(num_sensors):
+        dist = manhattan(sensors[i], beacons[i])
+        shortest_dists.append(dist)
+    # print(shortest_dists)
+
+    max_x_y = 20
+    y_no_beacons = set()
+
+    # generate some diamonds/ranges
+    for i in range(num_sensors):
+        sensor = sensors[i]
+        dist = shortest_dists[i]
+        print("Sensor ", i, "out of ", num_sensors)
+
+        # figure out if we're in range of x and y
+        # have a set of all possible coords? ...
+        # remove items from the set
+
+        # if sensor[1] - dist <= y <= sensor[1] + dist:
+            # print(sensor, "in range")
+            # figure out which "row" we're in
+            # row = abs(y - sensor[1])
+            # print("row", row)
+            # xdiff = dist - abs(row)
+            # print("xdiff",xdiff)
+            # for dx in range(-xdiff, xdiff + 1):
+                #no_beacon = (sensor[0] + dx, y)
+                # print(no_beacon)
+                #if no_beacon not in beacons:
+                    #y_no_beacons.add(no_beacon[0])
+
+        print()
+    # print(sorted(y_no_beacons))
+    print(len(y_no_beacons))
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
