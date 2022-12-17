@@ -51,6 +51,10 @@ class PriorityQueue:
 class State:
     def __init__(self, valves, current_valve_name='AA', total_release=0, minutes=30, cache=None):
         self.valves = valves
+        self.sorted_valve_names = []
+        for valve in self.valves.values():
+            self.sorted_valve_names.append(valve.name)
+        self.sorted_valve_names = sorted(self.sorted_valve_names)
         self.current_valve_name = current_valve_name
         self.total_release = total_release
         self.minutes = minutes
@@ -61,51 +65,58 @@ class State:
 
     def generate_cache_key(self):
         release_for_minute, opened_valve_names = self.get_release_for_minute()
-        return self.current_valve_name + ":" + opened_valve_names + ":" + str(self.total_release)
+        return self.current_valve_name + ":" + opened_valve_names + ":" + str(self.total_release), release_for_minute, opened_valve_names
+
 
     def get_release_for_minute(self):
         total = 0
         open_valves = []
-        for valve in self.valves.values():
+        for valve_name in self.sorted_valve_names:
+            valve = self.valves[valve_name]
             if valve.is_open:
                 total += valve.flow_rate
                 open_valves.append(valve.name)
-        return total, ",".join(sorted(open_valves))
+            # else:
+            #     open_valves.append('0')
+        return total, ",".join(open_valves)
 
 
 def dfs(state: State, cache):
-    release_for_minute, opened_valve_names = state.get_release_for_minute()
+    cache_key, release_for_minute, opened_valve_names = state.generate_cache_key()
     next_release = state.total_release + release_for_minute
 
     if state.minutes == 0:
         return state.total_release # next_release
-    cache_key = state.generate_cache_key()
     if cache.get(cache_key) is not None:
         return cache[cache_key]
 
     new_valves = copy.deepcopy(state.valves)
     current_valve = state.valves[state.current_valve_name]
+    current_valve_copy = copy.deepcopy(current_valve)
     # print(" " * depth, "at ", current_valve_name)
     # path 1 is open this valve
     # print("current valve", current_valve)
     path1 = 0
-    if current_valve.flow_rate > 0:
-        if not current_valve.is_open:
-            # print(" " * depth,"opening", current_valve_name)
-            current_valve.is_open = True
-            new_valves[state.current_valve_name] = current_valve
-            # minutes -= 1 # it takes 1 extra min to open
+    # open the valve
+    if current_valve.flow_rate > 0 and not current_valve.is_open:
+        # print("opening", state.current_valve_name)
+        current_valve_copy.is_open = True
+        new_valves[state.current_valve_name] = current_valve_copy
+        # minutes -= 1 # it takes 1 extra min to open
         path1 = dfs(State(new_valves, state.current_valve_name, next_release, state.minutes-1), cache)
+    # don't open the valve
+    options = [path1]
 
     # path 2 is to move
-    options = []
     for tunnel in current_valve.leads_to:
-        # print(" " * depth,"following ", tunnel)
+        # print(state.current_valve_name, "following ", tunnel)
         path2 = dfs(State(state.valves, tunnel, next_release, state.minutes-1), cache)
         options.append(path2)
     # print(" " * depth,"options", options)
 
-    answer = max(path1, max(options))
+    answer = max(options)
+    # only cache when at least one valve is open, to avoid the case where we have a bunch of 0 flow_rates in a row
+    # if opened_valve_names != "":
     cache[cache_key] = answer
     print("saving ", cache_key, answer)
     # print(cache)
@@ -113,7 +124,7 @@ def dfs(state: State, cache):
 
 def part1():
     valves = parseInput(16)
-    # print(valves)
+    print(valves)
 
 
     print(dfs(State(valves), {}))
