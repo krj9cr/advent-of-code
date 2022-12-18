@@ -67,7 +67,7 @@ def part1():
 
     for rock_idx in range(2022):
         # update max height
-        for coord in all_rock_coords:
+        for coord in reversed(all_rock_coords):
             if coord[1] > max_height:
                 max_height = coord[1]
         # rock appears
@@ -107,7 +107,7 @@ def part1():
                         new_coord = (coord[0] + 1, coord[1])
                         jet_falling_rock_coords.append(new_coord)
                         # check if blocked
-                        if new_coord in all_rock_coords:
+                        if new_coord in reversed(all_rock_coords):
                             can_move = False
                             break
                     if not can_move: # this rock won't be moved by the jet
@@ -125,7 +125,7 @@ def part1():
                     for coord in falling_rock_coords:
                         new_coord = (coord[0] - 1, coord[1])
                         jet_falling_rock_coords.append(new_coord)
-                        if new_coord in all_rock_coords:
+                        if new_coord in reversed(all_rock_coords):
                             can_move = False
                             break
                     if not can_move: # this rock won't be moved by the jet
@@ -153,7 +153,7 @@ def part1():
                 hit_rock = False
                 for coord in jet_falling_rock_coords:
                     new_coord = (coord[0], coord[1] - 1)
-                    if new_coord in all_rock_coords:
+                    if new_coord in reversed(all_rock_coords):
                         # print("rock would hit another rock")
                         hit_rock = True
                         break
@@ -177,15 +177,18 @@ def part2():
     all_rock_coords = [] # all rock coords that have landed
     max_height = 0
 
-    total_rocks = 1000000000000
+    total_rocks = 400
     # keep track of rock_idx and steps
     jet_rock_idx = None
     jet_rock_step = None
     repeat = False
+    cycle = {}
+    for i in range(5):
+        cycle[i] = None
 
     for rock_idx in range(total_rocks):
         # update max height
-        for coord in all_rock_coords:
+        for coord in all_rock_coords[-5:]:
             if coord[1] > max_height:
                 max_height = coord[1]
         if repeat:
@@ -232,7 +235,7 @@ def part2():
                         new_coord = (coord[0] + 1, coord[1])
                         jet_falling_rock_coords.append(new_coord)
                         # check if blocked
-                        if new_coord in all_rock_coords:
+                        if new_coord in reversed(all_rock_coords):
                             can_move = False
                             break
                     if not can_move: # this rock won't be moved by the jet
@@ -250,7 +253,7 @@ def part2():
                     for coord in falling_rock_coords:
                         new_coord = (coord[0] - 1, coord[1])
                         jet_falling_rock_coords.append(new_coord)
-                        if new_coord in all_rock_coords:
+                        if new_coord in reversed(all_rock_coords):
                             can_move = False
                             break
                     if not can_move: # this rock won't be moved by the jet
@@ -264,12 +267,6 @@ def part2():
             # wrap around if we pass the end
             if jet_idx >= num_jets:
                 jet_idx = 0
-                if jet_rock_idx is None:
-                    jet_rock_idx = rock_idx
-                    jet_rock_step = rock_step
-                elif rock_idx == jet_rock_idx and jet_rock_step == rock_step:
-                    print("repeat!! at index", rock_idx)
-                    repeat = True
 
 
             # move down
@@ -285,7 +282,7 @@ def part2():
                 hit_rock = False
                 for coord in jet_falling_rock_coords:
                     new_coord = (coord[0], coord[1] - 1)
-                    if new_coord in all_rock_coords:
+                    if new_coord in reversed(all_rock_coords):
                         # print("rock would hit another rock")
                         hit_rock = True
                         break
@@ -297,6 +294,17 @@ def part2():
             falling_rock_coords = down_falling_rock_coords
             # draw(all_rock_coords, max_height, falling_rock_coords)
             rock_step += 1
+        # rock stopped falling, check for cycles
+        rock_type = rock_idx % 5
+        if cycle[rock_type] is not None:
+            cycle_jet_idx, cycle_max_height = cycle[rock_type]
+            if cycle_jet_idx == jet_idx:
+                print("rock  type", rock_type, "CYCLE between", cycle_max_height,  max_height)
+                # break
+        cycle[rock_type] = (jet_idx, max_height)
+
+    draw(all_rock_coords, max_height, falling_rock_coords)
+
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
