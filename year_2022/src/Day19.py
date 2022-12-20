@@ -1,5 +1,6 @@
 import copy
 import time
+import math
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -69,19 +70,12 @@ def run_blueprint(blueprint, minute):
 
     minutes_left = max_minutes - minute
 
-    # next_blueprint = copy.deepcopy(blueprint)
-    # next_blueprint.ore += blueprint.ore_robot_count
-    # next_blueprint.clay += blueprint.clay_robot_count
-    # next_blueprint.obsidian += blueprint.obsidian_robot_count
-    # next_blueprint.geodes += blueprint.geode_robot_count
-
     # build a geode robot
     build_geode = 0
     # always try to build it
     if blueprint.ore >= blueprint.geode_robot_ore_cost and \
             blueprint.obsidian >= blueprint.geode_robot_obsidian_cost:
         geode_blueprint = copy.deepcopy(blueprint)
-        geode_blueprint.geode_robot_count += 1
         geode_blueprint.ore -= blueprint.geode_robot_ore_cost
         geode_blueprint.obsidian -= blueprint.geode_robot_obsidian_cost
 
@@ -90,58 +84,70 @@ def run_blueprint(blueprint, minute):
         geode_blueprint.obsidian += blueprint.obsidian_robot_count
         geode_blueprint.geodes += blueprint.geode_robot_count
 
+        geode_blueprint.geode_robot_count += 1
         build_geode = run_blueprint(geode_blueprint, minute + 1)
     elif blueprint.obsidian_robot_count > 0: # we need at least one obsidian robot
-        minutes_from_now = max(blueprint.geode_robot_ore_cost - blueprint.ore, blueprint.geode_robot_obsidian_cost - blueprint.obsidian)
+        ore_minutes_from_now = math.ceil((blueprint.geode_robot_ore_cost - blueprint.ore) / blueprint.ore_robot_count)
+        obsidian_minutes_from_now = math.ceil((blueprint.geode_robot_obsidian_cost - blueprint.obsidian) / blueprint.obsidian_robot_count)
+        # minutes_from_now = max(blueprint.geode_robot_ore_cost - blueprint.ore, blueprint.geode_robot_obsidian_cost - blueprint.obsidian)
+        minutes_from_now = max(ore_minutes_from_now, obsidian_minutes_from_now)
         if minute + minutes_from_now <= max_minutes:
             geode_blueprint = copy.deepcopy(blueprint)
             geode_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
             geode_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
             geode_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
             geode_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+
             geode_blueprint.ore -= blueprint.geode_robot_ore_cost
             geode_blueprint.obsidian -= blueprint.geode_robot_obsidian_cost
             geode_blueprint.geode_robot_count += 1
-
-            geode_blueprint.ore += blueprint.ore_robot_count
-            geode_blueprint.clay += blueprint.clay_robot_count
-            geode_blueprint.obsidian += blueprint.obsidian_robot_count
-            geode_blueprint.geodes += blueprint.geode_robot_count
             build_geode = run_blueprint(geode_blueprint, minute + minutes_from_now)
         # else: # just go to the end
         #     return blueprint.geodes + blueprint.geode_robot_count * minutes_left
 
     # don't try making any other robots (may not be accurate, but will speed things up)
-    # if build_geode > 0:
-    #     print("stopping geodes: ", build_geode)
-    #     return build_geode
+    if build_geode > 0:
+        print("stopping geodes: ", build_geode)
+        return build_geode
 
     # branch for when we can build each robot next
     # build an ore robot
     build_ore = 0
     if blueprint.ore_robot_count * minutes_left + blueprint.ore < \
-            minutes_left * max(blueprint.clay_robot_ore_cost,  # TODO: max or min, here?
+            minutes_left * min(blueprint.clay_robot_ore_cost,  # TODO: max or min, here?
                                blueprint.obsidian_robot_ore_cost, blueprint.geode_robot_ore_cost):
         if blueprint.ore >= blueprint.ore_robot_ore_cost:
             ore_blueprint = copy.deepcopy(blueprint)
-            ore_blueprint.ore_robot_count += 1
             ore_blueprint.ore -= ore_blueprint.ore_robot_ore_cost
 
             ore_blueprint.ore += blueprint.ore_robot_count
             ore_blueprint.clay += blueprint.clay_robot_count
             ore_blueprint.obsidian += blueprint.obsidian_robot_count
             ore_blueprint.geodes += blueprint.geode_robot_count
+
+            ore_blueprint.ore_robot_count += 1
             build_ore = run_blueprint(ore_blueprint, minute + 1)
         else:
-            minutes_from_now = blueprint.ore_robot_ore_cost - blueprint.ore
+            # ore_robot_ore_cost = 4
+            # 2 ore robots
+            # 1 ore
+            # minutes from now should be 2
+            # 2 = (4 - 1) / ore robots
+            # ore + (ore_robots * minutes_from_now) >= cost
+            #  (ore_robots * minutes_from_now) >= cost - ore
+            # minutes_from_now >= (cost - ore) / ore_robots
+            minutes_from_now = math.ceil((blueprint.ore_robot_ore_cost - blueprint.ore) / blueprint.ore_robot_count)
+            # minutes_from_now = blueprint.ore_robot_ore_cost - blueprint.ore
             if minute + minutes_from_now <= max_minutes:
                 ore_blueprint = copy.deepcopy(blueprint)
-                ore_blueprint.ore_robot_count += 1
+
                 ore_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
                 ore_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
                 ore_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
                 ore_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+
                 ore_blueprint.ore -= blueprint.ore_robot_ore_cost
+                ore_blueprint.ore_robot_count += 1
                 build_ore = run_blueprint(ore_blueprint, minute + minutes_from_now)
 
     # build a clay robot
@@ -150,22 +156,26 @@ def run_blueprint(blueprint, minute):
             minutes_left * blueprint.obsidian_robot_clay_cost:
         if blueprint.ore >= blueprint.clay_robot_ore_cost:
             clay_blueprint = copy.deepcopy(blueprint)
-            clay_blueprint.clay_robot_count += 1
             clay_blueprint.ore -= clay_blueprint.clay_robot_ore_cost
 
             clay_blueprint.ore += blueprint.ore_robot_count
             clay_blueprint.clay += blueprint.clay_robot_count
             clay_blueprint.obsidian += blueprint.obsidian_robot_count
             clay_blueprint.geodes += blueprint.geode_robot_count
+
+            clay_blueprint.clay_robot_count += 1
             build_clay = run_blueprint(clay_blueprint, minute + 1)
         else:
-            minutes_from_now = blueprint.clay_robot_ore_cost - blueprint.ore
+            minutes_from_now = math.ceil((blueprint.clay_robot_ore_cost - blueprint.ore) / blueprint.ore_robot_count)
+            # minutes_from_now = blueprint.clay_robot_ore_cost - blueprint.ore
             if minute + minutes_from_now <= max_minutes:
                 clay_blueprint = copy.deepcopy(blueprint)
+
                 clay_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
                 clay_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
                 clay_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
                 clay_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+
                 clay_blueprint.ore -= blueprint.clay_robot_ore_cost
                 clay_blueprint.clay_robot_count += 1
                 build_clay = run_blueprint(clay_blueprint, minute + minutes_from_now)
@@ -178,7 +188,6 @@ def run_blueprint(blueprint, minute):
         if blueprint.ore >= blueprint.obsidian_robot_ore_cost and \
                 blueprint.clay >= blueprint.obsidian_robot_clay_cost:
             obsidian_blueprint = copy.deepcopy(blueprint)
-            obsidian_blueprint.obsidian_robot_count += 1
             obsidian_blueprint.ore -= blueprint.obsidian_robot_ore_cost
             obsidian_blueprint.clay -= blueprint.obsidian_robot_clay_cost
 
@@ -186,24 +195,33 @@ def run_blueprint(blueprint, minute):
             obsidian_blueprint.clay += blueprint.clay_robot_count
             obsidian_blueprint.obsidian += blueprint.obsidian_robot_count
             obsidian_blueprint.geodes += blueprint.geode_robot_count
+
+            obsidian_blueprint.obsidian_robot_count += 1
             build_obsidian = run_blueprint(obsidian_blueprint, minute + 1)
         elif blueprint.clay_robot_count > 0:  # we need at least one clay robot to jump ahead
-            minutes_from_now = max(blueprint.obsidian_robot_ore_cost - blueprint.ore, blueprint.obsidian_robot_clay_cost - blueprint.clay)
+
+            ore_minutes_from_now = math.ceil(
+                (blueprint.geode_robot_ore_cost - blueprint.ore) / blueprint.ore_robot_count)
+            clay_minutes_from_now = math.ceil(
+                (blueprint.obsidian_robot_clay_cost - blueprint.clay) / blueprint.clay_robot_count)
+            minutes_from_now = max(ore_minutes_from_now, clay_minutes_from_now)
+            # minutes_from_now = max(blueprint.obsidian_robot_ore_cost - blueprint.ore, blueprint.obsidian_robot_clay_cost - blueprint.clay)
             if minute + minutes_from_now <= max_minutes:
                 obsidian_blueprint = copy.deepcopy(blueprint)
+
                 obsidian_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
                 obsidian_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
                 obsidian_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
                 obsidian_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+
                 obsidian_blueprint.ore -= blueprint.obsidian_robot_ore_cost
                 obsidian_blueprint.clay -= blueprint.obsidian_robot_clay_cost
                 obsidian_blueprint.obsidian_robot_count += 1
                 build_obsidian = run_blueprint(obsidian_blueprint, minute + minutes_from_now)
 
 
-
     # print(minute, "  best", max(nothing, build_ore, build_clay, build_obsidian))
-    print("max of :", build_ore, build_clay, build_obsidian, build_geode)
+    # print("max of :", build_ore, build_clay, build_obsidian, build_geode)
     return max(build_ore, build_clay, build_obsidian, build_geode)
 
 
@@ -216,11 +234,15 @@ def part1():
     for i in range(len(blueprints)):
         blueprint = blueprints[i]
         print(blueprint)
-        geodes = run_blueprint(blueprint, 0)
+        geodes = run_blueprint(blueprint, 1)
         print(i, "geodes: ", geodes)
         print()
-        totals.append((i + 1) * geodes)
-    print("answer", sum(totals))
+        totals.append(geodes)
+    answer = 0
+    for i in range(len(totals)):
+        print("Blueprint ", i+1, totals[i])
+        answer += (i+1) * totals[i]
+    print("answer", answer)
 
 
 
