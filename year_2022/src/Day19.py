@@ -1,4 +1,5 @@
 import copy
+import heapq
 import time
 import math
 
@@ -59,16 +60,11 @@ cache =  {}
 def run_blueprint(blueprint, minute):
     print(minute, "  ", blueprint)
 
-    # check cache
-    # h = blueprint.hash(minute)
-    # if cache.get(h) is not None:
-    #     return cache[h]
     if minute >= max_minutes:
         print("done, geodes:", blueprint.geodes)
-        # cache[h] = blueprint.geodes
         return blueprint.geodes
 
-    minutes_left = max_minutes - minute
+    minutes_left = max_minutes - minute + 1
 
     # build a geode robot
     build_geode = 0
@@ -102,19 +98,19 @@ def run_blueprint(blueprint, minute):
             geode_blueprint.obsidian -= blueprint.geode_robot_obsidian_cost
             geode_blueprint.geode_robot_count += 1
             build_geode = run_blueprint(geode_blueprint, minute + minutes_from_now)
-        # else: # just go to the end
-        #     return blueprint.geodes + blueprint.geode_robot_count * minutes_left
+        else: # TODO: just go to the end??
+            build_geode = blueprint.geodes + (blueprint.geode_robot_count * minutes_left)
 
     # don't try making any other robots (may not be accurate, but will speed things up)
-    if build_geode > 0:
-        print("stopping geodes: ", build_geode)
-        return build_geode
+    # if build_geode > 0:
+    #     print("stopping geodes: ", build_geode)
+    #     return build_geode
 
     # branch for when we can build each robot next
     # build an ore robot
     build_ore = 0
     if blueprint.ore_robot_count * minutes_left + blueprint.ore < \
-            minutes_left * min(blueprint.clay_robot_ore_cost,  # TODO: max or min, here?
+            minutes_left * max(blueprint.clay_robot_ore_cost,  # TODO: max or min, here?
                                blueprint.obsidian_robot_ore_cost, blueprint.geode_robot_ore_cost):
         if blueprint.ore >= blueprint.ore_robot_ore_cost:
             ore_blueprint = copy.deepcopy(blueprint)
@@ -223,7 +219,6 @@ def run_blueprint(blueprint, minute):
     # print(minute, "  best", max(nothing, build_ore, build_clay, build_obsidian))
     # print("max of :", build_ore, build_clay, build_obsidian, build_geode)
     return max(build_ore, build_clay, build_obsidian, build_geode)
-
 
 
 def part1():
