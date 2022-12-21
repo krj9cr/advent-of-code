@@ -1,5 +1,6 @@
 import copy
 import heapq
+import sys
 import time
 import math
 
@@ -25,11 +26,12 @@ def parseInput(day):
 
 class Blueprint:
     def __init__(self, ore_robot_ore_cost, clay_robot_ore_cost, obsidian_robot_ore_cost, obsidian_robot_clay_cost,
-                 geode_robot_ore_cost, geode_robot_obsidian_cost):
+                 geode_robot_ore_cost, geode_robot_obsidian_cost, minute=0):
         self.ore_robot_count = 1
         self.clay_robot_count = 0
         self.obsidian_robot_count = 0
         self.geode_robot_count = 0
+        self.minute = minute
 
         self.ore_robot_ore_cost = ore_robot_ore_cost
         self.clay_robot_ore_cost = clay_robot_ore_cost
@@ -38,14 +40,126 @@ class Blueprint:
         self.geode_robot_ore_cost = geode_robot_ore_cost
         self.geode_robot_obsidian_cost = geode_robot_obsidian_cost
 
+        # limit building robots to the most expensive cost of any robot
+        self.max_ore_bots = max(self.ore_robot_ore_cost, self.clay_robot_ore_cost, self.obsidian_robot_ore_cost, self.geode_robot_ore_cost)
+        self.max_clay_bots = self.obsidian_robot_clay_cost
+        self.max_obsidian_bots = self.obsidian_robot_clay_cost
+
         self.ore = 0
         self.clay = 0
         self.obsidian = 0
         self.geodes = 0
 
-    def hash(self, minute):
-        return f"{minute}: {self.ore_robot_count}, {self.clay_robot_count}, {self.obsidian_robot_count}, " \
+    def hash(self):
+        return f"{self.minute}: {self.ore_robot_count}, {self.clay_robot_count}, {self.obsidian_robot_count}, " \
                f"{self.geode_robot_count}. {self.ore}, {self.clay}, {self.obsidian}, {self.geodes}"
+
+    def get_next_states(self, best):
+        minutes_left = max_minutes - self.minute + 1
+
+        # check if we should just stop
+        # if we hypothetically created a geode bot every remaining minute and are still less than best
+        best_geodes = self.geodes
+        for i in range(minutes_left+1):
+            best_geodes += self.geode_robot_count + i
+        if best_geodes < best:
+            return []
+
+        states = []
+        # build geode
+        if self.obsidian_robot_count > 0:
+            ore_minutes_from_now = math.ceil((self.geode_robot_ore_cost - self.ore) / self.ore_robot_count)
+            obsidian_minutes_from_now = math.ceil((self.geode_robot_obsidian_cost - self.obsidian) / self.obsidian_robot_count)
+            minutes_from_now = max(ore_minutes_from_now, obsidian_minutes_from_now, 0)
+            next_state = copy.deepcopy(self)
+            next_state.collect(minutes_from_now)
+            if minutes_from_now <= minutes_left:
+                next_state.build_robot(3)
+            next_state.minute += minutes_from_now
+            states.append(next_state)
+            return states
+
+        # build obsidian
+        if self.clay_robot_count > 0 and self.obsidian_robot_count < self.max_obsidian_bots:
+            ore_minutes_from_now = math.ceil((self.obsidian_robot_ore_cost - self.ore) / self.ore_robot_count)
+            clay_minutes_from_now = math.ceil((self.obsidian_robot_clay_cost - self.clay) / self.clay_robot_count)
+            minutes_from_now = max(ore_minutes_from_now, clay_minutes_from_now, 0)
+            # minutes_from_now = min(minutes_left, minutes_from_now)
+            next_state = copy.deepcopy(self)
+            next_state.collect(minutes_from_now)
+            if minutes_from_now <= minutes_left:
+                next_state.build_robot(2)
+            next_state.minute += minutes_from_now
+            states.append(next_state)
+
+        # build clay
+        if self.clay_robot_count < self.max_clay_bots:
+            minutes_from_now = math.ceil((self.clay_robot_ore_cost - self.ore) / self.ore_robot_count)
+            minutes_from_now = max(minutes_from_now, 0)
+            # minutes_from_now = min(minutes_left, minutes_from_now)
+            next_state = copy.deepcopy(self)
+            next_state.collect(minutes_from_now)
+            if minutes_from_now <= minutes_left:
+                next_state.build_robot(1)
+            next_state.minute += minutes_from_now
+            states.append(next_state)
+
+        # build ore
+        if self.ore_robot_count < self.max_ore_bots:
+            minutes_from_now = math.ceil((self.ore_robot_ore_cost - self.ore) / self.ore_robot_count)
+            minutes_from_now = max(minutes_from_now, 0)
+            # minutes_from_now = min(minutes_left, minutes_from_now)
+            next_state = copy.deepcopy(self)
+            next_state.collect(minutes_from_now)
+            next_state.build_robot(0)
+            if minutes_from_now <= minutes_left:
+                next_state.minute += minutes_from_now
+            states.append(next_state)
+
+        return states
+
+    def can_build_robots(self):
+        build_ore = False
+        build_clay = False
+        build_obsidian = False
+        build_geode = False
+        if self.ore >= self.ore_robot_ore_cost:
+            build_ore = True
+        if self.ore >= self.clay_robot_ore_cost:
+            build_clay = True
+        if self.ore >= self.obsidian_robot_ore_cost and self.clay >= self.obsidian_robot_clay_cost:
+            build_obsidian = True
+        if self.ore >= self.geode_robot_ore_cost and self.obsidian >= self.geode_robot_obsidian_cost:
+            build_geode = True
+        return build_ore, build_clay, build_obsidian, build_geode
+
+    def collect(self, minutes=1):
+        self.ore += self.ore_robot_count * minutes
+        self.clay += self.clay_robot_count * minutes
+        self.obsidian += self.obsidian_robot_count * minutes
+        self.geodes += self.geode_robot_count * minutes
+
+    # 0 - ore, 1 - clay, 2 - obsidian, 3 - geode
+    # Don't call this before 'collect'!
+    def build_robot(self, robot_idx):
+        if robot_idx == 0:
+            self.ore -= self.ore_robot_ore_cost
+            self.ore_robot_count += 1
+        elif robot_idx == 1:
+            self.ore -= self.clay_robot_ore_cost
+            self.clay_robot_count += 1
+        elif robot_idx == 2:
+            self.ore -= self.obsidian_robot_ore_cost
+            self.clay -= self.obsidian_robot_clay_cost
+            self.obsidian_robot_count += 1
+        elif robot_idx == 3:
+            self.ore -= self.geode_robot_ore_cost
+            self.obsidian -= self.geode_robot_obsidian_cost
+            self.geode_robot_count += 1
+        else:
+            print("error, bad robot index", robot_idx)
+            sys.exit(1)
+
 
     def __repr__(self):
         return f"Blueprint robots: {self.ore_robot_count}, {self.clay_robot_count}, {self.obsidian_robot_count}, " \
@@ -55,7 +169,30 @@ class Blueprint:
 
 
 max_minutes = 24
-cache =  {}
+# cache =  {}
+
+def run_blueprint2(blueprint, cache, best=0):
+    print(blueprint.minute, "  ", blueprint)
+
+    h = blueprint.hash()
+    if cache.get(h) is not None:
+        return cache[h]
+    # get next states
+    states = blueprint.get_next_states(best)
+
+    results = [0]
+    for state in states:
+        if state.minute >= max_minutes:
+            print("done, geodes:", state.geodes)
+            if state.geodes > best:
+                best = state.geodes
+            results.append(state.geodes)
+        else:
+            results.append(run_blueprint2(state, cache, best))
+
+    res = max(results)
+    cache[h] = res
+    return res
 
 def run_blueprint(blueprint, minute):
     print(minute, "  ", blueprint)
@@ -89,17 +226,17 @@ def run_blueprint(blueprint, minute):
         minutes_from_now = max(ore_minutes_from_now, obsidian_minutes_from_now)
         if minute + minutes_from_now <= max_minutes:
             geode_blueprint = copy.deepcopy(blueprint)
-            geode_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
-            geode_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
-            geode_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
-            geode_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+            geode_blueprint.ore += blueprint.ore_robot_count * (minutes_from_now+1)
+            geode_blueprint.clay += blueprint.clay_robot_count * (minutes_from_now+1)
+            geode_blueprint.obsidian += blueprint.obsidian_robot_count * (minutes_from_now+1)
+            geode_blueprint.geodes += blueprint.geode_robot_count * (minutes_from_now+1)
 
             geode_blueprint.ore -= blueprint.geode_robot_ore_cost
             geode_blueprint.obsidian -= blueprint.geode_robot_obsidian_cost
             geode_blueprint.geode_robot_count += 1
-            build_geode = run_blueprint(geode_blueprint, minute + minutes_from_now)
-        else: # TODO: just go to the end??
-            build_geode = blueprint.geodes + (blueprint.geode_robot_count * minutes_left)
+            build_geode = run_blueprint(geode_blueprint, minute + (minutes_from_now+1))
+        # else: # TODO: just go to the end??
+        #     build_geode = blueprint.geodes + (blueprint.geode_robot_count * minutes_left)
 
     # don't try making any other robots (may not be accurate, but will speed things up)
     # if build_geode > 0:
@@ -137,14 +274,14 @@ def run_blueprint(blueprint, minute):
             if minute + minutes_from_now <= max_minutes:
                 ore_blueprint = copy.deepcopy(blueprint)
 
-                ore_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
-                ore_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
-                ore_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
-                ore_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+                ore_blueprint.ore += blueprint.ore_robot_count * (minutes_from_now+1)
+                ore_blueprint.clay += blueprint.clay_robot_count * (minutes_from_now+1)
+                ore_blueprint.obsidian += blueprint.obsidian_robot_count * (minutes_from_now+1)
+                ore_blueprint.geodes += blueprint.geode_robot_count * (minutes_from_now+1)
 
                 ore_blueprint.ore -= blueprint.ore_robot_ore_cost
                 ore_blueprint.ore_robot_count += 1
-                build_ore = run_blueprint(ore_blueprint, minute + minutes_from_now)
+                build_ore = run_blueprint(ore_blueprint, minute + (minutes_from_now+1))
 
     # build a clay robot
     build_clay = 0
@@ -167,14 +304,14 @@ def run_blueprint(blueprint, minute):
             if minute + minutes_from_now <= max_minutes:
                 clay_blueprint = copy.deepcopy(blueprint)
 
-                clay_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
-                clay_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
-                clay_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
-                clay_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+                clay_blueprint.ore += blueprint.ore_robot_count * (minutes_from_now+1)
+                clay_blueprint.clay += blueprint.clay_robot_count * (minutes_from_now+1)
+                clay_blueprint.obsidian += blueprint.obsidian_robot_count * (minutes_from_now+1)
+                clay_blueprint.geodes += blueprint.geode_robot_count * (minutes_from_now+1)
 
                 clay_blueprint.ore -= blueprint.clay_robot_ore_cost
                 clay_blueprint.clay_robot_count += 1
-                build_clay = run_blueprint(clay_blueprint, minute + minutes_from_now)
+                build_clay = run_blueprint(clay_blueprint, minute + minutes_from_now+1)
 
 
     # build an obsidian robot
@@ -205,15 +342,15 @@ def run_blueprint(blueprint, minute):
             if minute + minutes_from_now <= max_minutes:
                 obsidian_blueprint = copy.deepcopy(blueprint)
 
-                obsidian_blueprint.ore += blueprint.ore_robot_count * minutes_from_now
-                obsidian_blueprint.clay += blueprint.clay_robot_count * minutes_from_now
-                obsidian_blueprint.obsidian += blueprint.obsidian_robot_count * minutes_from_now
-                obsidian_blueprint.geodes += blueprint.geode_robot_count * minutes_from_now
+                obsidian_blueprint.ore += blueprint.ore_robot_count * (minutes_from_now+1)
+                obsidian_blueprint.clay += blueprint.clay_robot_count * (minutes_from_now+1)
+                obsidian_blueprint.obsidian += blueprint.obsidian_robot_count * (minutes_from_now+1)
+                obsidian_blueprint.geodes += blueprint.geode_robot_count * (minutes_from_now+1)
 
                 obsidian_blueprint.ore -= blueprint.obsidian_robot_ore_cost
                 obsidian_blueprint.clay -= blueprint.obsidian_robot_clay_cost
                 obsidian_blueprint.obsidian_robot_count += 1
-                build_obsidian = run_blueprint(obsidian_blueprint, minute + minutes_from_now)
+                build_obsidian = run_blueprint(obsidian_blueprint, minute + (minutes_from_now+1))
 
 
     # print(minute, "  best", max(nothing, build_ore, build_clay, build_obsidian))
@@ -229,7 +366,7 @@ def part1():
     for i in range(len(blueprints)):
         blueprint = blueprints[i]
         print(blueprint)
-        geodes = run_blueprint(blueprint, 1)
+        geodes = run_blueprint2(blueprint, {}, 0)
         print(i, "geodes: ", geodes)
         print()
         totals.append(geodes)
