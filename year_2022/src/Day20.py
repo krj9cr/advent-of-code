@@ -18,19 +18,19 @@ def part1():
 
     for num in original_lines:
         if num != 0:
-            index = lines.index(num) # if this is 1
-            new_index = index + num # if this is -10, which is more then the size
+            index = lines.index(num)
+            new_index = index + num
             if new_index < 0:
                 while new_index < 0:
                     new_index = size + new_index - 1
             else:
                 new_index = new_index % size
             del lines[index]
-            print(lines)
-            print("moving num:", num, "to", new_index)
+            # print(lines)
+            # print("moving num:", num, "to", new_index)
             lines.insert(new_index, num)
-        print(lines)
-        print()
+        # print(lines)
+        # print()
 
     # find zero
     zero_index = lines.index(0)
@@ -47,10 +47,46 @@ def part1():
 
 
 
-
 def part2():
-    lines = parseInput(20)
-    print(lines)
+    lines0 = parseInput(20)
+    # print(lines)
+    size = len(lines0)
+
+    multiplier = 811589153
+    lines = []
+    for num in lines0:
+        lines.append(num * multiplier)
+
+    original_lines = copy.deepcopy(lines)
+
+    for num in original_lines:
+        if num != 0:
+            index = lines.index(num)
+            new_index = index + num
+            if new_index < 0:
+                while new_index < 0: # TODO: need euclidean remainder or else it's too slow
+                    new_index = size + new_index - 1
+            else:
+                new_index = new_index % size
+            del lines[index]
+            # print(lines)
+            # print("moving num:", num, "to", new_index)
+            lines.insert(new_index, num)
+        # print(lines)
+        # print()
+
+    # find zero
+    zero_index = lines.index(0)
+    first_index = (zero_index + 1000) % size
+    second_index = (zero_index + 2000) % size
+    third_index = (zero_index + 3000) % size
+
+    # get
+    first = lines[first_index]
+    second = lines[second_index]
+    third = lines[third_index]
+    print("result:", first, second, third)
+    print("answer:", first + second + third)
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
