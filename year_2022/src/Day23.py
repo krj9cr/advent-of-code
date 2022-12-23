@@ -156,18 +156,86 @@ def part1():
 
 
 def part2():
-    lines = parseInput(23)
-    print(lines)
+    elves = set(parseInput(23))
+    print(elves)
+    num_elves = len(elves)
+
+    r = 0
+
+    # NORTH = 0
+    # EAST = 1
+    # SOUTH = 2
+    # WEST = 3
+    direction_order = [NORTH, SOUTH, WEST, EAST]
+
+    while True:
+        r += 1
+        print("\nround ", r)
+        # print(direction_order)
+        # draw_elves(elves)
+        next_elves = {}
+        # During the first half of each round, each Elf considers the eight positions adjacent to themself.
+        for elf in elves:
+            # Otherwise, the Elf looks in each of four directions in the following order and proposes moving one step
+            # in the first valid direction:
+            if has_neighbors(elves, elf, direction=None):
+                can_move = False
+                for direction in direction_order:
+                    if not has_neighbors(elves, elf, direction=direction):
+                        next_elf = move_direction(elf, direction)
+                        # print("elf", elf, "goes", direction)
+                        next_elves[elf] = next_elf
+                        can_move = True
+                        break
+                if not can_move:
+                    next_elves[elf] = elf # elf does not move
+            # If no other Elves are in one of those eight positions, the Elf does not do anything during this round.
+            else:
+                next_elves[elf] = elf # elf does not move
+                # TODO: hopefully this isn't problematic with other elves trying to move
+
+        # After each Elf has had a chance to propose a move, the second half of the round can begin.
+        # Simultaneously, each Elf moves to their proposed destination tile if they were the only Elf to propose
+        # moving to that position.
+        # If two or more Elves propose moving to the same position, none of those Elves move.
+        # print("next_elves", next_elves)
+        # final_moves = []
+
+        seen = set()
+        for next_elf in next_elves.values():
+            if next_elf not in seen:
+                seen.add(next_elf)
+            else:
+                # we need to dedup
+                for elf in next_elves:
+                    next_elf2 = next_elves[elf]
+                    if next_elf2 == next_elf:
+                        next_elves[elf] = elf
+
+        # check if no elf moved
+        if elves == set(next_elves.values()):
+            break
+
+        elves = set(next_elves.values())
+        # print("actual next", elves)
+
+        # Finally, at the end of the round, the first direction the Elves considered is moved to the end of the
+        # list of directions.
+        direction_order = direction_order[1:] + [direction_order[0]]
+
+    # draw_elves(elves)
+
+    print("answer", r)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
