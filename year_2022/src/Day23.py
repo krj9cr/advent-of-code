@@ -78,7 +78,7 @@ def draw_elves(elves):
 
 
 def part1():
-    elves = parseInput(23)
+    elves = set(parseInput(23))
     print(elves)
     num_elves = len(elves)
 
@@ -92,12 +92,11 @@ def part1():
 
     for r in range(rounds):
         print("\nround ", r)
-        print(direction_order)
-        draw_elves(elves)
-        next_elves = []
+        # print(direction_order)
+        # draw_elves(elves)
+        next_elves = {}
         # During the first half of each round, each Elf considers the eight positions adjacent to themself.
-        for i in range(num_elves):
-            elf = elves[i]
+        for elf in elves:
             # Otherwise, the Elf looks in each of four directions in the following order and proposes moving one step
             # in the first valid direction:
             if has_neighbors(elves, elf, direction=None):
@@ -105,32 +104,37 @@ def part1():
                 for direction in direction_order:
                     if not has_neighbors(elves, elf, direction=direction):
                         next_elf = move_direction(elf, direction)
-                        print("elf", elf, "goes", direction)
-                        next_elves.append(next_elf)
+                        # print("elf", elf, "goes", direction)
+                        next_elves[elf] = next_elf
                         can_move = True
                         break
                 if not can_move:
-                    next_elves.append(elf) # elf does not move
+                    next_elves[elf] = elf # elf does not move
             # If no other Elves are in one of those eight positions, the Elf does not do anything during this round.
             else:
-                next_elves.append(elf) # elf does not move
+                next_elves[elf] = elf # elf does not move
                 # TODO: hopefully this isn't problematic with other elves trying to move
 
         # After each Elf has had a chance to propose a move, the second half of the round can begin.
         # Simultaneously, each Elf moves to their proposed destination tile if they were the only Elf to propose
         # moving to that position.
         # If two or more Elves propose moving to the same position, none of those Elves move.
-        print("next_elves", next_elves)
+        # print("next_elves", next_elves)
         # final_moves = []
-        for k in range(num_elves):
-            for j in range(num_elves):
-                if k == j:
-                    continue
-                if next_elves[k] == next_elves[j]:
-                    next_elves[k] = elves[k]
-                    next_elves[j] = elves[j]
-        elves = next_elves
-        print("actual next", elves)
+
+        seen = set()
+        for next_elf in next_elves.values():
+            if next_elf not in seen:
+                seen.add(next_elf)
+            else:
+                # we need to dedup
+                for elf in next_elves:
+                    next_elf2 = next_elves[elf]
+                    if next_elf2 == next_elf:
+                        next_elves[elf] = elf
+
+        elves = set(next_elves.values())
+        # print("actual next", elves)
 
         # Finally, at the end of the round, the first direction the Elves considered is moved to the end of the
         # list of directions.
@@ -139,7 +143,7 @@ def part1():
     # count the number of empty ground tiles contained by the smallest rectangle that contains every Elf.
     min_x, max_x, min_y, max_y = find_size(elves)
 
-    draw_elves(elves)
+    # draw_elves(elves)
 
     print()
     count = 0
