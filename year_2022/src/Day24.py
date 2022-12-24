@@ -86,7 +86,8 @@ class PriorityQueue:
         return len(self.elements) == 0
 
     def put(self, item, priority):
-        heapq.heappush(self.elements, (priority, item))
+        if (priority, item) not in self.elements:
+            heapq.heappush(self.elements, (priority, item))
 
     def get(self):
         return heapq.heappop(self.elements)[1]
@@ -162,8 +163,11 @@ def part1():
     # print(walls)
     print("start", start, "end", end)
 
+    cap = (w + h) * 2
+
     minute = 0
-    spots = [start] # keep track of (x, y), as if we were simultaneously in each spot
+    spots = PriorityQueue() # use a queue to prioritize the path we take
+    spots.put(start, 0) # keep track of (x, y), as if we were simultaneously in each spot
     while True:
         # print(spots)
         # move all the blizzards
@@ -173,8 +177,9 @@ def part1():
             blizzard_coords.append(b.coord)
 
         # move our location(s)
-        next_spots = []
-        for (x, y) in spots:
+        next_spots = PriorityQueue()
+        while not spots.empty():
+            (x, y) = spots.get()
             # get all adjacent open spots
             for x2, y2 in ((x, y + 1), (x + 1, y), (x - 1, y), (x, y - 1)):
                 next_spot = (x2, y2)
@@ -182,15 +187,19 @@ def part1():
                 if 0 <= x2 < w and 0 <= y2 < h:
                     # if we're not hitting a wall or blizzard
                     if next_spot not in walls and next_spot not in blizzard_coords:
-                        next_spots.append(next_spot)
+                        cost = minute + heuristic(end, x2, y2)
+                        # if cost < cap:
+                        next_spots.put(next_spot, cost)
                         # if any spot is the end goal, return minutes_elapsed
                         if next_spot == end:
                             print("made it to the end! in ", minute+1, "Minutes")
                             return
             # add waiting at the current spot as an option, if it's open
             if (x, y) not in blizzard_coords:
-                next_spots.append((x, y))
+                cost = minute + heuristic(end, x, y)
+                next_spots.put((x, y), cost)
         spots = next_spots
+        print(spots)
 
         minute += 1
 
