@@ -146,19 +146,22 @@ def part1():
     options = PriorityQueue()
     options.put(('AA', valves, pressure, minute), 0)
 
-    results = []
+    best = 0
     # move our location(s)
     while not options.empty():
         # TODO: instead of passing along "valves", we just need to track open valves, which can be a string of binary numbers
-        # indexed on the alphabeical order of the valves
+        # indexed on the alphabetical order of the valves
 
         # TODO: create a cache
+
+        # TODO: theoretical cap, if we opened all the valves over the remaining minutes, and it's still worse
+        # than our best so far, we can stop
         (current_valve_name, valves, pressure, minute) = options.get()
         current_valve = valves[current_valve_name]
 
         if minute >= 30:
             print("hit time, pressure", pressure)
-            results.append(pressure)
+            best = max(best, pressure)
             continue
 
         # get current pressure
@@ -187,9 +190,8 @@ def part1():
             next_minute = minute + 1
             # we prioritize by negative pressure, since want max pressure
             options.put((next_valve, valves, next_pressure, next_minute), -next_pressure)
-        print(options)
-    print(results)
-    print(max(results))
+        # print(options)
+    print(best)
 
 
 def part2():
