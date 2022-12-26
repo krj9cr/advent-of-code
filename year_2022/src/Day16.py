@@ -85,11 +85,21 @@ class State:
         return total, ",".join(open_valves)
 
 
-def get_release_for_minute(valves):
+# def get_release_for_minute(valves):
+#     total = 0
+#     for valve_name in valves:
+#         valve = valves[valve_name]
+#         if valve.is_open:
+#             total += valve.flow_rate
+#     return total
+
+def get_release_for_minute(open_valves, alphabetical_valve_names, valves):
     total = 0
-    for valve_name in valves:
-        valve = valves[valve_name]
-        if valve.is_open:
+    for i in range(len(alphabetical_valve_names)):
+        is_open = True if open_valves[i] == "1" else False
+        if is_open:
+            valve_name = alphabetical_valve_names[i]
+            valve = valves[valve_name]
             total += valve.flow_rate
     return total
 
@@ -99,36 +109,36 @@ def dfs(state: State, cache):
 
     if state.minutes == 0:
         return state.total_release # next_release
-    if cache.get(cache_key) is not None:
+    if cache_key in cache:
         return cache[cache_key]
 
-    new_valves = copy.deepcopy(state.valves)
     current_valve = state.valves[state.current_valve_name]
-    current_valve_copy = copy.deepcopy(current_valve)
     # print(" " * depth, "at ", current_valve_name)
     # path 1 is open this valve
     # print("current valve", current_valve)
-    path1 = 0
+    answer = 0
     # open the valve
     if current_valve.flow_rate > 0 and not current_valve.is_open:
+        new_valves = copy.deepcopy(state.valves)
+        current_valve_copy = copy.deepcopy(current_valve)
         # print("opening", state.current_valve_name)
         current_valve_copy.is_open = True
         new_valves[state.current_valve_name] = current_valve_copy
         # minutes -= 1 # it takes 1 extra min to open
         path1 = dfs(State(new_valves, state.current_valve_name, next_release, state.minutes-1), cache)
-    # don't open the valve
-    options = [path1]
+        answer = max(answer, path1)
 
     # path 2 is to move
     for tunnel in current_valve.leads_to:
+        new_valves = copy.deepcopy(state.valves)
         # print(state.current_valve_name, "following ", tunnel)
-        path2 = dfs(State(state.valves, tunnel, next_release, state.minutes-1), cache)
-        options.append(path2)
+        path2 = dfs(State(new_valves, tunnel, next_release, state.minutes-1), cache)
+        answer = max(answer, path2)
     # print(" " * depth,"options", options)
 
-    answer = max(options)
     # only cache when at least one valve is open, to avoid the case where we have a bunch of 0 flow_rates in a row
     # if opened_valve_names != "":
+        # cache_key, release_for_minute, opened_valve_names = state.generate_cache_key()
     cache[cache_key] = answer
     print("saving ", cache_key, answer)
     # print(cache)
@@ -138,60 +148,67 @@ def part1():
     valves = parseInput(16)
     print(valves)
 
-    pressure = 0
-    minute = 0
-    alphabetical_valve_names = sorted(valves.keys())
-    open_valves = '0' * len(alphabetical_valve_names)
+    print(dfs(State(valves), {}))
 
-    options = PriorityQueue()
-    options.put(('AA', valves, pressure, minute), 0)
-
-    best = 0
-    # move our location(s)
-    while not options.empty():
-        # TODO: instead of passing along "valves", we just need to track open valves, which can be a string of binary numbers
-        # indexed on the alphabetical order of the valves
-
-        # TODO: create a cache
-
-        # TODO: theoretical cap, if we opened all the valves over the remaining minutes, and it's still worse
-        # than our best so far, we can stop
-        (current_valve_name, valves, pressure, minute) = options.get()
-        current_valve = valves[current_valve_name]
-
-        if minute >= 30:
-            print("hit time, pressure", pressure)
-            best = max(best, pressure)
-            continue
-
-        # get current pressure
-        turn_pressure = get_release_for_minute(valves)
-
-        # open valve if not open, and it's not 0
-        valve_idx = alphabetical_valve_names.index(current_valve_name)
-        # current_valve_is_open = open_valves
-        if current_valve.flow_rate > 0 and not current_valve.is_open:
-            next_valve = current_valve_name
-            next_valves = {}
-            for valve_name in valves:
-                valve = valves[valve_name]
-                if valve_name == current_valve_name:
-                    valve.is_open = True
-                next_valves[valve_name] = valve
-            next_pressure = pressure + turn_pressure
-            next_minute = minute + 1
-            # we prioritize by negative pressure, since want max pressure
-            options.put((next_valve, next_valves, next_pressure, next_minute), -next_pressure)
-
-        # move to each valve
-        for tunnel in current_valve.leads_to:
-            next_valve = tunnel
-            next_pressure = pressure + turn_pressure
-            next_minute = minute + 1
-            # we prioritize by negative pressure, since want max pressure
-            options.put((next_valve, valves, next_pressure, next_minute), -next_pressure)
-        # print(options)
-    print(best)
+    # pressure = 0
+    # minute = 0
+    # alphabetical_valve_names = sorted(valves.keys())
+    # open_valves = '0' * len(alphabetical_valve_names)
+    #
+    # options = PriorityQueue()
+    # options.put(('AA', open_valves, pressure, minute), 0)
+    #
+    # best = 0
+    # cache = {}
+    # # move our location(s)
+    # while not options.empty():
+    #     # TODO: instead of passing along "valves", we just need to track open valves, which can be a string of binary numbers
+    #     # indexed on the alphabetical order of the valves
+    #
+    #     # TODO: create a cache
+    #
+    #     # TODO: theoretical cap, if we opened all the valves over the remaining minutes, and it's still worse
+    #     # than our best so far, we can stop
+    #     (current_valve_name, open_valves, pressure, minute) = options.get()
+    #     current_valve = valves[current_valve_name]
+    #     hash_key = f"{current_valve_name}:{open_valves}:{pressure}:{minute}"
+    #
+    #     # if hash_key in cache:
+    #     #     cache[hash_key] = pressure
+    #     # else:
+    #     #     cache[hash_key] = pressure
+    #
+    #     if minute >= 30:
+    #         best = max(best, pressure)
+    #         print("hit time, pressure", pressure, "best", best)
+    #         continue
+    #
+    #     # get current pressure
+    #     turn_pressure = get_release_for_minute(open_valves, alphabetical_valve_names, valves)
+    #     next_pressure = pressure + turn_pressure
+    #     next_minute = minute + 1
+    #
+    #     # open valve if not open, and it's not 0
+    #     valve_idx = alphabetical_valve_names.index(current_valve_name)
+    #     current_valve_is_open = True if open_valves[valve_idx] == "1" else False
+    #     if current_valve.flow_rate > 0 and not current_valve_is_open:
+    #         next_valve = current_valve_name
+    #         next_open_valves = ""
+    #         for i in range(len(open_valves)):
+    #             if i == valve_idx:
+    #                 next_open_valves += "1"
+    #             else:
+    #                 next_open_valves += open_valves[i]
+    #         # we prioritize by negative pressure, since want max pressure
+    #         options.put((next_valve, next_open_valves, next_pressure, next_minute), -next_pressure)
+    #
+    #     # move to each valve
+    #     for tunnel in current_valve.leads_to:
+    #         next_valve = tunnel
+    #         # we prioritize by negative pressure, since want max pressure
+    #         options.put((next_valve, open_valves, next_pressure, next_minute), -next_pressure)
+    #     # print(options)
+    # print(best)
 
 
 def part2():
