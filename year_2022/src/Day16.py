@@ -1,6 +1,8 @@
 import copy
 import heapq
 import time
+import matplotlib.pyplot as plt
+import networkx as nx
 
 class Valve:
     def __init__(self, name, flow_rate=0, leads_to=None, is_open=False):
@@ -52,47 +54,6 @@ class PriorityQueue:
     def __repr__(self):
         return str(self.elements)
 
-class State:
-    def __init__(self, valves, current_valve_name='AA', total_release=0, minutes=30, cache=None):
-        self.valves = valves
-        self.sorted_valve_names = []
-        for valve in self.valves.values():
-            self.sorted_valve_names.append(valve.name)
-        self.sorted_valve_names = sorted(self.sorted_valve_names)
-        self.current_valve_name = current_valve_name
-        self.total_release = total_release
-        self.minutes = minutes
-        if cache is not None:
-            self.cache = cache
-        else:
-            self.cache = {}
-
-    def generate_cache_key(self):
-        release_for_minute, opened_valve_names = self.get_release_for_minute()
-        return self.current_valve_name + ":" + opened_valve_names + ":" + str(self.total_release), release_for_minute, opened_valve_names
-
-
-    def get_release_for_minute(self):
-        total = 0
-        open_valves = []
-        for valve_name in self.sorted_valve_names:
-            valve = self.valves[valve_name]
-            if valve.is_open:
-                total += valve.flow_rate
-                open_valves.append(valve.name)
-            # else:
-            #     open_valves.append('0')
-        return total, ",".join(open_valves)
-
-
-# def get_release_for_minute(valves):
-#     total = 0
-#     for valve_name in valves:
-#         valve = valves[valve_name]
-#         if valve.is_open:
-#             total += valve.flow_rate
-#     return total
-
 def get_release_for_minute(open_valves, alphabetical_valve_names, valves):
     total = 0
     for i in range(len(alphabetical_valve_names)):
@@ -103,117 +64,202 @@ def get_release_for_minute(open_valves, alphabetical_valve_names, valves):
             total += valve.flow_rate
     return total
 
-def dfs(state: State, cache):
-    cache_key, release_for_minute, opened_valve_names = state.generate_cache_key()
-    next_release = state.total_release + release_for_minute
-
-    if state.minutes == 0:
-        return state.total_release # next_release
-    if cache_key in cache:
-        return cache[cache_key]
-
-    current_valve = state.valves[state.current_valve_name]
-    # print(" " * depth, "at ", current_valve_name)
-    # path 1 is open this valve
-    # print("current valve", current_valve)
-    answer = 0
-    # open the valve
-    if current_valve.flow_rate > 0 and not current_valve.is_open:
-        new_valves = copy.deepcopy(state.valves)
-        current_valve_copy = copy.deepcopy(current_valve)
-        # print("opening", state.current_valve_name)
-        current_valve_copy.is_open = True
-        new_valves[state.current_valve_name] = current_valve_copy
-        # minutes -= 1 # it takes 1 extra min to open
-        path1 = dfs(State(new_valves, state.current_valve_name, next_release, state.minutes-1), cache)
-        answer = max(answer, path1)
-
-    # path 2 is to move
-    for tunnel in current_valve.leads_to:
-        new_valves = copy.deepcopy(state.valves)
-        # print(state.current_valve_name, "following ", tunnel)
-        path2 = dfs(State(new_valves, tunnel, next_release, state.minutes-1), cache)
-        answer = max(answer, path2)
-    # print(" " * depth,"options", options)
-
-    # only cache when at least one valve is open, to avoid the case where we have a bunch of 0 flow_rates in a row
-    # if opened_valve_names != "":
-        # cache_key, release_for_minute, opened_valve_names = state.generate_cache_key()
-    cache[cache_key] = answer
-    print("saving ", cache_key, answer)
-    # print(cache)
-    return answer
+def get_unopened_valves(open_valves, alphabetical_valve_names, valves):
+    result = []
+    for i in range(len(alphabetical_valve_names)):
+        is_open = True if open_valves[i] == "1" else False
+        valve_name = alphabetical_valve_names[i]
+        valve = valves[valve_name]
+        if not is_open and valve.flow_rate > 0:
+            result.append(valve)
+    return result
 
 def part1():
     valves = parseInput(16)
-    print(valves)
+    # print(valves)
 
-    print(dfs(State(valves), {}))
+    # create a graph to get shortest distance between all pairs of nodes
+    valve_edges = {}
+    for valve_name in valves:
+        valve = valves[valve_name]
+        valve_edges[valve_name] = valve.leads_to
+    graph = nx.from_dict_of_lists(valve_edges)
+    all_pairs_shortest_path = dict(nx.all_pairs_shortest_path(graph))
 
-    # pressure = 0
-    # minute = 0
-    # alphabetical_valve_names = sorted(valves.keys())
-    # open_valves = '0' * len(alphabetical_valve_names)
-    #
-    # options = PriorityQueue()
-    # options.put(('AA', open_valves, pressure, minute), 0)
-    #
-    # best = 0
-    # cache = {}
-    # # move our location(s)
-    # while not options.empty():
-    #     # TODO: instead of passing along "valves", we just need to track open valves, which can be a string of binary numbers
-    #     # indexed on the alphabetical order of the valves
-    #
-    #     # TODO: create a cache
-    #
-    #     # TODO: theoretical cap, if we opened all the valves over the remaining minutes, and it's still worse
-    #     # than our best so far, we can stop
-    #     (current_valve_name, open_valves, pressure, minute) = options.get()
-    #     current_valve = valves[current_valve_name]
-    #     hash_key = f"{current_valve_name}:{open_valves}:{pressure}:{minute}"
-    #
-    #     # if hash_key in cache:
-    #     #     cache[hash_key] = pressure
-    #     # else:
-    #     #     cache[hash_key] = pressure
-    #
-    #     if minute >= 30:
-    #         best = max(best, pressure)
-    #         print("hit time, pressure", pressure, "best", best)
-    #         continue
-    #
-    #     # get current pressure
-    #     turn_pressure = get_release_for_minute(open_valves, alphabetical_valve_names, valves)
-    #     next_pressure = pressure + turn_pressure
-    #     next_minute = minute + 1
-    #
-    #     # open valve if not open, and it's not 0
-    #     valve_idx = alphabetical_valve_names.index(current_valve_name)
-    #     current_valve_is_open = True if open_valves[valve_idx] == "1" else False
-    #     if current_valve.flow_rate > 0 and not current_valve_is_open:
-    #         next_valve = current_valve_name
-    #         next_open_valves = ""
-    #         for i in range(len(open_valves)):
-    #             if i == valve_idx:
-    #                 next_open_valves += "1"
-    #             else:
-    #                 next_open_valves += open_valves[i]
-    #         # we prioritize by negative pressure, since want max pressure
-    #         options.put((next_valve, next_open_valves, next_pressure, next_minute), -next_pressure)
-    #
-    #     # move to each valve
-    #     for tunnel in current_valve.leads_to:
-    #         next_valve = tunnel
-    #         # we prioritize by negative pressure, since want max pressure
-    #         options.put((next_valve, open_valves, next_pressure, next_minute), -next_pressure)
-    #     # print(options)
-    # print(best)
+    # draw the graph
+    # nx.draw(
+    #     graph,
+    #     with_labels=True,
+    #     node_size=800,
+    #     node_color="#ffff8f",
+    #     width=0.8,
+    #     font_size=10,
+    # )
+    # plt.show()
+
+    pressure = 0
+    minute = 0
+    num_valves_with_flow = 0
+    alphabetical_valve_names = []
+    for valve_name in valves:
+        valve = valves[valve_name]
+        if valve.flow_rate > 0:
+            num_valves_with_flow += 1
+            alphabetical_valve_names.append(valve_name)
+    alphabetical_valve_names = sorted(alphabetical_valve_names)
+    open_valves = '0' * num_valves_with_flow
+    all_open = '1' * num_valves_with_flow
+
+    options = PriorityQueue()
+    options.put(('AA', open_valves, pressure, minute), 0)
+
+    best = 0
+    # move our location(s)
+    while not options.empty():
+        (current_valve_name, open_valves, pressure, minute) = options.get()
+        current_valve = valves[current_valve_name]
+        hash_key = f"{current_valve_name}:{open_valves}:{pressure}:{minute}"
+
+        # get current pressure
+        turn_pressure = get_release_for_minute(open_valves, alphabetical_valve_names, valves)
+
+        # if all valves are open, we can just wait until the end
+        if open_valves == all_open:
+            minutes_left = 30 - minute
+            best = max(best, pressure + (turn_pressure * minutes_left))
+            # no new states
+            continue
+
+        # print("curr", current_valve_name, "pressure", pressure, "considering",  get_unopened_valves(open_valves, alphabetical_valve_names, valves))
+        # for every unopened valve > 0, try to move to it
+        for valve in get_unopened_valves(open_valves, alphabetical_valve_names, valves):
+            cost_to_move_and_open = len(all_pairs_shortest_path[current_valve_name][valve.name])
+            # print("cost to move from ", current_valve_name, "to", valve.name, ":", cost_to_move_and_open)
+            next_minute = minute + cost_to_move_and_open
+            # if moving to and opening the valve exceeds the time limit, just wait it out
+            if next_minute >= 30:
+                minutes_left = 30 - minute
+                best = max(best, pressure + (turn_pressure * minutes_left))
+                # no new states
+                continue
+
+            # go to it and open, create new states
+            next_pressure = pressure + (turn_pressure * cost_to_move_and_open)
+            # open it
+            next_valve_idx = alphabetical_valve_names.index(valve.name)
+            next_open_valves = ""
+            for i in range(len(open_valves)):
+                if i == next_valve_idx:
+                    next_open_valves += "1"
+                else:
+                    next_open_valves += open_valves[i]
+            # we prioritize by negative pressure, since want max pressure
+            options.put((valve.name, next_open_valves, next_pressure, next_minute), -next_pressure)
+
+    print(best)
 
 
 def part2():
-    lines = parseInput(16)
-    print(lines)
+    valves = parseInput(16)
+    # print(valves)
+
+    # create a graph to get shortest distance between all pairs of nodes
+    valve_edges = {}
+    for valve_name in valves:
+        valve = valves[valve_name]
+        valve_edges[valve_name] = valve.leads_to
+    graph = nx.from_dict_of_lists(valve_edges)
+    all_pairs_shortest_path = dict(nx.all_pairs_shortest_path(graph))
+
+    # draw the graph
+    # nx.draw(
+    #     graph,
+    #     with_labels=True,
+    #     node_size=800,
+    #     node_color="#ffff8f",
+    #     width=0.8,
+    #     font_size=10,
+    # )
+    # plt.show()
+
+    pressure = 0
+    minute = 0
+    num_valves_with_flow = 0
+    alphabetical_valve_names = []
+    for valve_name in valves:
+        valve = valves[valve_name]
+        if valve.flow_rate > 0:
+            num_valves_with_flow += 1
+            alphabetical_valve_names.append(valve_name)
+    alphabetical_valve_names = sorted(alphabetical_valve_names)
+    open_valves = '0' * num_valves_with_flow
+    all_open = '1' * num_valves_with_flow
+
+    options = PriorityQueue()
+    options.put(('AA', open_valves, pressure, minute), 0)
+
+    best = {} # keep track of best for each set of opened valves
+    # move our location(s)
+    while not options.empty():
+        (current_valve_name, open_valves, pressure, minute) = options.get()
+        current_valve = valves[current_valve_name]
+        hash_key = f"{current_valve_name}:{open_valves}:{pressure}:{minute}"
+
+        # get current pressure
+        turn_pressure = get_release_for_minute(open_valves, alphabetical_valve_names, valves)
+
+        minutes_left = 26 - minute
+        end_pressure = pressure + (turn_pressure * minutes_left)
+        if open_valves in best:
+            if end_pressure > best[open_valves]:
+                best[open_valves] = end_pressure
+        else:
+            best[open_valves] = end_pressure
+
+        # if all valves are open, we can just wait until the end
+        if open_valves == all_open:
+            # no new states
+            continue
+
+        # print("curr", current_valve_name, "pressure", pressure, "considering",  get_unopened_valves(open_valves, alphabetical_valve_names, valves))
+        # for every unopened valve > 0, try to move to it
+        for valve in get_unopened_valves(open_valves, alphabetical_valve_names, valves):
+            cost_to_move_and_open = len(all_pairs_shortest_path[current_valve_name][valve.name])
+            # print("cost to move from ", current_valve_name, "to", valve.name, ":", cost_to_move_and_open)
+            next_minute = minute + cost_to_move_and_open
+            # if moving to and opening the valve exceeds the time limit, just wait it out
+            if next_minute >= 26:
+                # no new states
+                continue
+
+            # go to it and open, create new states
+            next_pressure = pressure + (turn_pressure * cost_to_move_and_open)
+            # open it
+            next_valve_idx = alphabetical_valve_names.index(valve.name)
+            next_open_valves = ""
+            for i in range(len(open_valves)):
+                if i == next_valve_idx:
+                    next_open_valves += "1"
+                else:
+                    next_open_valves += open_valves[i]
+            # we prioritize by negative pressure, since want max pressure
+            options.put((valve.name, next_open_valves, next_pressure, next_minute), -next_pressure)
+
+    # the elephant and us should open different sets of valves to be optimal
+    best_combos = 0
+    for path1 in best:
+        for path2 in best:
+            if path1 == path2:
+                continue
+            disjoint = True
+            for i in range(len(path1)):
+                if path1[i] == "1" and path2[i] == "1":
+                    disjoint = False
+                    break
+            if disjoint:
+                best_combos = max(best_combos, best[path1] + best[path2])
+
+    print(best_combos)
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
@@ -222,8 +268,8 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
 
-    # print("\nPART 2 RESULT")
-    # start = time.perf_counter()
-    # part2()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
