@@ -57,6 +57,20 @@ def draw(all_rock_coords, max_height, falling_rock_coords=None):
     print()
 
 
+def draw_to_file(all_rock_coords, max_height, file_path, falling_rock_coords=None):
+    with open(file_path, 'w') as file:
+        h = max(max_height, 4)
+        for j in range(h, 0, -1):
+            for i in range(w):
+                # print(i, j)
+                if (i, j) in all_rock_coords or (i, j) in falling_rock_coords:
+                    file.write("#")
+                else:
+                    file.write(".")
+            file.write("\n")
+        file.write("\n")
+
+
 def part1():
     jets = parseInput(17)
     num_jets = len(jets)
@@ -166,42 +180,34 @@ def part1():
             # draw(all_rock_coords, max_height, falling_rock_coords)
     print("max height", max_height)
 
+def manhattan(one, two):
+    return abs(one[0] - two[0]) + abs(one[1] - two[1])
 
 def part2():
     jets = parseInput(17)
     num_jets = len(jets)
     jet_idx = 0
     print("num_jets", num_jets)
-    pattern_idx = num_jets * 5
 
     all_rock_coords = [] # all rock coords that have landed
     max_height = 0
 
-    total_rocks = 400
-    # keep track of rock_idx and steps
-    jet_rock_idx = None
-    jet_rock_step = None
-    repeat = False
-    cycle = {}
-    for i in range(5):
-        cycle[i] = None
+    simulated_height = 0
+    total_rocks = 1000000000000
+    cycle = {} # keep track of (rock_type, x_coords) -> [(rock_idx, max_height)]
+    prev_max_height = 0
+    rock_idx = 0
+    cycle_found= False
 
-    for rock_idx in range(total_rocks):
+    while rock_idx < total_rocks:
         # update max height
-        for coord in all_rock_coords[-5:]:
+        for coord in reversed(all_rock_coords):
             if coord[1] > max_height:
                 max_height = coord[1]
-        if repeat:
-            print("max height", max_height)
-            r = rock_idx - 1
-            print("answer?", ((total_rocks // r) * max_height) + (total_rocks % r))
-            break
         # rock appears
-        if rock_idx % 1000 == 0:
-            print(rock_idx, "rock appears, max_height = ", max_height)
+        print(rock_idx, "rock appears, max_height = ", max_height)
         falling_rock_coords = get_next_rock(rock_idx, max_height)
 
-        rock_step = 0
         # keep falling until it stops
         while True:
             min_y = 9999999
@@ -238,7 +244,7 @@ def part2():
                         if new_coord in reversed(all_rock_coords):
                             can_move = False
                             break
-                    if not can_move: # this rock won't be moved by the jet
+                    if not can_move:  # this rock won't be moved by the jet
                         jet_falling_rock_coords = falling_rock_coords
             elif jet == "<":
                 # get min x of rock
@@ -256,7 +262,7 @@ def part2():
                         if new_coord in reversed(all_rock_coords):
                             can_move = False
                             break
-                    if not can_move: # this rock won't be moved by the jet
+                    if not can_move:  # this rock won't be moved by the jet
                         jet_falling_rock_coords = falling_rock_coords
             else:
                 print("unknown jet direction")
@@ -267,7 +273,6 @@ def part2():
             # wrap around if we pass the end
             if jet_idx >= num_jets:
                 jet_idx = 0
-
 
             # move down
             down_falling_rock_coords = []
@@ -293,17 +298,57 @@ def part2():
                     break
             falling_rock_coords = down_falling_rock_coords
             # draw(all_rock_coords, max_height, falling_rock_coords)
-            rock_step += 1
-        # rock stopped falling, check for cycles
-        rock_type = rock_idx % 5
-        if cycle[rock_type] is not None:
-            cycle_jet_idx, cycle_max_height = cycle[rock_type]
-            if cycle_jet_idx == jet_idx:
-                print("rock  type", rock_type, "CYCLE between", cycle_max_height,  max_height)
-                # break
-        cycle[rock_type] = (jet_idx, max_height)
 
-    draw(all_rock_coords, max_height, falling_rock_coords)
+        # also try to detect cycles
+        rock_type = rock_idx % 5
+        if not cycle_found and rock_type == 0 and rock_idx > 0:
+            # get the x coordinates for the rock
+            x_coords = []
+            for coord in falling_rock_coords:
+                x_coords.append(coord[0])
+            x_coords = tuple(x_coords)
+            print("rock_idx:", rock_idx, " rock_type: ", rock_type, " coord: ", x_coords, " max_height:", max_height,
+                  "diff:", max_height-prev_max_height)
+            # get the relative heights of each column
+            column_heights = [0] * w
+            for (x, y) in all_rock_coords:
+                column_heights[x] = max(column_heights[x], y)
+            print("column_heights:", column_heights)
+            min_col_height = min(column_heights)
+            column_heights = tuple([h - min_col_height for h in column_heights])
+            print("relative column_heights:", column_heights)
+            print()
+            prev_max_height = max_height
+            cycle_key = (rock_type, jet_idx, column_heights)
+            if cycle_key in cycle:
+                print("key", cycle_key, "cycle with!!", cycle[cycle_key])
+                prev_rock_idx, prev_cycle_height = cycle[cycle_key]
+                # pre_cycle_height = heights[prev_rock_idx]
+                print("pre-cycle height at rock_idx: ", prev_rock_idx, "was: ", prev_cycle_height)
+                cycle_height = max_height - prev_cycle_height
+                cycle_rocks = rock_idx - prev_rock_idx
+
+                # jump ahead some rock_idx-es as if we re-cycled a bunch
+                mult = (total_rocks - prev_rock_idx) // cycle_rocks
+                min_answer = mult * cycle_height
+
+                remainder = (total_rocks - rock_idx) % cycle_rocks
+                print("cycle_height:", cycle_height, "cycle_rocks:", cycle_rocks, "mult:", mult,
+                      "min_answer:", min_answer, "remainder:", remainder)
+
+                # simulate the remaining rocks, because we'll end up somewhere in the middle of the cycle
+                # and computing height mid-cycle is hard
+                rock_idx = total_rocks - remainder
+                simulated_height = prev_cycle_height + min_answer - max_height # subtract out current max height since we add it back in at the end
+                print("new rock_idx:", rock_idx, "simulated height", simulated_height)
+
+                cycle_found = True
+            else:
+                cycle[cycle_key] = (rock_idx, max_height)
+        rock_idx += 1
+    # all done
+    # draw_to_file(all_rock_coords, max_height, "out.txt", falling_rock_coords)
+    print("final height:", max_height + simulated_height, "simulated gain:", max_height-simulated_height, "total rocks:", rock_idx)
 
 
 if __name__ == "__main__":
