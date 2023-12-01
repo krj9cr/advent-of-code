@@ -7,9 +7,13 @@ if __name__ == '__main__':
     days = []
     part1Times = []
     part2Times = []
-    for i in range(1, 11):
+    for i in range(1, 26):
+        if i in [19]:
+            print("Skipping day", day)
+            continue
         day = "{:02d}".format(i)
         days.append(day)
+        print("Running day", day)
 
         module = __import__(f"Day{day}", fromlist=["src"])
         start = time.perf_counter()
