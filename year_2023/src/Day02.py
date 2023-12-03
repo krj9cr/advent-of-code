@@ -34,13 +34,13 @@ def parseInput(day):
                 round_cubes = {}
                 for cube in cubes:
                     cube_info = cube.strip().split(" ")
-                    print(cube_info)
+                    # print(cube_info)
                     num_cube = int(cube_info[0])
                     cube_color = cube_info[1]
                     round_cubes[cube_color] = num_cube
                 rounds.append(round_cubes)
             games.append(Game(gameId, num_rounds, rounds))
-            print(rounds)
+            # print(rounds)
         return games
 
 def part1():
@@ -50,10 +50,10 @@ def part1():
     max_blue = 14
     possible_games = []
     for game in games:
-        print(game)
+        # print(game)
         all_rounds_possible = True
         for the_round in game.rounds:
-            print(the_round)
+            # print(the_round)
             if (the_round.get('red') is not None and the_round['red'] > max_red) or \
                     (the_round.get('green') is not None and the_round['green'] > max_green) or \
                     (the_round.get('blue') is not None and the_round['blue'] > max_blue):
@@ -72,11 +72,11 @@ def part2():
         min_green = 0
         min_blue = 0
         for the_round in game.rounds:
-            if (the_round.get('red') is not None and the_round['red'] > min_red):
+            if the_round.get('red') is not None and the_round['red'] > min_red:
                 min_red = the_round['red']
-            if (the_round.get('green') is not None and the_round['green'] > min_green):
+            if the_round.get('green') is not None and the_round['green'] > min_green:
                 min_green = the_round['green']
-            if (the_round.get('blue') is not None and the_round['blue'] > min_blue):
+            if the_round.get('blue') is not None and the_round['blue'] > min_blue:
                 min_blue = the_round['blue']
         power_sets.append(min_red * min_green * min_blue)
 
@@ -84,12 +84,12 @@ def part2():
     print(sum(power_sets))
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # total = end - start
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    total = end - start
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
