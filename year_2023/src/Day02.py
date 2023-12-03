@@ -44,25 +44,35 @@ def parseInput(day):
         return games
 
 def part1():
-    games = parseInput(2)
-    max_red = 12
-    max_green = 13
-    max_blue = 14
-    possible_games = []
-    for game in games:
-        # print(game)
-        all_rounds_possible = True
-        for the_round in game.rounds:
-            # print(the_round)
-            if (the_round.get('red') is not None and the_round['red'] > max_red) or \
-                    (the_round.get('green') is not None and the_round['green'] > max_green) or \
-                    (the_round.get('blue') is not None and the_round['blue'] > max_blue):
-                all_rounds_possible = False
-                break
-        if all_rounds_possible:
-            possible_games.append(game.gameId)
-    print(possible_games)
-    print(sum(possible_games))
+    dayf = "{:02d}".format(2)
+    path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
+    with open(path, 'r') as file:
+        max_red = 12
+        max_green = 13
+        max_blue = 14
+        possible_games = []
+
+        for line in file:
+            line = line.strip()
+            parts = line.split(": ")
+            gameId = int(parts[0].strip("Game "))
+            all_rounds_possible = True
+            for raw_round in parts[1].split(";"):
+                for cube in raw_round.split(","):
+                    cube_info = cube.strip().split(" ")
+                    num_cube = int(cube_info[0])
+                    cube_color = cube_info[1]
+                    if (cube_color == "red" and num_cube > max_red) or \
+                            (cube_color == "green" and num_cube > max_green) or \
+                            (cube_color == "blue" and num_cube > max_blue):
+                        all_rounds_possible = False
+                        break
+                if not all_rounds_possible:
+                    break
+            if all_rounds_possible:
+                possible_games.append(gameId)
+        print(possible_games)
+        print(sum(possible_games))
 
 def part2():
     games = parseInput(2)
@@ -91,9 +101,9 @@ if __name__ == "__main__":
     total = end - start
     print("Time (ms):", (end - start) * 1000)
 
-    print("\nPART 2 RESULT")
-    start = time.perf_counter()
-    part2()
-    end = time.perf_counter()
-    total = end - start
-    print("Time (ms):", (end - start) * 1000)
+    # print("\nPART 2 RESULT")
+    # start = time.perf_counter()
+    # part2()
+    # end = time.perf_counter()
+    # total = end - start
+    # print("Time (ms):", (end - start) * 1000)
