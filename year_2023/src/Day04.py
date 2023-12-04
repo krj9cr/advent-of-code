@@ -31,10 +31,9 @@ def part1():
     cards = parseInput(4)
     answer = 0
     for card in cards:
-        point = 1
         total_points = 0
         first_match = True
-        print(card)
+        # print(card)
         for m in card.mine:
             if m in card.winning:
                 if first_match:
@@ -42,13 +41,15 @@ def part1():
                     first_match = False
                 else:
                     total_points *= 2
-        print(total_points)
+        # print(total_points)
         answer += total_points
     print(answer)
 
 card_always_copied = {}
 
 def process_card(card, cards):
+    if card_always_copied.get(card.id):
+        return card_always_copied[card.id]
     num_winning = 0
     card_copies = []
     for m in card.mine:
@@ -57,11 +58,9 @@ def process_card(card, cards):
     # print(num_winning)
     for i in range(0, num_winning):
         card_copies.append(i + card.id + 1)
-        copy_copies = process_card(cards[i + card.id], cards)
-        if len(copy_copies) > 0:
-            card_copies += copy_copies
+        card_copies += process_card(cards[i + card.id], cards)
     card_always_copied[card.id] = card_copies
-    print(card.id, card_copies)
+    # print(card.id, card_copies)
     return card_copies
 
 def part2():
@@ -69,17 +68,13 @@ def part2():
     answer = 0
     card_totals = {}
     for card in cards:
-        print(card)
+        # print(card)
         if card_totals.get(card.id):
             card_totals[card.id] += 1
         else:
             card_totals[card.id] = 1
 
-        cards_copied = []
-        if card_always_copied.get(card.id):
-            cards_copied = card_always_copied[card.id]
-        else:
-            cards_copied = process_card(card, cards)
+        cards_copied = process_card(card, cards)
         for cardId2 in cards_copied:
             if card_totals.get(cardId2):
                 card_totals[cardId2] += 1
@@ -89,7 +84,7 @@ def part2():
     for cardId in card_totals:
         answer += card_totals[cardId]
 
-    print(card_totals)
+    # print(card_totals)
     print(answer)
 
 if __name__ == "__main__":
