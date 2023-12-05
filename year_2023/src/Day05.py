@@ -1,4 +1,6 @@
+import sys
 import time
+from multiprocessing import Pool
 
 class MyMap:
   def __init__(self, dest_range_start, source_range_start, range_len):
@@ -45,6 +47,22 @@ def mapSeed(seed, myMap):
   else:
     return None
 
+def getSeedAnswer(seed, maps):
+  mappedSeed = seed
+  for mapSet in maps:
+    #print("new map set")
+    mapSetSeedStart = mappedSeed
+    # assuming a seed only works for one m?
+    for m in mapSet:
+      #print(mappedSeed, "using", m)
+      newMappedSeed = mapSeed(mappedSeed, m)
+      #print("got", newMappedSeed)
+      if newMappedSeed is not None:
+        mappedSeed = newMappedSeed
+        break
+      else:
+        mappedSeed = mapSetSeedStart
+  return mappedSeed
 
 def part1():
     seeds, maps = parseInput(5)
@@ -57,41 +75,74 @@ def part1():
     #print(mapSeed(79, MyMap(52, 50, 48)))
     seedAnswers = []
     for seed in seeds:
-      mappedSeed = seed
-      for mapSet in maps:
-        print("new map set")
-        mapSetSeedStart = mappedSeed
-        # assuming a seed only works for one m?
-        for m in mapSet:
-          print(mappedSeed, "using", m)
-          newMappedSeed = mapSeed(mappedSeed, m)
-          print("got", newMappedSeed)
-          if newMappedSeed is not None:
-            mappedSeed = newMappedSeed
-            break
-          else:
-            mappedSeed = mapSetSeedStart
+      mappedSeed = getSeedAnswer(seed, maps)
+      #mappedSeed = seed
+      #for mapSet in maps:
+      #  print("new map set")
+      #  mapSetSeedStart = mappedSeed
+      #  # assuming a seed only works for one m?
+      #  for m in mapSet:
+      #    print(mappedSeed, "using", m)
+      #    newMappedSeed = mapSeed(mappedSeed, m)
+      #    print("got", newMappedSeed)
+      #    if newMappedSeed is not None:
+      #      mappedSeed = newMappedSeed
+      #      break
+      #    else:
+      #      mappedSeed = mapSetSeedStart
       
       print(mappedSeed)
       seedAnswers.append(mappedSeed)
     print(seedAnswers)
     print(min(seedAnswers))
         
-          
+
+def computeRange(range_start, range_end, maps):
+  min_seed = sys.maxsize
+  min_answer = sys.maxsize
+  print("range_start", range_start, "range_end", range_end)
+  for s in range(range_start, range_end):
+    mappedSeed = getSeedAnswer(s, maps)
+    print(s, ":", mappedSeed)
+    if mappedSeed < min_answer:
+      min_seed = s
+      min_answer = mappedSeed
+      print("new min seed:", min_seed, ":", min_answer)
+  return min_seed, min_answer
+
 
 def part2():
-    lines = parseInput(5)
-    print(lines)
+    seeds, maps = parseInput(5)
+
+    min_seed = sys.maxsize
+    min_answer = sys.maxsize
+
+    pool = Pool()
+
+    range_start = None
+    for i in range(0, len(seeds)):
+      if i % 2 == 0:
+        range_start = seeds[i]
+      else:
+        range_len = seeds[i]
+        range_end = range_start + range_len
+        range_min_seed, range_min_answer = computeRange(range_start, range_end, maps)
+        if range_min_answer < min_answer:
+          min_seed = range_min_seed
+          min_answer = range_min_answer
+          print("new min:", min_seed, ":", min_answer)
+    print("min seed:", min_seed, ":", min_answer) 
+
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
+    #print("\nPART 1 RESULT")
+    #start = time.perf_counter()
+    #part1()
+    #end = time.perf_counter()
+    #print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
     start = time.perf_counter()
-    part1()
+    part2()
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
-    # start = time.perf_counter()
-    # part2()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
