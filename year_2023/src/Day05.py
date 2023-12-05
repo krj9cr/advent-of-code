@@ -103,7 +103,7 @@ def computeRange(range_start, range_end, maps):
   print("range_start", range_start, "range_end", range_end)
   for s in range(range_start, range_end):
     mappedSeed = getSeedAnswer(s, maps)
-    print(s, ":", mappedSeed)
+    #print(s, ":", mappedSeed)
     if mappedSeed < min_answer:
       min_seed = s
       min_answer = mappedSeed
@@ -120,29 +120,39 @@ def part2():
     pool = Pool()
 
     range_start = None
+    processes = []
     for i in range(0, len(seeds)):
       if i % 2 == 0:
         range_start = seeds[i]
       else:
         range_len = seeds[i]
         range_end = range_start + range_len
-        range_min_seed, range_min_answer = computeRange(range_start, range_end, maps)
+        processes.append(pool.apply_async(computeRange, [range_start, range_end, maps]))
+    for process in processes:
+        range_min_seed, range_min_answer = process.get()
+        print("process", range_min_seed, range_min_answer)
+        #range_min_seed, range_min_answer = computeRange(range_start, range_end, maps)
         if range_min_answer < min_answer:
           min_seed = range_min_seed
           min_answer = range_min_answer
-          print("new min:", min_seed, ":", min_answer)
+          #print("new min:", min_seed, ":", min_answer)
     print("min seed:", min_seed, ":", min_answer) 
 
+# Brute forcing it and keeping track of smallest answer as processes finish
+# this took about 30mins and I stopped it partway through
+# 314779387
+# 235340701 
+# 137516820
 
 if __name__ == "__main__":
-    #print("\nPART 1 RESULT")
-    #start = time.perf_counter()
-    #part1()
-    #end = time.perf_counter()
-    #print("Time (ms):", (end - start) * 1000)
-
-    print("\nPART 2 RESULT")
+    print("\nPART 1 RESULT")
     start = time.perf_counter()
-    part2()
+    part1()
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
+
+    #print("\nPART 2 RESULT")
+    #start = time.perf_counter()
+    #part2()
+    #end = time.perf_counter()
+    #print("Time (ms):", (end - start) * 1000)
