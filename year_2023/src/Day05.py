@@ -114,11 +114,11 @@ def part2():
             # print("new min:", min_seed, ":", min_answer)
     print("min seed:", min_seed, ":", min_answer)
 
-# Brute forcing it and keeping track of smallest answer as processes finish
+# Brute forcing it and keeping track of the smallest answer as processes finish
 # this took about 30mins and I stopped it partway through
 # 314779387
 # 235340701 
-# 137516820
+# 137516820 - 34mins to get here on Mac
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
