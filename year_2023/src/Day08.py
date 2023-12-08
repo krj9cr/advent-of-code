@@ -89,18 +89,20 @@ def part2():
     i = 0
     while True:
         # check of all curr nodes end with Z
-        done = True
-        for curr_node in curr_nodes:
-            if curr_node.value[-1] != "Z":
-                done = False
-                break
-        if done:
-            break
+        # done = True
+        # for curr_node in curr_nodes:
+        #     if curr_node.value[-1] != "Z":
+        #         done = False
+        #         break
+        # if done:
+        #     break
+
         # get next direction
         if i >= len(directions):
             i = 0
         next_direction = directions[i]
         # print("going", next_direction)
+        done = True
         # step each node
         for j in range(len(curr_nodes)):
             curr_node = curr_nodes[j]
@@ -109,6 +111,11 @@ def part2():
                 curr_nodes[j] = nodes[curr_node.left]
             else:
                 curr_nodes[j] = nodes[curr_node.right]
+            if curr_nodes[j].value[-1] != "Z":
+                done = False
+                break
+        if done:
+            break
         i += 1
         steps += 1
     print("steps", steps)
