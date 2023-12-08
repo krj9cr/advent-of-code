@@ -101,6 +101,7 @@ class HandBidJoker:
         self.bid = bid
         self.cardCounts = self.countCards()
         self.handKind = self.detectHandKind()
+        # print("handKind", self.handKind)
 
     def __str__(self):
         return str(self.hand) + " " + str(self.bid)
@@ -116,7 +117,7 @@ class HandBidJoker:
 
     # return 1-7 based on hand kind using joker rules
     def detectHandKind(self):
-        print(self)
+        # print(self)
         # if no jokers, use the old way
         if self.cardCounts.get("J") is None:
             numUniqueCards = len(self.cardCounts)
@@ -147,13 +148,22 @@ class HandBidJoker:
                 return 1
         # there are jokers, we can "ignore" them and reduce the problem set?
         numJokers = self.cardCounts["J"]
-        print("numJokers", numJokers)
+        # print("numJokers", numJokers)
         cardCountsNoJoker = self.cardCounts.copy()
         del cardCountsNoJoker["J"]
-        print("cardCountsNoJoker", cardCountsNoJoker)
+        # print("cardCountsNoJoker", cardCountsNoJoker)
         numUniqueCards = len(cardCountsNoJoker)
-        if numUniqueCards == 1 or numJokers == 5:  # five of a kind
+        if numJokers == 5 or numJokers == 4 or numUniqueCards == 1:  # five of a kind
             return 7
+        # numUniqueCards must be > 1 at this point
+        if numJokers == 3:
+            return 6  # four of a kind
+        if numJokers == 2:
+            if numUniqueCards == 3:
+                return 4  # three of a kind
+            elif numUniqueCards == 2:
+                return 6  # four of a kind
+        # numJokers is 1 at this point
         if numUniqueCards == 2:  # four of a kind or full house
             for card in cardCountsNoJoker:
                 count = cardCountsNoJoker[card]
@@ -169,7 +179,9 @@ class HandBidJoker:
                 count = cardCountsNoJoker[card]
                 if count > maxCount:
                     maxCount = count
-            if maxCount == 2:  # three of a kind
+            if maxCount == 2:  # three of a kind, one J
+                return 4
+            elif maxCount == 1 and numJokers == 2:
                 return 4
             else:
                 return 3  # two pair
@@ -177,7 +189,7 @@ class HandBidJoker:
             return 2
         if numUniqueCards == 5:  # high card.. although we should never get this?
             return 1
-        print("NO CASE!?")
+        # print("NO CASE!?")
 
     def __lt__(self, other):
         hand1 = self.hand
@@ -213,7 +225,7 @@ def part1():
     answer = 0
     for i in range(0, len(handBids)):
         handBid = handBids[i]
-        print(handBid)
+        # print(handBid)
         answer += handBid.bid * (i + 1)
     print(answer)
 
@@ -232,18 +244,16 @@ def part2():
         answer = 0
         for i in range(0, len(handBids)):
             handBid = handBids[i]
-            print(handBid)
+            # print(handBid)
             answer += handBid.bid * (i + 1)
         print(answer)
 
-# 247820485 too low
-
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
