@@ -55,19 +55,73 @@ def part1():
         steps += 1
     print("steps", steps)
 
+def stepNode(node_value, nodes, directions):
+    curr_node = nodes[node_value]
+    i = 0
+    steps = 0
+    while True:
+        print(curr_node)
+        if curr_node.value[-1] == "Z":
+            break
+        if i >= len(directions):
+            i = 0
+        next_direction = directions[i]
+        # print("going", next_direction)
+        if next_direction == "L":
+            curr_node = nodes[curr_node.left]
+        else:
+            curr_node = nodes[curr_node.right]
+        i += 1
+        steps += 1
+    # print("steps", steps)
+    return steps
+
 def part2():
-    lines = parseInput(8)
-    print(lines)
+    directions, nodes = parseInput(8)
+
+    # find every node that ends with A
+    curr_nodes = []
+    for node in nodes:
+        if node[-1] == "A":
+            curr_nodes.append(nodes[node])
+
+    steps = 0
+    i = 0
+    while True:
+        # check of all curr nodes end with Z
+        done = True
+        for curr_node in curr_nodes:
+            if curr_node.value[-1] != "Z":
+                done = False
+                break
+        if done:
+            break
+        # get next direction
+        if i >= len(directions):
+            i = 0
+        next_direction = directions[i]
+        # print("going", next_direction)
+        # step each node
+        for j in range(len(curr_nodes)):
+            curr_node = curr_nodes[j]
+            # print(curr_node)
+            if next_direction == "L":
+                curr_nodes[j] = nodes[curr_node.left]
+            else:
+                curr_nodes[j] = nodes[curr_node.right]
+        i += 1
+        steps += 1
+    print("steps", steps)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
