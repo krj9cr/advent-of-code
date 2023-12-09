@@ -17,12 +17,6 @@ def processSequence(sequence):
         diffs.append(sequence[i] - sequence[i-1])
     return diffs
 
-def allZeros(sequence):
-    for s in sequence:
-        if s != 0:
-            return False
-    return True
-
 def allSame(sequence):
     first = sequence[0]
     for s in sequence:
@@ -43,16 +37,12 @@ def part1():
             if allSame(sequences[-1]):
                 break
         # print(sequences)
-        # print("done")
         num = sequences[-1][0]
         for i in range(len(sequences)-2, -1, -1):
             sequence = sequences[i]
-            sequence.append(sequence[-1] + num)
-            num = sequence[-1]
+            num = sequence[-1] + num
         # print(sequences)
-        value = sequences[0][-1]
-        # print(value)
-        answer += value
+        answer += num
     print(answer)
 
 
@@ -68,29 +58,21 @@ def part2():
             sequences.append(processSequence(sequences[-1]))
             if allSame(sequences[-1]):
                 break
-        # sequences = list(reversed(sequences))[1:]
         # print(sequences)
-        # print("done")
         num = sequences[-1][0]
-        newSeqs = []
         for i in range(len(sequences)-2, -1, -1):
             sequence = sequences[i]
-            sequence = [sequence[0] - num] + sequence
-            newSeqs.append(sequence)
-            # print(sequence)
-            num = sequence[0]
-        # print(newSeqs)
-        value = newSeqs[-1][0]
+            num = sequence[0] - num
         # print(value)
-        answer += value
+        answer += num
     print(answer)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
