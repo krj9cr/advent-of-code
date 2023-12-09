@@ -1,4 +1,5 @@
 import time
+from math import gcd
 
 class Node:
     def __init__(self, value, left=None, right=None):
@@ -32,21 +33,21 @@ def parseInput(day):
 
 def part1():
     directions, nodes = parseInput(8)
-    print(directions)
-    for node in nodes:
-        print(nodes[node])
+    # print(directions)
+    # for node in nodes:
+    #     print(nodes[node])
 
     curr_node = nodes["AAA"]
     i = 0
     steps = 0
     while True:
-        print(curr_node)
+        # print(curr_node)
         if curr_node.value == "ZZZ":
             break
         if i >= len(directions):
             i = 0
         next_direction = directions[i]
-        print("going", next_direction)
+        # print("going", next_direction)
         if next_direction == "L":
             curr_node = nodes[curr_node.left]
         else:
@@ -60,7 +61,7 @@ def stepNode(node_value, nodes, directions):
     i = 0
     steps = 0
     while True:
-        print(curr_node)
+        # print(curr_node)
         if curr_node.value[-1] == "Z":
             break
         if i >= len(directions):
@@ -85,39 +86,25 @@ def part2():
         if node[-1] == "A":
             curr_nodes.append(nodes[node])
 
-    steps = 0
-    i = 0
-    while True:
-        # get next direction
-        if i >= len(directions):
-            i = 0
-        next_direction = directions[i]
-        # print("going", next_direction)
-        done = True
-        # step each node
-        for j in range(len(curr_nodes)):
-            curr_node = curr_nodes[j]
-            # print(curr_node)
-            if next_direction == "L":
-                curr_nodes[j] = nodes[curr_node.left]
-            else:
-                curr_nodes[j] = nodes[curr_node.right]
-            # check of all curr nodes end with Z
-            if curr_nodes[j].value[-1] != "Z":
-                done = False
-                break
-        if done:
-            break
-        i += 1
-        steps += 1
-    print("steps", steps)
+    steps = []
+    for curr_node in curr_nodes:
+        s = stepNode(curr_node.value, nodes, directions)
+        # print(curr_node, "steps:", s)
+        steps.append(s)
+
+    # lcm: https://stackoverflow.com/questions/37237954/calculate-the-lcm-of-a-list-of-given-numbers-in-python
+    lcm = 1
+    for i in steps:
+        lcm = lcm * i // gcd(lcm, i)
+    print(lcm)
+
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
