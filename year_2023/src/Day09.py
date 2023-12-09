@@ -23,57 +23,65 @@ def allZeros(sequence):
             return False
     return True
 
+def allSame(sequence):
+    first = sequence[0]
+    for s in sequence:
+        if s != first:
+            return False
+    return True
+
 def part1():
     histories = parseInput(9)
-    print(histories)
+    # print(histories)
 
     answer = 0
     for history in histories:
         sequences = [history]
-        # get diffs between numbers
+        # generate all the sequences until we end up with one with the same number
         while True:
             sequences.append(processSequence(sequences[-1]))
-            if allZeros(sequences[-1]):
+            if allSame(sequences[-1]):
                 break
-        sequences = list(reversed(sequences))[1:]
-        print(sequences)
+        # print(sequences)
         # print("done")
-        num = sequences[0][0]
-        for sequence in sequences[1:]:
+        num = sequences[-1][0]
+        for i in range(len(sequences)-2, -1, -1):
+            sequence = sequences[i]
             sequence.append(sequence[-1] + num)
             num = sequence[-1]
-        print(sequences)
-        value = sequences[-1][-1]
-        print(value)
+        # print(sequences)
+        value = sequences[0][-1]
+        # print(value)
         answer += value
     print(answer)
 
 
 def part2():
     histories = parseInput(9)
-    print(histories)
+    # print(histories)
 
     answer = 0
     for history in histories:
         sequences = [history]
-        # get diffs between numbers
+        # generate all the sequences until we end up with one with the same number
         while True:
             sequences.append(processSequence(sequences[-1]))
-            if allZeros(sequences[-1]):
+            if allSame(sequences[-1]):
                 break
-        sequences = list(reversed(sequences))[1:]
-        print(sequences)
+        # sequences = list(reversed(sequences))[1:]
+        # print(sequences)
         # print("done")
-        num = sequences[0][0]
+        num = sequences[-1][0]
         newSeqs = []
-        for sequence in sequences[1:]:
+        for i in range(len(sequences)-2, -1, -1):
+            sequence = sequences[i]
             sequence = [sequence[0] - num] + sequence
             newSeqs.append(sequence)
-            print(sequence)
+            # print(sequence)
             num = sequence[0]
-        print(newSeqs)
+        # print(newSeqs)
         value = newSeqs[-1][0]
-        print(value)
+        # print(value)
         answer += value
     print(answer)
 
