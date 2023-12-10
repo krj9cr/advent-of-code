@@ -140,25 +140,35 @@ def part1():
     startPos = getStart(grid)
     print(startPos)
     totalSteps[startPos] = 0
-    print(longestPath(startPos[0], startPos[1], grid, 0))
+    # print(longestPath(startPos[0], startPos[1], grid, 0))
     # print(getNextSteps(3, 3, grid))
-    # queue = deque([[startPos]])
-    # seen = {startPos}
-    # maxSteps = 0
-    # while queue:
-    #     path = queue.popleft()
-    #     x, y = path[-1]
-    #     nextSteps = getNextSteps(x, y, grid)
-    #     print("at", x, y)
-    #     print("next steps:", nextSteps)
-    #     if len(nextSteps) == 0:
-    #         print(path)
-    #         break
-    #     for nextStep in nextSteps:
-    #         print(nextStep)
-    #         if nextStep not in seen:
-    #             queue.append(path + [nextStep])
-    #             seen.add(nextStep)
+    queue = deque([[startPos]])
+    seen = {startPos}
+    maxSteps = 0
+    steps = 0
+    while queue:
+        path = queue.popleft()
+        x, y = path[-1]
+        nextSteps = getNextSteps(x, y, grid)
+        print("at", x, y)
+        print("next steps:", nextSteps)
+        if len(nextSteps) == 0:
+            print(path)
+            break
+        for nextStep in nextSteps:
+            print(nextStep)
+            if nextStep not in seen:
+                queue.append(path + [nextStep])
+                seen.add(nextStep)
+                totalSteps[nextStep] = len(path)
+    print(totalSteps)
+
+    # find max totalSteps
+    maxSteps = 0
+    for pos in totalSteps:
+        if totalSteps[pos] > maxSteps:
+            maxSteps = totalSteps[pos]
+    print(maxSteps)
 
 
 
