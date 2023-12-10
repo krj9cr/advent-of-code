@@ -215,8 +215,51 @@ def part2():
     w = len(grid[0])
     print(grid)
 
-    # space out grid to handle squeezing???
+    # find the path first like in part 1... so that we can mark junk pieces as dots I guess
+    startPos = getStart(grid)
+    print(startPos)
+    totalSteps = {}
+    totalSteps[startPos] = 0
+    queue = deque([[startPos]])
+    seen = {startPos}
+    while queue:
+        path = queue.popleft()
+        x, y = path[-1]
+        nextSteps = getNextSteps(x, y, grid)
+        # print("at", x, y)
+        # print("next steps:", nextSteps)
+        if len(nextSteps) == 0:
+            # print(path)
+            break
+        for nextStep in nextSteps:
+            # print(nextStep)
+            if nextStep not in seen:
+                queue.append(path + [nextStep])
+                seen.add(nextStep)
+                totalSteps[nextStep] = len(path)
+    print(totalSteps)
+
+    # create a grid of totalSteps...?
+    for pos in totalSteps:
+        grid[pos[1]][pos[0]] = "X"
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid]))
+    print()
+
+    # get coordinates of junk pieces, and mark in origGrid
+    junk = []
+    for j in range(len(grid)):
+        row = grid[j]
+        for i in range(len(row)):
+            char = row[i]
+            if char != "X":
+                junk.append(tuple([i, j]))
+                origGrid[j][i] = "."
+
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in origGrid]))
+    print()
+
+
+    # space out grid to handle squeezing???
     spacedGrid = []
     for j in range(len(origGrid)):
         row = origGrid[j]
@@ -289,7 +332,7 @@ def part2():
 
     origSpacedGrid = copy.deepcopy(spacedGrid)
 
-    # find main loop
+    # find main loop again
     startPos = getStart(spacedGrid)
     print(startPos)
     totalSteps = {}
@@ -315,7 +358,6 @@ def part2():
 
     # create a grid of totalSteps...?
     for pos in totalSteps:
-        # if totalSteps[pos] != 0:
         spacedGrid[pos[1]][pos[0]] = "X"
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in spacedGrid]))
 
@@ -325,7 +367,7 @@ def part2():
         row = grid2[j]
         for i in range(len(row)):
             char = row[i]
-            if char != "X" and char != "#":
+            if char == ".":
                 # check if the dot is contained
                 startPos = (i, j)
                 # print("START", startPos)
