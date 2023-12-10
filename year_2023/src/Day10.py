@@ -214,7 +214,49 @@ def part2():
     h = len(grid)
     w = len(grid[0])
     print(grid)
-    startPos = getStart(grid)
+
+    # space out grid to handle squeezing???
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in origGrid]))
+    spacedGrid = []
+    for j in range(len(origGrid)):
+        row = origGrid[j]
+        newRow = []
+        # add horizontal spacing
+        for i in range(len(row)-1):
+            char = row[i]
+            nextChar = row[i+1]
+            if char == ".":
+                newRow.append(".")
+                newRow.append("#")
+            elif char == "S":
+                newRow.append("S")
+                if nextChar == "-" or nextChar == "J" or nextChar == "7":
+                    newRow.append("-")
+                else:
+                    newRow.append("#")
+            elif (char == "|" or char == "J" or char == "7") \
+                    and nextChar == "|" or nextChar == "L" or nextChar == "F" or nextChar == ".":
+                newRow.append(char)
+                newRow.append("#")
+            elif (char == "-" or char == "L" or char == "F") \
+                    and (nextChar == "-" or nextChar == "J" or nextChar == "7"):
+                newRow.append(char)
+                newRow.append("-")
+            else:
+                newRow.append(char)
+                newRow.append("X")
+        newRow.append(row[-1])
+        spacedGrid.append(newRow)
+
+    print("spacedGrid")
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in spacedGrid]))
+    print()
+
+
+    origSpacedGrid = copy.deepcopy(spacedGrid)
+
+    # find main loop
+    startPos = getStart(spacedGrid)
     print(startPos)
     totalSteps = {}
     totalSteps[startPos] = 0
@@ -223,14 +265,14 @@ def part2():
     while queue:
         path = queue.popleft()
         x, y = path[-1]
-        nextSteps = getNextSteps(x, y, grid)
-        print("at", x, y)
-        print("next steps:", nextSteps)
+        nextSteps = getNextSteps(x, y, spacedGrid)
+        # print("at", x, y)
+        # print("next steps:", nextSteps)
         if len(nextSteps) == 0:
-            print(path)
+            # print(path)
             break
         for nextStep in nextSteps:
-            print(nextStep)
+            # print(nextStep)
             if nextStep not in seen:
                 queue.append(path + [nextStep])
                 seen.add(nextStep)
@@ -240,19 +282,19 @@ def part2():
     # create a grid of totalSteps...?
     for pos in totalSteps:
         # if totalSteps[pos] != 0:
-        grid[pos[1]][pos[0]] = "X"
-    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid]))
+        spacedGrid[pos[1]][pos[0]] = "X"
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in spacedGrid]))
 
-    grid2 = copy.deepcopy(grid)
+    grid2 = copy.deepcopy(spacedGrid)
     # find all dots
-    for j in range(len(grid)):
-        row = grid[j]
+    for j in range(len(grid2)):
+        row = grid2[j]
         for i in range(len(row)):
             char = row[i]
-            if char != "X":
+            if char != "X" and char != "#":
                 # check if the dot is contained
                 startPos = (i, j)
-                print("START", startPos)
+                # print("START", startPos)
                 totalSteps = {}
                 totalSteps[startPos] = 0
                 queue = deque([[startPos]])
@@ -263,7 +305,7 @@ def part2():
                 while queue:
                     path = queue.popleft()
                     x, y = path[-1]
-                    nextSteps = dotNextSteps(x, y, grid)
+                    nextSteps = dotNextSteps(x, y, grid2)
                     # print("at", x, y)
                     # print("next steps:", nextSteps)
                     if nextSteps is None:  # this means it's not in a loop, or next to an edge
@@ -272,20 +314,31 @@ def part2():
                     if len(nextSteps) == 0:
                         break
                     for nextStep in nextSteps:
-                        print(nextStep)
+                        # print(nextStep)
                         if nextStep not in seen:
                             queue.append(path + [nextStep])
                             seen.add(nextStep)
                             totalSteps[nextStep] = len(path)
-                print(totalSteps)
+                # print(totalSteps)
                 if not wayOut:
                     # create a grid of totalSteps...?
                     for pos in totalSteps:
-                        grid2[pos[1]][pos[0]] = "I"
+                        if grid2[pos[1]][pos[0]] == ".":
+                            grid2[pos[1]][pos[0]] = "I"
                 if wayOut:
                     # create a grid of totalSteps...?
                     for pos in totalSteps:
-                        grid2[pos[1]][pos[0]] = "O"
+                        if grid2[pos[1]][pos[0]] == ".":
+                            grid2[pos[1]][pos[0]] = "O"
+
+    # replace X's with original grid
+    for j in range(len(grid2)):
+        row = grid2[j]
+        for i in range(len(row)):
+            char = row[i]
+            if char == "X":
+                grid2[j][i] = origSpacedGrid[j][i]
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
 
     # then just count the number of dots?
     answer = 0
@@ -296,15 +349,6 @@ def part2():
             if char == "I":
                 answer += 1
     print(answer)
-
-    # replace X's with original grid
-    for j in range(len(grid2)):
-        row = grid2[j]
-        for i in range(len(row)):
-            char = row[i]
-            if char == "X":
-                grid2[j][i] = origGrid[j][i]
-    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
 
 # 547 too high
 # 530 too high
