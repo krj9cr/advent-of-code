@@ -121,50 +121,31 @@ def getNextSteps(x, y, grid):
 def dotNextSteps(x, y, grid):
     h = len(grid)
     w = len(grid[0])
-    char = grid[y][x]
     steps = []
-    # wayOut = False
-    # if char != "X":
     # left
     nx, ny = x - 1, y
-    if 0 <= nx < w and 0 <= ny < h:
-        nextChar = grid[ny][nx]
-        # if nextChar == "-" or nextChar == "L" or nextChar == "F":
-        #     return None
-        if nextChar != "X":
-            steps.append(tuple([nx, ny]))
-    else:
-        return None
+    # if 0 <= nx < w and 0 <= ny < h:
+    nextChar = grid[ny][nx]
+    if nextChar != "X":
+        steps.append(tuple([nx, ny]))
     # right
     nx, ny = x + 1, y
-    if 0 <= nx < w and 0 <= ny < h:
-        nextChar = grid[ny][nx]
-        # if nextChar == "-" or nextChar == "7" or nextChar == "J":
-        #     return None
-        if nextChar != "X":
-            steps.append(tuple([nx, ny]))
-    else:
-        return None
+    # if 0 <= nx < w and 0 <= ny < h:
+    nextChar = grid[ny][nx]
+    if nextChar != "X":
+        steps.append(tuple([nx, ny]))
     # up
     nx, ny = x, y - 1
-    if 0 <= nx < w and 0 <= ny < h:
-        nextChar = grid[ny][nx]
-        # if nextChar == "|" or nextChar == "7" or nextChar == "F":
-        #     return None
-        if nextChar != "X":
-            steps.append(tuple([nx, ny]))
-    else:
-        return None
+    # if 0 <= nx < w and 0 <= ny < h:
+    nextChar = grid[ny][nx]
+    if nextChar != "X":
+        steps.append(tuple([nx, ny]))
     # down
     nx, ny = x, y + 1
-    if 0 <= nx < w and 0 <= ny < h:
-        nextChar = grid[ny][nx]
-        # if nextChar == "|" or nextChar == "L" or nextChar == "J":
-        #     return None
-        if nextChar != "X":
-            steps.append(tuple([nx, ny]))
-    else:
-        return None
+    # if 0 <= nx < w and 0 <= ny < h:
+    nextChar = grid[ny][nx]
+    if nextChar != "X":
+        steps.append(tuple([nx, ny]))
     return steps
 
 seen = set()
@@ -258,7 +239,6 @@ def part2():
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in origGrid]))
     print()
 
-
     # space out grid to handle squeezing???
     spacedGrid = []
     for j in range(len(origGrid)):
@@ -282,7 +262,7 @@ def part2():
                 newRow.append(char)
                 newRow.append("#")
             elif (char == "-" or char == "L" or char == "F") \
-                    and (nextChar == "-" or nextChar == "J" or nextChar == "7"):
+                    and (nextChar == "-" or nextChar == "J" or nextChar == "7" or nextChar == "S"):
                 newRow.append(char)
                 newRow.append("-")
             else:
@@ -329,6 +309,8 @@ def part2():
 
 
     spacedGrid = spacedGrid2
+    h = len(spacedGrid)
+    w = len(spacedGrid[0])
 
     origSpacedGrid = copy.deepcopy(spacedGrid)
 
@@ -361,8 +343,8 @@ def part2():
         spacedGrid[pos[1]][pos[0]] = "X"
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in spacedGrid]))
 
+    # see if there's a way out for each "."
     grid2 = copy.deepcopy(spacedGrid)
-    # find all dots
     for j in range(len(grid2)):
         row = grid2[j]
         for i in range(len(row)):
@@ -370,42 +352,37 @@ def part2():
             if char == ".":
                 # check if the dot is contained
                 startPos = (i, j)
-                # print("START", startPos)
-                totalSteps = {}
-                totalSteps[startPos] = 0
                 queue = deque([[startPos]])
                 seen = {startPos}
-                maxSteps = 0
-                steps = 0
                 wayOut = False
                 while queue:
+                    if wayOut:
+                        break
                     path = queue.popleft()
                     x, y = path[-1]
-                    nextSteps = dotNextSteps(x, y, grid2)
-                    # print("at", x, y)
-                    # print("next steps:", nextSteps)
-                    if nextSteps is None:  # this means it's not in a loop, or next to an edge
-                        wayOut = True
-                        break
-                    if len(nextSteps) == 0:
-                        break
-                    for nextStep in nextSteps:
-                        # print(nextStep)
-                        if nextStep not in seen:
-                            queue.append(path + [nextStep])
-                            seen.add(nextStep)
-                            totalSteps[nextStep] = len(path)
+                    # if x < 0 or x >= w or y < 0 or y >= h:
+                    #     wayOut = True
+                    #     break
+                    for x2, y2 in ((x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1)):
+                        if 0 <= x2 < w and 0 <= y2 < h:
+                            next = (x2, y2)
+                            nextItem = spacedGrid[y2][x2]
+                            if next not in seen and nextItem != "X":
+                                queue.append(path + [next])
+                                seen.add(next)
+                        else:
+                            wayOut = True
+                            if startPos == (20, 8):
+                                print("x2, y2", x2, y2)
+                                print("PATH", path)
+                            break
                 # print(totalSteps)
                 if not wayOut:
-                    # create a grid of totalSteps...?
-                    for pos in totalSteps:
-                        if grid2[pos[1]][pos[0]] == ".":
-                            grid2[pos[1]][pos[0]] = "I"
+                    if grid2[j][i] == ".":
+                        grid2[j][i] = "I"
                 if wayOut:
-                    # create a grid of totalSteps...?
-                    for pos in totalSteps:
-                        if grid2[pos[1]][pos[0]] == ".":
-                            grid2[pos[1]][pos[0]] = "O"
+                    if grid2[j][i] == ".":
+                        grid2[j][i] = "O"
 
     # replace X's with original grid
     for j in range(len(grid2)):
