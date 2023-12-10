@@ -218,12 +218,8 @@ def part2():
     print(startPos)
     totalSteps = {}
     totalSteps[startPos] = 0
-    # print(longestPath(startPos[0], startPos[1], grid, 0))
-    # print(getNextSteps(3, 3, grid))
     queue = deque([[startPos]])
     seen = {startPos}
-    maxSteps = 0
-    steps = 0
     while queue:
         path = queue.popleft()
         x, y = path[-1]
@@ -240,15 +236,6 @@ def part2():
                 seen.add(nextStep)
                 totalSteps[nextStep] = len(path)
     print(totalSteps)
-
-    # find max totalSteps
-    # maxSteps = 0
-    # end = None
-    # for pos in totalSteps:
-    #     if totalSteps[pos] > maxSteps:
-    #         maxSteps = totalSteps[pos]
-    #         end = pos
-    # print(maxSteps, end)
 
     # create a grid of totalSteps...?
     for pos in totalSteps:
@@ -280,8 +267,6 @@ def part2():
                     # print("at", x, y)
                     # print("next steps:", nextSteps)
                     if nextSteps is None:  # this means it's not in a loop, or next to an edge
-                        # for p in path:
-                        #     del totalSteps[p]
                         wayOut = True
                         break
                     if len(nextSteps) == 0:
@@ -296,18 +281,12 @@ def part2():
                 if not wayOut:
                     # create a grid of totalSteps...?
                     for pos in totalSteps:
-                        # if totalSteps[pos] != 0:
                         grid2[pos[1]][pos[0]] = "I"
                 if wayOut:
                     # create a grid of totalSteps...?
                     for pos in totalSteps:
-                        # if totalSteps[pos] != 0:
                         grid2[pos[1]][pos[0]] = "O"
 
-    # np.set_printoptions(precision=2)
-    # print(np.array(grid2))
-    # print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
-    # print(contained)
     # then just count the number of dots?
     answer = 0
     for j in range(len(grid2)):
