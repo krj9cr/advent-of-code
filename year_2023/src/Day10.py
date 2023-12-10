@@ -1,7 +1,6 @@
 import copy
 import time
 from collections import deque
-import numpy as np
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -147,7 +146,7 @@ def part1():
 
     print(maxSteps)
 
-# TODO: the way we're copying grids is probably inefficient
+# TODO: the way we're copying grids is probably inefficient, but nice for visualization
 def part2():
     grid = parseInput(10)
     origGrid = copy.deepcopy(grid)
