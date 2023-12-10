@@ -244,7 +244,7 @@ def part2():
                 newRow.append("-")
             else:
                 newRow.append(char)
-                newRow.append("X")
+                newRow.append("#")
         newRow.append(row[-1])
         spacedGrid.append(newRow)
 
@@ -252,6 +252,40 @@ def part2():
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in spacedGrid]))
     print()
 
+    # add vertical spacing
+    spacedGrid2 = []
+    for j in range(len(spacedGrid)-1):
+        row = spacedGrid[j]
+        nextRow = spacedGrid[j+1]
+        newRow = []
+        for i in range(len(row)):
+            char = row[i]
+            nextChar = nextRow[i]
+            if char == "." or char == "#":
+                newRow.append("#")
+            elif char == "S":
+                if nextChar == "|" or nextChar == "L" or nextChar == "J":
+                    newRow.append("|")
+                else:
+                    newRow.append("#")
+            elif char == "-" or char == "L" or char == "J":
+                newRow.append("#")
+            elif char == "|" or char == "F" or char == "7":
+                newRow.append("|")
+            else:
+                newRow.append("#")
+        spacedGrid2.append(row)
+        spacedGrid2.append(newRow)
+    spacedGrid2.append(spacedGrid[-1])
+
+
+    print("spacedGrid2")
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in spacedGrid2]))
+    print()
+
+
+
+    spacedGrid = spacedGrid2
 
     origSpacedGrid = copy.deepcopy(spacedGrid)
 
@@ -338,6 +372,7 @@ def part2():
             char = row[i]
             if char == "X":
                 grid2[j][i] = origSpacedGrid[j][i]
+    print()
     print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
 
     # then just count the number of dots?
