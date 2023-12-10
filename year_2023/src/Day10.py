@@ -124,47 +124,47 @@ def dotNextSteps(x, y, grid):
     char = grid[y][x]
     steps = []
     # wayOut = False
-    if char == ".":
-        # left
-        nx, ny = x - 1, y
-        if 0 <= nx < w and 0 <= ny < h:
-            nextChar = grid[ny][nx]
-            if nextChar == "-" or nextChar == "L" or nextChar == "F":
-                return None
-            elif nextChar == ".":
-                steps.append(tuple([nx, ny]))
-        else:
-            return None
-        # right
-        nx, ny = x + 1, y
-        if 0 <= nx < w and 0 <= ny < h:
-            nextChar = grid[ny][nx]
-            if nextChar == "-" or nextChar == "7" or nextChar == "J":
-                return None
-            elif nextChar == ".":
-                steps.append(tuple([nx, ny]))
-        else:
-            return None
-        # up
-        nx, ny = x, y - 1
-        if 0 <= nx < w and 0 <= ny < h:
-            nextChar = grid[ny][nx]
-            if nextChar == "|" or nextChar == "7" or nextChar == "F":
-                return None
-            elif nextChar == ".":
-                steps.append(tuple([nx, ny]))
-        else:
-            return None
-        # down
-        nx, ny = x, y + 1
-        if 0 <= nx < w and 0 <= ny < h:
-            nextChar = grid[ny][nx]
-            if nextChar == "|" or nextChar == "L" or nextChar == "J":
-                return None
-            elif nextChar == ".":
-                steps.append(tuple([nx, ny]))
-        else:
-            return None
+    # if char != "X":
+    # left
+    nx, ny = x - 1, y
+    if 0 <= nx < w and 0 <= ny < h:
+        nextChar = grid[ny][nx]
+        # if nextChar == "-" or nextChar == "L" or nextChar == "F":
+        #     return None
+        if nextChar != "X":
+            steps.append(tuple([nx, ny]))
+    else:
+        return None
+    # right
+    nx, ny = x + 1, y
+    if 0 <= nx < w and 0 <= ny < h:
+        nextChar = grid[ny][nx]
+        # if nextChar == "-" or nextChar == "7" or nextChar == "J":
+        #     return None
+        if nextChar != "X":
+            steps.append(tuple([nx, ny]))
+    else:
+        return None
+    # up
+    nx, ny = x, y - 1
+    if 0 <= nx < w and 0 <= ny < h:
+        nextChar = grid[ny][nx]
+        # if nextChar == "|" or nextChar == "7" or nextChar == "F":
+        #     return None
+        if nextChar != "X":
+            steps.append(tuple([nx, ny]))
+    else:
+        return None
+    # down
+    nx, ny = x, y + 1
+    if 0 <= nx < w and 0 <= ny < h:
+        nextChar = grid[ny][nx]
+        # if nextChar == "|" or nextChar == "L" or nextChar == "J":
+        #     return None
+        if nextChar != "X":
+            steps.append(tuple([nx, ny]))
+    else:
+        return None
     return steps
 
 seen = set()
@@ -210,25 +210,59 @@ def part1():
 
 def part2():
     grid = parseInput(10)
+    origGrid = copy.deepcopy(grid)
     h = len(grid)
     w = len(grid[0])
     print(grid)
-    # startPos = getStart(grid)
-    # print(startPos)
-    # totalSteps[startPos] = 0
+    startPos = getStart(grid)
+    print(startPos)
+    totalSteps = {}
+    totalSteps[startPos] = 0
     # print(longestPath(startPos[0], startPos[1], grid, 0))
     # print(getNextSteps(3, 3, grid))
+    queue = deque([[startPos]])
+    seen = {startPos}
+    maxSteps = 0
+    steps = 0
+    while queue:
+        path = queue.popleft()
+        x, y = path[-1]
+        nextSteps = getNextSteps(x, y, grid)
+        print("at", x, y)
+        print("next steps:", nextSteps)
+        if len(nextSteps) == 0:
+            print(path)
+            break
+        for nextStep in nextSteps:
+            print(nextStep)
+            if nextStep not in seen:
+                queue.append(path + [nextStep])
+                seen.add(nextStep)
+                totalSteps[nextStep] = len(path)
+    print(totalSteps)
+
+    # find max totalSteps
+    # maxSteps = 0
+    # end = None
+    # for pos in totalSteps:
+    #     if totalSteps[pos] > maxSteps:
+    #         maxSteps = totalSteps[pos]
+    #         end = pos
+    # print(maxSteps, end)
+
+    # create a grid of totalSteps...?
+    for pos in totalSteps:
+        # if totalSteps[pos] != 0:
+        grid[pos[1]][pos[0]] = "X"
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid]))
 
     grid2 = copy.deepcopy(grid)
-    allTotalSteps = {}
     # find all dots
-    dots = []
-    contained = []
     for j in range(len(grid)):
         row = grid[j]
         for i in range(len(row)):
             char = row[i]
-            if char == ".":
+            if char != "X":
                 # check if the dot is contained
                 startPos = (i, j)
                 print("START", startPos)
@@ -250,9 +284,8 @@ def part2():
                         #     del totalSteps[p]
                         wayOut = True
                         break
-                    # if len(nextSteps) == 0:
-                    #     print("PATH", path)
-                    #     break
+                    if len(nextSteps) == 0:
+                        break
                     for nextStep in nextSteps:
                         print(nextStep)
                         if nextStep not in seen:
@@ -260,11 +293,11 @@ def part2():
                             seen.add(nextStep)
                             totalSteps[nextStep] = len(path)
                 print(totalSteps)
-                # if not wayOut:
-                #     # create a grid of totalSteps...?
-                #     for pos in totalSteps:
-                #         # if totalSteps[pos] != 0:
-                #         grid2[pos[1]][pos[0]] = "I"
+                if not wayOut:
+                    # create a grid of totalSteps...?
+                    for pos in totalSteps:
+                        # if totalSteps[pos] != 0:
+                        grid2[pos[1]][pos[0]] = "I"
                 if wayOut:
                     # create a grid of totalSteps...?
                     for pos in totalSteps:
@@ -273,7 +306,7 @@ def part2():
 
     # np.set_printoptions(precision=2)
     # print(np.array(grid2))
-    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
+    # print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
     # print(contained)
     # then just count the number of dots?
     answer = 0
@@ -281,12 +314,21 @@ def part2():
         row = grid2[j]
         for i in range(len(row)):
             char = row[i]
-            if char == ".":
+            if char == "I":
                 answer += 1
     print(answer)
 
+    # replace X's with original grid
+    for j in range(len(grid2)):
+        row = grid2[j]
+        for i in range(len(row)):
+            char = row[i]
+            if char == "X":
+                grid2[j][i] = origGrid[j][i]
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
 
-    # scan for '.' that are contained by
+# 547 too high
+# 530 too high
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
