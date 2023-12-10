@@ -1,5 +1,7 @@
+import copy
 import time
 from collections import deque
+import numpy as np
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -7,6 +9,12 @@ def parseInput(day):
     with open(path, 'r') as file:
         lines = [[char for char in line.strip()] for line in file]
         return lines
+
+def print_2d_grid(grid):
+    for row in grid:
+        for item in row:
+            print(item, end="")
+        print()
 
 def getStart(grid):
     for j in range(len(grid)):
@@ -110,27 +118,56 @@ def getNextSteps(x, y, grid):
             steps.append(tuple([nx, ny]))
     return steps
 
-seen = set()
-totalSteps = {}
+def dotNextSteps(x, y, grid):
+    h = len(grid)
+    w = len(grid[0])
+    char = grid[y][x]
+    steps = []
+    # wayOut = False
+    if char == ".":
+        # left
+        nx, ny = x - 1, y
+        if 0 <= nx < w and 0 <= ny < h:
+            nextChar = grid[ny][nx]
+            if nextChar == "-" or nextChar == "L" or nextChar == "F":
+                return None
+            elif nextChar == ".":
+                steps.append(tuple([nx, ny]))
+        else:
+            return None
+        # right
+        nx, ny = x + 1, y
+        if 0 <= nx < w and 0 <= ny < h:
+            nextChar = grid[ny][nx]
+            if nextChar == "-" or nextChar == "7" or nextChar == "J":
+                return None
+            elif nextChar == ".":
+                steps.append(tuple([nx, ny]))
+        else:
+            return None
+        # up
+        nx, ny = x, y - 1
+        if 0 <= nx < w and 0 <= ny < h:
+            nextChar = grid[ny][nx]
+            if nextChar == "|" or nextChar == "7" or nextChar == "F":
+                return None
+            elif nextChar == ".":
+                steps.append(tuple([nx, ny]))
+        else:
+            return None
+        # down
+        nx, ny = x, y + 1
+        if 0 <= nx < w and 0 <= ny < h:
+            nextChar = grid[ny][nx]
+            if nextChar == "|" or nextChar == "L" or nextChar == "J":
+                return None
+            elif nextChar == ".":
+                steps.append(tuple([nx, ny]))
+        else:
+            return None
+    return steps
 
-def longestPath(x, y, grid, steps):
-    nextSteps = getNextSteps(x, y, grid)
-    if len(nextSteps) == 0:
-        return steps
-    maxSteps = steps
-    print("at: ", x, y)
-    takeNextSteps = []
-    for nextStep in nextSteps:
-        if nextStep not in totalSteps:
-            totalSteps[nextStep] = steps + 1
-            takeNextSteps.append(nextStep)
-    for nextStep in takeNextSteps:
-        print("next step", nextStep)
-        print("seen", totalSteps)
-        l = longestPath(nextStep[0], nextStep[1], grid, steps + 1)
-        if l > maxSteps:
-            maxSteps = l
-    return maxSteps
+seen = set()
 
 def part1():
     grid = parseInput(10)
@@ -139,6 +176,7 @@ def part1():
     print(grid)
     startPos = getStart(grid)
     print(startPos)
+    totalSteps = {}
     totalSteps[startPos] = 0
     # print(longestPath(startPos[0], startPos[1], grid, 0))
     # print(getNextSteps(3, 3, grid))
@@ -170,21 +208,95 @@ def part1():
             maxSteps = totalSteps[pos]
     print(maxSteps)
 
-
-
 def part2():
-    lines = parseInput(10)
-    print(lines)
+    grid = parseInput(10)
+    h = len(grid)
+    w = len(grid[0])
+    print(grid)
+    # startPos = getStart(grid)
+    # print(startPos)
+    # totalSteps[startPos] = 0
+    # print(longestPath(startPos[0], startPos[1], grid, 0))
+    # print(getNextSteps(3, 3, grid))
+
+    grid2 = copy.deepcopy(grid)
+    allTotalSteps = {}
+    # find all dots
+    dots = []
+    contained = []
+    for j in range(len(grid)):
+        row = grid[j]
+        for i in range(len(row)):
+            char = row[i]
+            if char == ".":
+                # check if the dot is contained
+                startPos = (i, j)
+                print("START", startPos)
+                totalSteps = {}
+                totalSteps[startPos] = 0
+                queue = deque([[startPos]])
+                seen = {startPos}
+                maxSteps = 0
+                steps = 0
+                wayOut = False
+                while queue:
+                    path = queue.popleft()
+                    x, y = path[-1]
+                    nextSteps = dotNextSteps(x, y, grid)
+                    # print("at", x, y)
+                    # print("next steps:", nextSteps)
+                    if nextSteps is None:  # this means it's not in a loop, or next to an edge
+                        # for p in path:
+                        #     del totalSteps[p]
+                        wayOut = True
+                        break
+                    # if len(nextSteps) == 0:
+                    #     print("PATH", path)
+                    #     break
+                    for nextStep in nextSteps:
+                        print(nextStep)
+                        if nextStep not in seen:
+                            queue.append(path + [nextStep])
+                            seen.add(nextStep)
+                            totalSteps[nextStep] = len(path)
+                print(totalSteps)
+                # if not wayOut:
+                #     # create a grid of totalSteps...?
+                #     for pos in totalSteps:
+                #         # if totalSteps[pos] != 0:
+                #         grid2[pos[1]][pos[0]] = "I"
+                if wayOut:
+                    # create a grid of totalSteps...?
+                    for pos in totalSteps:
+                        # if totalSteps[pos] != 0:
+                        grid2[pos[1]][pos[0]] = "O"
+
+    # np.set_printoptions(precision=2)
+    # print(np.array(grid2))
+    print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in grid2]))
+    # print(contained)
+    # then just count the number of dots?
+    answer = 0
+    for j in range(len(grid2)):
+        row = grid2[j]
+        for i in range(len(row)):
+            char = row[i]
+            if char == ".":
+                answer += 1
+    print(answer)
+
+
+    # scan for '.' that are contained by
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
