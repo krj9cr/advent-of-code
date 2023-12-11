@@ -1,15 +1,95 @@
+import copy
 import time
+import numpy as np
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
     path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
     with open(path, 'r') as file:
-        lines = [line.strip() for line in file]
+        lines = [[ char for char in line.strip()] for line in file]
         return lines
 
+def print_2d_grid(grid):
+    for row in grid:
+        for item in row:
+            print(item, end="")
+        print()
+
+def manhattan_distance(a, b):
+    return np.abs(a - b).sum()
+
 def part1():
-    lines = parseInput(11)
-    print(lines)
+    grid = parseInput(11)
+    print_2d_grid(grid)
+
+    # expand the universe
+    # find rows that have no galaxy
+    newGrid = []
+    for row in grid:
+        hasGalaxy = False
+        for char in row:
+            if char == "#":
+                hasGalaxy = True
+                break
+        if not hasGalaxy:
+            newGrid.append(row)
+            newGrid.append(row)
+        else:
+            newGrid.append(row)
+    # find cols that have no galaxy
+    grid = copy.deepcopy(newGrid)
+    print()
+    print("horizontal grid")
+    print_2d_grid(grid)
+    colIds = []
+    for i in range(len(grid[0])):
+        hasGalaxy = False
+        for j in range(len(grid)):
+            char = grid[j][i]
+            if char == "#":
+                hasGalaxy = True
+                break
+        if not hasGalaxy:
+            colIds.append(i)
+    print(colIds)
+    newGrid = []
+    for row in grid:
+        newRow = []
+        for i in range(len(grid[0])):
+            newRow.append(row[i])
+            if i in colIds:
+                newRow.append(row[i])
+            for c in colIds:
+                c += 1
+        newGrid.append(newRow)
+    grid = copy.deepcopy(newGrid)
+    print()
+    print("veritcal grid")
+    print_2d_grid(grid)
+
+    # find all the galaxies and number them
+    galaxies = {}
+    gid = 1
+    for j in range(len(grid)):
+        for i in range(len(grid[0])):
+            char = grid[j][i]
+            if char == "#":
+                galaxies[gid] = (i, j)
+                gid += 1
+    print(galaxies)
+
+    # get all pairs
+    pairs = [(a, b) for idx, a in enumerate(list(galaxies.keys())) for b in list(galaxies.keys())[idx + 1:]]
+
+    answer = 0
+    for (a, b) in pairs:
+        # find the min path between two galaxies
+        x1, x2 = galaxies[a]
+        y1, y2 = galaxies[b]
+        dist = manhattan_distance(np.array(galaxies[a]), np.array(galaxies[b]))
+
+        answer += dist
+    print(answer)
 
 def part2():
     lines = parseInput(11)
