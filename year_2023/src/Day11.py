@@ -89,9 +89,6 @@ def part1():
         answer += dist
     print(answer)
 
-# TODO:...
-#  smarter way is to not manipulate the grid, just take the coordinates of the galaxies,
-#  check what rows/cols to expand, and increase their coordinate values accordingly
 def part2():
     grid = parseInput(11)
     print_2d_grid(grid)
@@ -154,7 +151,7 @@ def part2():
                 galaxies[galaxyId] = (x2 + expandSize, y2)
     print(galaxies)
 
-    # print galaxies in 2d grid
+    # print galaxies in 2d grid (for debugging)
     # maxX = 0
     # maxY = 0
     # for galaxyId in galaxies:
