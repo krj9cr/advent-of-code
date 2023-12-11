@@ -96,29 +96,23 @@ def part2():
     grid = parseInput(11)
     print_2d_grid(grid)
 
-    expandSize = 10
+    expandSize = 1000000-1
 
-    # expand the universe
     # find rows that have no galaxy
-    newGrid = []
-    for row in grid:
+    rowsNoGalaxy = []
+    for j in range(len(grid)):
         hasGalaxy = False
-        for char in row:
+        row = grid[j]
+        for i in range(len(row)):
+            char = row[i]
             if char == "#":
                 hasGalaxy = True
                 break
         if not hasGalaxy:
-            newGrid.append(row)
-            for _ in range(expandSize):
-                newGrid.append(row)
-        else:
-            newGrid.append(row)
+            rowsNoGalaxy.append(j)
+
     # find cols that have no galaxy
-    grid = copy.deepcopy(newGrid)
-    print()
-    print("horizontal grid")
-    print_2d_grid(grid)
-    colIds = []
+    colsNoGalaxy = []
     for i in range(len(grid[0])):
         hasGalaxy = False
         for j in range(len(grid)):
@@ -127,23 +121,9 @@ def part2():
                 hasGalaxy = True
                 break
         if not hasGalaxy:
-            colIds.append(i)
-    print(colIds)
-    newGrid = []
-    for row in grid:
-        newRow = []
-        for i in range(len(grid[0])):
-            newRow.append(row[i])
-            if i in colIds:
-                for _ in range(expandSize):
-                    newRow.append(row[i])
-            # for c in colIds:
-            #     c += expandSize
-        newGrid.append(newRow)
-    grid = copy.deepcopy(newGrid)
-    print()
-    print("vertical grid")
-    print_2d_grid(grid)
+            colsNoGalaxy.append(i)
+
+    print(rowsNoGalaxy, colsNoGalaxy)
 
     # find all the galaxies and number them
     galaxies = {}
@@ -155,6 +135,46 @@ def part2():
                 galaxies[gid] = (i, j)
                 gid += 1
     print(galaxies)
+
+    origGalaxies = copy.deepcopy(galaxies)
+    # expand the universe
+    # find any galaxies with a higher index, and add by expandSize
+    for rowId in rowsNoGalaxy:
+        for galaxyId in galaxies:
+            x, y = origGalaxies[galaxyId]
+            x2, y2 = galaxies[galaxyId]
+            if y > rowId:
+                galaxies[galaxyId] = (x2, y2 + expandSize)
+    print(galaxies)
+    for colId in colsNoGalaxy:
+        for galaxyId in galaxies:
+            x, y = origGalaxies[galaxyId]
+            x2, y2 = galaxies[galaxyId]
+            if x > colId:
+                galaxies[galaxyId] = (x2 + expandSize, y2)
+    print(galaxies)
+
+    # print galaxies in 2d grid
+    # maxX = 0
+    # maxY = 0
+    # for galaxyId in galaxies:
+    #     x, y = galaxies[galaxyId]
+    #     if x > maxX:
+    #         maxX = x
+    #     if y > maxY:
+    #         maxY = y
+    # print(maxX, maxY)
+    # grid = []
+    # for j in range(maxY+1):
+    #     row = []
+    #     for i in range(maxX+1):
+    #         if (i, j) in galaxies.values():
+    #             row.append("#")
+    #         else:
+    #             row.append(".")
+    #     grid.append(row)
+    
+    # print_2d_grid(grid)
 
     # get all pairs
     pairs = [(a, b) for idx, a in enumerate(list(galaxies.keys())) for b in list(galaxies.keys())[idx + 1:]]
