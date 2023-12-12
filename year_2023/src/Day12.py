@@ -1,14 +1,24 @@
 import itertools
 import time
 import copy
+from multiprocessing import Pool
 
 class SpringGroup:
     def __init__(self, springs, arrangement):
         self.springs = springs
         self.arrangement = arrangement
+        self.numKnownSprings = self.getNumSprings(self.springs)
+        self.totalSprings = sum(self.arrangement)
 
     def __str__(self):
         return self.springs + " " + str(self.arrangement)
+
+    def getNumSprings(self, springs):
+        count = 0
+        for char in springs:
+            if char == "#":
+                count += 1
+        return count
 
     def satisfiesArrangement(self, springs):
         groups = []
@@ -34,9 +44,12 @@ class SpringGroup:
         # print(numQuestions)
 
         # get all possible combos of filling in the question marks
-        combos = list(itertools.product([".", "#"], repeat=numQuestions))
         answer = 0
-        for combo in combos:
+        for combo in itertools.product([".", "#"], repeat=numQuestions):
+            numComboSprings = self.getNumSprings(combo)
+            # prune off combos that don't have the same total number of springs we expect
+            if numComboSprings + self.numKnownSprings != self.totalSprings:
+                continue
             springs = ""
             c = 0
             for i in range(len(self.springs)):
@@ -46,7 +59,7 @@ class SpringGroup:
                     c += 1
                 else:
                     springs += char
-            print(springs)
+            # print(springs, numComboSprings, self.numKnownSprings, self.totalSprings)
             # check if this satisfies and count it
             if self.satisfiesArrangement(springs):
                 answer += 1
@@ -61,6 +74,9 @@ class SpringGroup:
         for i in range(4):
             self.arrangement += c
         # print(self.arrangement)
+        # recompute totals
+        self.numKnownSprings = self.getNumSprings(self.springs)
+        self.totalSprings = sum(self.arrangement)
 
 
 def parseInput(day):
@@ -95,8 +111,9 @@ def part2():
     answer = 0
     for group in springGroups:
         group.unfold()
+        print(group, end=None)
         a = group.guessArrangement()
-        print(group, a)
+        print(a)
         answer += a
     print(answer)
 
