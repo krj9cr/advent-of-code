@@ -18,83 +18,7 @@ def print_2d_grid(grid):
 def manhattan_distance(a, b):
     return np.abs(a - b).sum()
 
-def part1():
-    grid = parseInput(11)
-    print_2d_grid(grid)
-
-    # expand the universe
-    # find rows that have no galaxy
-    newGrid = []
-    for row in grid:
-        hasGalaxy = False
-        for char in row:
-            if char == "#":
-                hasGalaxy = True
-                break
-        if not hasGalaxy:
-            newGrid.append(row)
-            newGrid.append(row)
-        else:
-            newGrid.append(row)
-    # find cols that have no galaxy
-    grid = copy.deepcopy(newGrid)
-    print()
-    print("horizontal grid")
-    print_2d_grid(grid)
-    colIds = []
-    for i in range(len(grid[0])):
-        hasGalaxy = False
-        for j in range(len(grid)):
-            char = grid[j][i]
-            if char == "#":
-                hasGalaxy = True
-                break
-        if not hasGalaxy:
-            colIds.append(i)
-    print(colIds)
-    newGrid = []
-    for row in grid:
-        newRow = []
-        for i in range(len(grid[0])):
-            newRow.append(row[i])
-            if i in colIds:
-                newRow.append(row[i])
-            for c in colIds:
-                c += 1
-        newGrid.append(newRow)
-    grid = copy.deepcopy(newGrid)
-    print()
-    print("veritcal grid")
-    print_2d_grid(grid)
-
-    # find all the galaxies and number them
-    galaxies = {}
-    gid = 1
-    for j in range(len(grid)):
-        for i in range(len(grid[0])):
-            char = grid[j][i]
-            if char == "#":
-                galaxies[gid] = (i, j)
-                gid += 1
-    print(galaxies)
-
-    # get all pairs
-    pairs = [(a, b) for idx, a in enumerate(list(galaxies.keys())) for b in list(galaxies.keys())[idx + 1:]]
-
-    answer = 0
-    for (a, b) in pairs:
-        # find the min path between two galaxies
-        dist = manhattan_distance(np.array(galaxies[a]), np.array(galaxies[b]))
-
-        answer += dist
-    print(answer)
-
-def part2():
-    grid = parseInput(11)
-    print_2d_grid(grid)
-
-    expandSize = 1000000-1
-
+def solve(grid, expandSize=1):
     # find rows that have no galaxy
     rowsNoGalaxy = []
     for j in range(len(grid)):
@@ -120,7 +44,7 @@ def part2():
         if not hasGalaxy:
             colsNoGalaxy.append(i)
 
-    print(rowsNoGalaxy, colsNoGalaxy)
+    # print(rowsNoGalaxy, colsNoGalaxy)
 
     # find all the galaxies and number them
     galaxies = {}
@@ -131,7 +55,7 @@ def part2():
             if char == "#":
                 galaxies[gid] = (i, j)
                 gid += 1
-    print(galaxies)
+    # print(galaxies)
 
     origGalaxies = copy.deepcopy(galaxies)
     # expand the universe
@@ -142,14 +66,14 @@ def part2():
             x2, y2 = galaxies[galaxyId]
             if y > rowId:
                 galaxies[galaxyId] = (x2, y2 + expandSize)
-    print(galaxies)
+    # print(galaxies)
     for colId in colsNoGalaxy:
         for galaxyId in galaxies:
             x, y = origGalaxies[galaxyId]
             x2, y2 = galaxies[galaxyId]
             if x > colId:
                 galaxies[galaxyId] = (x2 + expandSize, y2)
-    print(galaxies)
+    # print(galaxies)
 
     # print galaxies in 2d grid (for debugging)
     # maxX = 0
@@ -170,7 +94,7 @@ def part2():
     #         else:
     #             row.append(".")
     #     grid.append(row)
-    
+
     # print_2d_grid(grid)
 
     # get all pairs
@@ -182,14 +106,23 @@ def part2():
         dist = manhattan_distance(np.array(galaxies[a]), np.array(galaxies[b]))
 
         answer += dist
-    print(answer)
+    return answer
+
+def part1():
+    grid = parseInput(11)
+    print(solve(grid, expandSize=1))
+
+def part2():
+    grid = parseInput(11)
+    # print_2d_grid(grid)
+    print(solve(grid, expandSize = 1000000-1))
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
