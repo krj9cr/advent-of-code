@@ -19,43 +19,30 @@ def manhattan_distance(a, b):
     return np.abs(a - b).sum()
 
 def solve(grid, expandSize=1):
-    # find rows that have no galaxy
-    rowsNoGalaxy = []
-    for j in range(len(grid)):
-        hasGalaxy = False
-        row = grid[j]
-        for i in range(len(row)):
-            char = row[i]
-            if char == "#":
-                hasGalaxy = True
-                break
-        if not hasGalaxy:
-            rowsNoGalaxy.append(j)
-
-    # find cols that have no galaxy
-    colsNoGalaxy = []
-    for i in range(len(grid[0])):
-        hasGalaxy = False
-        for j in range(len(grid)):
-            char = grid[j][i]
-            if char == "#":
-                hasGalaxy = True
-                break
-        if not hasGalaxy:
-            colsNoGalaxy.append(i)
-
-    # print(rowsNoGalaxy, colsNoGalaxy)
-
+    h = len(grid)
+    w = len(grid[0])
     # find all the galaxies and number them
     galaxies = {}
     gid = 1
-    for j in range(len(grid)):
-        for i in range(len(grid[0])):
+    for j in range(h):
+        for i in range(w):
             char = grid[j][i]
             if char == "#":
                 galaxies[gid] = (i, j)
                 gid += 1
     # print(galaxies)
+    cols = set([i[0] for i in galaxies.values()])
+    # print(cols)
+    rows = set([i[1] for i in galaxies.values()])
+    # print(rows)
+
+    # find rows that have no galaxy
+    rowsNoGalaxy = set([j for j in range(h)]).difference(rows)
+    # print(rowsNoGalaxy)
+
+    # find cols that have no galaxy
+    colsNoGalaxy = set([i for i in range(w)]).difference(cols)
+    # print(colsNoGalaxy)
 
     origGalaxies = copy.deepcopy(galaxies)
     # expand the universe
