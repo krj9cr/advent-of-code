@@ -1,5 +1,6 @@
 import itertools
 import time
+import copy
 
 class SpringGroup:
     def __init__(self, springs, arrangement):
@@ -45,11 +46,21 @@ class SpringGroup:
                     c += 1
                 else:
                     springs += char
-            # print(springs)
+            print(springs)
             # check if this satisfies and count it
             if self.satisfiesArrangement(springs):
                 answer += 1
         return answer
+
+    def unfold(self):
+        c = copy.deepcopy(self.springs)
+        for i in range(4):
+            self.springs += "?" + c
+        # print(self.springs)
+        c = copy.deepcopy(self.arrangement)
+        for i in range(4):
+            self.arrangement += c
+        # print(self.arrangement)
 
 
 def parseInput(day):
@@ -80,18 +91,28 @@ def part1():
     # print(g.guessArrangement())
 
 def part2():
-    lines = parseInput(12)
-    print(lines)
+    springGroups = parseInput(12)
+    answer = 0
+    for group in springGroups:
+        group.unfold()
+        a = group.guessArrangement()
+        print(group, a)
+        answer += a
+    print(answer)
+
+    # testing
+    # g = SpringGroup("???.###", [1,1,3])
+    # print(g.unfold())
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
