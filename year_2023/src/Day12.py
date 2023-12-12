@@ -22,6 +22,7 @@ class SpringGroup:
 
     def satisfiesArrangement(self, springs):
         groups = []
+        groupId = 0
         currentGroup = ""
         for char in springs:
             if char == "#":
@@ -29,6 +30,11 @@ class SpringGroup:
             else:
                 if currentGroup != "":
                     groups.append(len(currentGroup))
+                    # fail fast if a group doesn't match
+                    if self.arrangement[groupId] != len(currentGroup):
+                        # print(springs, self.arrangement, groups)
+                        return False
+                    groupId += 1
                     currentGroup = ""
         if currentGroup != "":
             groups.append(len(currentGroup))
@@ -96,7 +102,7 @@ def part1():
     springGroups = parseInput(12)
     answer = 0
     for group in springGroups:
-        a = group.guessArrangement()
+        g, a = group.guessArrangement()
         print(group, a)
         answer += a
     print(answer)
