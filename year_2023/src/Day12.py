@@ -63,7 +63,7 @@ class SpringGroup:
             # check if this satisfies and count it
             if self.satisfiesArrangement(springs):
                 answer += 1
-        return answer
+        return self, answer
 
     def unfold(self):
         c = copy.deepcopy(self.springs)
@@ -108,12 +108,20 @@ def part1():
 
 def part2():
     springGroups = parseInput(12)
+
+    pool = Pool()
+    processes = []
+
     answer = 0
     for group in springGroups:
         group.unfold()
-        print(group, end=None)
-        a = group.guessArrangement()
-        print(a)
+        print("starting processing for ", group)
+        # a = group.guessArrangement()
+        processes.append(pool.apply_async(group.guessArrangement))
+
+    for process in processes:
+        group, a = process.get()
+        print("finished processing", group, a)
         answer += a
     print(answer)
 
