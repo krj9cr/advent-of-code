@@ -30,6 +30,34 @@ class SpringGroup:
     def __str__(self):
         return self.springs + " " + str(self.arrangement)
 
+    # solve idea? generate only valid combos from the front
+    # for each arr number
+    # take all the ? and # until the first period or end... or sum of remaining arr + periods
+    # try to fit that arr number in every possible way, saving counts to a hash table
+    # recursively generate and solve with remaining arrs, adding up counts
+    # (this might recurse too much...? or answers need to be saved, somehow)
+    def solve(self, springs, arrangement):
+        # TODO: we can just ignore any dots at the front
+        #       and really just start from the first question mark, I suppose
+        subStr = ""
+        arr = arrangement[0]
+        maxSize = len(springs) - (sum(arrangement[1:]) + len(arrangement[1:]))
+        # print(len(springs), "-", (sum(arrangement[1:]) + len(arrangement[1:])), "= maxSize", maxSize)
+        # take all the ? and # until the first period or end... or sum of remaining arr + periods
+        for i in range(len(springs)):
+            if i >= maxSize:
+                break
+            char = springs[i]
+            if subStr == "" and char == ".":
+                continue
+            if char == "?" or char == "#":
+                subStr += char
+            else:
+                break
+        print("subStr", subStr, "i", i)
+        # try all combos to fit arr in the subStr
+        # append the rest of the string, and call solve
+
     # ???
     def reduce(self):
         # take the biggest number
@@ -201,7 +229,7 @@ def part2():
     # g = SpringGroup("???.###", [1,1,3])
     # print(g.reduce())
     for group in springGroups:
-        print(group, group.reduce())
+        print(group, group.solve(group.springs, group.arrangement))
 
     # g = SpringGroup("??", [1])
     # print("answer", g.guessArrangement())
