@@ -1,4 +1,5 @@
 import itertools
+import math
 import time
 import copy
 from multiprocessing import Pool
@@ -30,110 +31,60 @@ class SpringGroup:
     def __str__(self):
         return self.springs + " " + str(self.arrangement)
 
-    # solve idea? generate only valid combos from the front
-    # for each arr number
-    # take all the ? and # until the first period or end... or sum of remaining arr + periods
-    # try to fit that arr number in every possible way, saving counts to a hash table
-    # recursively generate and solve with remaining arrs, adding up counts
-    # (this might recurse too much...? or answers need to be saved, somehow)
-    def solve(self, springs, arrangement):
-        # TODO: we can just ignore any dots at the front
-        #       and really just start from the first question mark, I suppose
-        subStr = ""
-        arr = arrangement[0]
-        maxSize = len(springs) - (sum(arrangement[1:]) + len(arrangement[1:]))
-        # print(len(springs), "-", (sum(arrangement[1:]) + len(arrangement[1:])), "= maxSize", maxSize)
-        # take all the ? and # until the first period or end... or sum of remaining arr + periods
+    # recurse and prune better
+    def solve(self, springs):
+        # print(springs)
+        # find the next ?
+        questionMarkIdx = None
         for i in range(len(springs)):
-            if i >= maxSize:
-                break
             char = springs[i]
-            if subStr == "" and char == ".":
-                continue
-            if char == "?" or char == "#":
-                subStr += char
-            else:
+            if char == "?":
+                questionMarkIdx = i
                 break
-        print("subStr", subStr, "i", i)
-        # try all combos to fit arr in the subStr
-        # append the rest of the string, and call solve
-
-    # ???
-    def reduce(self):
-        # take the biggest number
-        maxNum = max(self.arrangement)
-        # see how many spots it can fit
-        # split on dots?
-        groups = []
-        idx = 0
-        string = ""
-        for char in self.springs:
-            if char == ".":
-                if string != "":
-                    charGroup = CharGroup(string, idx - len(string))
-                    groups.append(charGroup)
-                    # print("chargroup", charGroup)
-                    string = ""
+        # if no question marks, we're done
+        if questionMarkIdx is None:
+            if self.satisfiesArrangement(springs):
+                return 1, 1, self.springs
             else:
-                string += char
-            idx += 1
-        if string != "":
-            charGroup = CharGroup(string, idx - len(string))
-            groups.append(charGroup)
-            # print("chargroup", charGroup)
+                return 0, 1, self.springs
+        # try both "." and "#" and recurse
+        else:
+            springs2 = springs[:questionMarkIdx] + "#" + springs[questionMarkIdx + 1:]
+            if self.partialSatisfiesArrangement(springs2):
+                a2 = self.solve(springs2)
+            else:
+                a2 = 0, 0
+            springs3 = springs[:questionMarkIdx] + "." + springs[questionMarkIdx + 1:]
+            if self.partialSatisfiesArrangement(springs3):
+                a3 = self.solve(springs3)
+            else:
+                a3 = 0, 0
+            return a2[0] + a3[0], a2[1] + a3[1], self.springs
 
-        # convert these to Spring Groups... by looking at arrangements?
-        splitSpringGroups = []
-        # if len(groups) == len(self.arrangement):
-        #     # we know each group corresponds to a number, so we can split it
-        #     for i in range(len(groups)):
-        #         splitSpringGroups.append(SpringGroup(groups[i].string, [self.arrangement[i]]))
-        # else:  # the number of groups is less (can't be more)
-        # check the length, take the arrangements that are less than that length (adding periods)
-        availableArrangments = copy.deepcopy(self.arrangement)
-        for i in range(len(groups)):
-            group = groups[i]
-            print(group.string)
-            numChars = len(group.string)
-            # arr = availableArrangments.pop(0)  # this has to fit initially
-            # total = arr
-            # totalArr = [arr]
-            total = 0
-            totalArr = []
-            added = False
-            # TODO: there can be overlap... where arrangements fit into multiple groups, too
-            #       e.g. ??##?##??????????.?? 14,1 ..... the 1 fits into both groups
-            while len(availableArrangments) > 0:
-                # try adding the next arrangement (after a period)
-                arr = availableArrangments[0]
-                print("next arr", arr)
-                # add a period
-                if total > 0:
-                    total += 1
-                if total + arr <= numChars:
-                    total += arr
-                    totalArr.append(arr)
-                    availableArrangments = availableArrangments[1:]
-                    print("total", total, totalArr)
-                    print("availArr", availableArrangments)
-                else:
-                    splitSpringGroups.append(SpringGroup(group.string, totalArr))
-                    added = True
-                    break
-            if not added:
-                splitSpringGroups.append(SpringGroup(group.string, totalArr))
-
-        for group in splitSpringGroups:
-            print("spring group", group, group.guessArrangement()[1])
-
-
-        # sizedGroups = []
-        # for group in groups:
-        #     if len(group.string) >= maxNum:
-        #         sizedGroups.append(group)
-        # print(sizedGroups)
-        # if there's only one sizedGroup, slot that number in there, and generate more springGroups
-        # still with question marks, but it should be fewer
+    def partialSatisfiesArrangement(self, springs):
+        groups = []
+        groupId = 0
+        currentGroup = ""
+        partial = True
+        for char in springs:
+            if char == "?":
+                return partial
+            if char == "#":
+                currentGroup += char
+            else:
+                if currentGroup != "":
+                    groups.append(len(currentGroup))
+                    # fail fast if a group doesn't match
+                    if groupId >= len(self.arrangement) or self.arrangement[groupId] != len(currentGroup):
+                        # print(springs, self.arrangement, groups)
+                        return False
+                    groupId += 1
+                    currentGroup = ""
+        if currentGroup != "":
+            groups.append(len(currentGroup))
+        if len(groups) > len(self.arrangement):
+            return False
+        return True
 
     def satisfiesArrangement(self, springs):
         groups = []
@@ -146,7 +97,7 @@ class SpringGroup:
                 if currentGroup != "":
                     groups.append(len(currentGroup))
                     # fail fast if a group doesn't match
-                    if self.arrangement[groupId] != len(currentGroup):
+                    if groupId >= len(self.arrangement) or self.arrangement[groupId] != len(currentGroup):
                         # print(springs, self.arrangement, groups)
                         return False
                     groupId += 1
@@ -193,6 +144,7 @@ class SpringGroup:
         self.numKnownSprings = getNumChars(self.springs)
         self.totalSprings = sum(self.arrangement)
         self.numUnknownSprings = getNumChars(self.springs, "?")
+        return self
 
 
 def parseInput(day):
@@ -225,33 +177,21 @@ def part1():
 def part2():
     springGroups = parseInput(12)
 
-    # testing
-    # g = SpringGroup("???.###", [1,1,3])
-    # print(g.reduce())
+    pool = Pool()
+    processes = []
+
+    answer = 0
     for group in springGroups:
-        print(group, group.solve(group.springs, group.arrangement))
+        # print(group)
+        group.unfold()
+        print("starting", group, group.numUnknownSprings, "; totalPossible: ", math.pow(2, group.numUnknownSprings))
+        processes.append(pool.apply_async(group.solve, args=[group.springs]))
 
-    # g = SpringGroup("??", [1])
-    # print("answer", g.guessArrangement())
-
-    # # pool = Pool()
-    # # processes = []
-    #
-    # answer = 0
-    # for group in springGroups:
-    #     group.unfold()
-    #     print("starting", group, group.numUnknownSprings)
-    #     # a = group.guessArrangement()
-    #     # answer += a
-    #     # processes.append(pool.apply_async(group.guessArrangement))
-    #
-    # # for process in processes:
-    # #     group, a = process.get()
-    # #     print("finished processing", group, a)
-    # #     answer += a
-    # print(answer)
-
-
+    for process in processes:
+        a, totalChecked, group = process.get()
+        print("finished", group, "; answer:", a, "; totalChecked:", totalChecked)
+        answer += a
+    print(answer)
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
