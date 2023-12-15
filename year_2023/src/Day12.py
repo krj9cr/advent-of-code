@@ -84,6 +84,9 @@ class SpringGroup:
             groups.append(len(currentGroup))
         if len(groups) > len(self.arrangement):
             return False
+        # if there are more "#" than the sum of arrangement
+        if getNumChars(springs, "#") > sum(self.arrangement):
+            return False
         return True
 
     def satisfiesArrangement(self, springs):
