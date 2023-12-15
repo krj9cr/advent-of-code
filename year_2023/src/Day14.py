@@ -88,7 +88,8 @@ def part2():
 
     seen = {}
 
-    for i in range(3):
+    # NOTE: manually change 100 to 1000 for the input, and the cycle is visible
+    for i in range(100):
         # print(i)
         grid = cycle(grid)
         gridHash = gridToString(grid)
@@ -97,15 +98,23 @@ def part2():
         else:
             seen[gridHash] = i
 
-    cycle_start = 137
-    # starts at 93
-    cycle_length = 43
+    # manually grabbed these numbers upon inspecting output
+    cycle_start_index = 137
+    cycle_start_num = 93
+    cycle_length = 44
+
+    # example input
+    # cycle_start_index = 9
+    # cycle_start_num = 2
+    # cycle_length = 7
+
     cycle_end = 1000000000
-    cycle_num = (cycle_end - cycle_start) % cycle_length
+    cycle_num = (cycle_end - cycle_start_index) % cycle_length
     print("cycle_num", cycle_num)
 
-    # get the grid for 4
-    for i in range(93 + 33):
+    # get the grid for the cycle we care about
+    # TODO: maybe faster to grab it out of "seen"
+    for i in range(cycle_start_num + cycle_num):
         print(i)
         origGrid = cycle(origGrid)
     print_2d_grid(origGrid)
@@ -120,8 +129,6 @@ def part2():
             if char == "O":
                 answer += i + 1
     print(answer)
-
-# 101029 too high
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
