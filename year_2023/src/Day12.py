@@ -20,6 +20,33 @@ def getNumChars(springs, findChar="#"):
             count += 1
     return count
 
+def checkFirstGroup(springs, num):
+    if len(springs) == 0:
+        print("WEIRD CASE?")
+        return "", 0
+    currentGroup = ""
+    # get the first group of "#"
+    for i in range(len(springs)):
+        char = springs[i]
+        if char == "?":
+            if currentGroup == "":
+                return "", 0
+            else:
+                if len(currentGroup) == num:
+                    return currentGroup + "?", i
+        if char == ".":
+            if currentGroup == "":
+                continue
+            else:
+                break
+        if char == "#":
+            currentGroup += char
+    if len(currentGroup) == num:
+        return currentGroup, i
+    return "", 0
+
+cache = {}
+
 class SpringGroup:
     def __init__(self, springs, arrangement):
         self.springs = springs
@@ -59,6 +86,73 @@ class SpringGroup:
                 a3 = self.solve(springs3)
             else:
                 a3 = 0, 0
+            return a2[0] + a3[0], a2[1] + a3[1], self.springs
+
+    # recurse and memoize
+    def solve2(self, springs):
+        # print(springs)
+        # if no more arrangements?
+        # if len(self.arrangement) <= 0:
+        #     return 0, 1, self.springs
+        # find the next ?
+        questionMarkIdx = None
+        for i in range(len(springs)):
+            char = springs[i]
+            if char == "?":
+                questionMarkIdx = i
+                break
+        # if no question marks, we're done
+        if questionMarkIdx is None:
+            if self.satisfiesArrangement(springs):
+                cache[SpringGroup(springs, self.arrangement)] = (1, 1, self.springs)
+                return 1, 1, self.springs
+            else:
+                cache[SpringGroup(springs, self.arrangement)] = (0, 1, self.springs)
+                return 0, 1, self.springs
+        # try both "." and "#" and recurse
+        else:
+            springs2 = springs[:questionMarkIdx] + "#" + springs[questionMarkIdx + 1:]
+            if self.partialSatisfiesArrangement(springs2):
+                # check if we can remove any "arrangements"
+                num = self.arrangement[0]
+                s, sidx = checkFirstGroup(springs2, num)
+                if s != "":
+                    springs2 = springs2[sidx + 1:].strip(".")
+                    newSpringGroup = SpringGroup(springs2, self.arrangement[1:])
+                    print(newSpringGroup)
+                    if newSpringGroup in cache:
+                        a2 = cache[newSpringGroup]
+                        print("cache hit", newSpringGroup, a2)
+                    else:
+                        a2 = newSpringGroup.solve2(springs2)
+                        cache[newSpringGroup] = a2
+                else:
+                    a2 = self.solve2(springs2)
+                    cache[SpringGroup(springs2, self.arrangement)] = a2
+            else:
+                a2 = 0, 0
+                cache[SpringGroup(springs2, self.arrangement)] = a2
+
+            springs3 = springs[:questionMarkIdx] + "." + springs[questionMarkIdx + 1:]
+            if self.partialSatisfiesArrangement(springs2):
+                s, sidx = checkFirstGroup(springs2, num)
+                if s != "":
+                    springs3 = springs3[sidx+1:].strip(".")
+                    newSpringGroup = SpringGroup(springs3, self.arrangement[1:])
+                    print(newSpringGroup)
+                    if newSpringGroup in cache:
+                        a3 = cache[newSpringGroup]
+                        print("cache hit", newSpringGroup, a3)
+                    else:
+                        a3 = newSpringGroup.solve2(springs3)
+                        cache[newSpringGroup] = a3
+                else:
+                    a3 = self.solve2(springs3)
+                    cache[SpringGroup(springs3, self.arrangement)] = a3
+            else:
+                a3 = 0, 0
+                cache[SpringGroup(springs3, self.arrangement)] = a3
+
             return a2[0] + a3[0], a2[1] + a3[1], self.springs
 
     def partialSatisfiesArrangement(self, springs):
@@ -180,6 +274,8 @@ def part1():
 def part2():
     springGroups = parseInput(12)
 
+    # print(checkFirstGroup("###", 3))
+
     pool = Pool()
     processes = []
 
@@ -188,7 +284,7 @@ def part2():
         # print(group)
         group.unfold()
         print("starting", group, group.numUnknownSprings, "; totalPossible: ", math.pow(2, group.numUnknownSprings))
-        processes.append(pool.apply_async(group.solve, args=[group.springs]))
+        processes.append(pool.apply_async(group.solve2, args=[group.springs]))
 
     for process in processes:
         a, totalChecked, group = process.get()
