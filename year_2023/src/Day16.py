@@ -21,14 +21,10 @@ def parseInput(day):
 # 2 down
 # 3 left
 
-def part1():
-    mirrors, w, h = parseInput(16)
-    print(mirrors)
-    print(w, h)
-    beams = [(0, 0, 1)]
+def beamItUp(start, mirrors, w, h):
+    beams = [start]
 
     seen = set()
-    seenMirrors = set()
 
     for step in range(1000):
         newBeams = []
@@ -92,20 +88,57 @@ def part1():
             seen.add((i, j))
         beams = newBeams
         # print(beams)
-        print(len(seen))
-    print(seen)
-    for j in range(h):
-        for i in range(w):
-            if (i,j) in seen:
-                print("#", end="")
-            else:
-                print(".", end="")
-        print()
-    print(len(seen))
+        # print(len(seen))
+    # print(seen)
+    # print the board (for debugging)
+    # for j in range(h):
+    #     for i in range(w):
+    #         if (i, j) in seen:
+    #             print("#", end="")
+    #         else:
+    #             print(".", end="")
+    #     print()
+    return len(seen)
+
+def part1():
+    mirrors, w, h = parseInput(16)
+    answer = beamItUp((0, 0, 1), mirrors, w, h)
+    print(answer)
+
+# 0 up
+# 1 right
+# 2 down
+# 3 left
 
 def part2():
-    lines = parseInput(16)
-    print(lines)
+    mirrors, w, h = parseInput(16)
+
+    maxAnswer = 0
+    # top row going down
+    for i in range(w):
+        answer = beamItUp((i, 0, 2), mirrors, w, h)
+        if answer > maxAnswer:
+            maxAnswer = answer
+
+    # bottom row going up
+    for i in range(w):
+        answer = beamItUp((i, h-1, 0), mirrors, w, h)
+        if answer > maxAnswer:
+            maxAnswer = answer
+
+    # left side going right
+    for j in range(h):
+        answer = beamItUp((0, j, 1), mirrors, w, h)
+        if answer > maxAnswer:
+            maxAnswer = answer
+
+    # right side going left
+    for j in range(h):
+        answer = beamItUp((w-1, j, 3), mirrors, w, h)
+        if answer > maxAnswer:
+            maxAnswer = answer
+
+    print(maxAnswer)
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
@@ -114,8 +147,8 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
 
-    # print("\nPART 2 RESULT")
-    # start = time.perf_counter()
-    # part2()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
