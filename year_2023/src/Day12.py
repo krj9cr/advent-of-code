@@ -21,13 +21,6 @@ class SpringGroup:
         # print(self.arrangement)
         return self
 
-def getNumChars(springs, findChar="#"):
-    count = 0
-    for char in springs:
-        if char == findChar:
-            count += 1
-    return count
-
 def parseInput(day):
     dayf = "{:02d}".format(day)
     path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
@@ -41,6 +34,15 @@ def parseInput(day):
             springGroups.append(SpringGroup(springs, arrangement))
         return springGroups
 
+def getNumChars(springs, findChar="#"):
+    count = 0
+    for char in springs:
+        if char == findChar:
+            count += 1
+    return count
+
+# used for filtering combinations of springs with a given arrangement
+# does a few basic checks to see if the springs don't match the arrangement at all
 def partialSatisfiesArrangement(springs, arrangement):
     groups = []
     groupId = 0
@@ -69,6 +71,7 @@ def partialSatisfiesArrangement(springs, arrangement):
         return False
     return True
 
+# checks that springs 100% matches an arrangement
 def satisfiesArrangement(springs, arrangement):
     groups = []
     groupId = 0
@@ -89,12 +92,13 @@ def satisfiesArrangement(springs, arrangement):
         groups.append(len(currentGroup))
     return groups == arrangement
 
+# convert springs+arrangement to a string to use in cache
 def hashSpringsArrangement(springs, arrangement):
     return springs + " " + ",".join([str(i) for i in arrangement])
 
+# checks if the first group of springs is valid, so that we can "pop" it off
 def firstArrangementValid(springs, arrangement):
-    if len(arrangement) < 0:
-        print("UH OH")
+    if len(arrangement) < 1:
         return False
     firstArr = arrangement[0]
     if len(springs) < firstArr:
@@ -103,11 +107,33 @@ def firstArrangementValid(springs, arrangement):
         firstDot = springs.index(".")
         group = springs[:firstDot]
         return group == firstArr * "#"
-    except:
+    except ValueError:
         # no dots, so the whole thing needs to satisfy?
         return springs == firstArr * "#"
 
-# return (number of solutions, count of recursion)
+# does some work to replace a "?" with a char
+# and decides how to proceed
+# also do caching
+def getNextSpringsToTry(questionMarkIdx, springs, arrangement, char="#"):
+    springs2 = springs[:questionMarkIdx] + char + springs[questionMarkIdx + 1:]
+    springs2 = springs2.strip(".")
+    hashed2 = hashSpringsArrangement(springs2, arrangement)
+    a2 = 0, 0
+    if firstArrangementValid(springs2, arrangement):
+        firstArr = arrangement[0]
+        springs2 = springs2[firstArr:]
+        arrangement2 = arrangement[1:]
+        if partialSatisfiesArrangement(springs2, arrangement2):
+            a2 = solve(springs2, arrangement2)
+            cache[hashSpringsArrangement(springs2, arrangement2)] = a2[0]
+    else:
+        # see if this makes anything valid for the first group in arrangement
+        if partialSatisfiesArrangement(springs2, arrangement):
+            a2 = solve(springs2, arrangement)
+            cache[hashed2] = a2[0]
+    return a2
+
+# return (number of solutions, count of recursion, springs (so that we can print them with processes later lol))
 def solve(springs, arrangement):
     hashed = hashSpringsArrangement(springs, arrangement)
     # print(hashed)
@@ -118,45 +144,11 @@ def solve(springs, arrangement):
     try:
         questionMarkIdx = springs.index("?")
         # try both "." and "#" and recurse
-        springs2 = springs[:questionMarkIdx] + "#" + springs[questionMarkIdx + 1:]
-        springs2 = springs2.strip(".")
-        hashed2 = hashSpringsArrangement(springs2, arrangement)
-        a2 = 0, 0
-        if firstArrangementValid(springs2, arrangement):
-            firstArr = arrangement[0]
-            springs2 = springs2[firstArr:]
-            arrangement2 = arrangement[1:]
-            if partialSatisfiesArrangement(springs2, arrangement2):
-                a2 = solve(springs2, arrangement2)
-                cache[hashSpringsArrangement(springs2, arrangement2)] = a2[0]
-        else:
-            # see if this makes anything valid for the first group in arrangement
-            if partialSatisfiesArrangement(springs2, arrangement):
-                a2 = solve(springs2, arrangement)
-                cache[hashed2] = a2[0]
-
-        springs3 = springs[:questionMarkIdx] + "." + springs[questionMarkIdx + 1:]
-        springs3 = springs3.strip(".")
-        hashed3 = hashSpringsArrangement(springs3, arrangement)
-        a3 = 0, 0
-        if firstArrangementValid(springs3, arrangement):
-            firstArr = arrangement[0]
-            springs3 = springs3[firstArr:]
-            arrangement3 = arrangement[1:]
-            if partialSatisfiesArrangement(springs3, arrangement3):
-                a3 = solve(springs3, arrangement3)
-                cache[hashSpringsArrangement(springs3, arrangement3)] = a3[0]
-        else:
-            # see if this makes anything valid for the first group in arrangement
-            if partialSatisfiesArrangement(springs3, arrangement):
-                a3 = solve(springs3, arrangement)
-                cache[hashed3] = a3[0]
-        if hashed3 not in cache:
-            cache[hashed3] = 0
-
+        a2 = getNextSpringsToTry(questionMarkIdx, springs, arrangement, char="#")
+        a3 = getNextSpringsToTry(questionMarkIdx, springs, arrangement, char=".")
         return a2[0] + a3[0], a2[1] + a3[1], springs
-    except:
-        # we're done
+    except ValueError:
+        # no question marks means we're done
         if satisfiesArrangement(springs, arrangement):
             cache[hashed] = 1
             return 1, 1, springs
