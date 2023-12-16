@@ -271,6 +271,131 @@ def part1():
     # print(g.satisfiesArrangement("...#...#.###..."))
     # print(g.guessArrangement())
 
+
+def partialSatisfiesArrangement(springs, arrangement):
+    groups = []
+    groupId = 0
+    currentGroup = ""
+    partial = True
+    for char in springs:
+        if char == "?":
+            return partial
+        if char == "#":
+            currentGroup += char
+        else:
+            if currentGroup != "":
+                groups.append(len(currentGroup))
+                # fail fast if a group doesn't match
+                if groupId >= len(arrangement) or arrangement[groupId] != len(currentGroup):
+                    # print(springs, self.arrangement, groups)
+                    return False
+                groupId += 1
+                currentGroup = ""
+    if currentGroup != "":
+        groups.append(len(currentGroup))
+    if len(groups) > len(arrangement):
+        return False
+    # if there are more "#" than the sum of arrangement
+    if getNumChars(springs, "#") > sum(arrangement):
+        return False
+    return True
+
+def satisfiesArrangement(springs, arrangement):
+    groups = []
+    groupId = 0
+    currentGroup = ""
+    for char in springs:
+        if char == "#":
+            currentGroup += char
+        else:
+            if currentGroup != "":
+                groups.append(len(currentGroup))
+                # fail fast if a group doesn't match
+                if groupId >= len(arrangement) or arrangement[groupId] != len(currentGroup):
+                    # print(springs, self.arrangement, groups)
+                    return False
+                groupId += 1
+                currentGroup = ""
+    if currentGroup != "":
+        groups.append(len(currentGroup))
+    return groups == arrangement
+
+def hashSpringsArrangement(springs, arrangement):
+    return springs + " " + ",".join([str(i) for i in arrangement])
+
+def firstArrangementValid(springs, arrangement):
+    if len(arrangement) < 0:
+        print("UH OH")
+        return False
+    firstArr = arrangement[0]
+    if len(springs) < firstArr:
+        return False
+    try:
+        firstDot = springs.index(".")
+        group = springs[:firstDot]
+        return group == firstArr * "#"
+    except:
+        # no dots, so the whole thing needs to satisfy?
+        return springs == firstArr * "#"
+
+# return (number of solutions, count of recursion)
+def solve3(springs, arrangement):
+    hashed = hashSpringsArrangement(springs, arrangement)
+    # print(hashed)
+    if hashed in cache:
+        # print("cache hit", hashed,  "--->", cache[hashed])
+        return cache[hashed], 0
+    # find the next question mark
+    try:
+        questionMarkIdx = springs.index("?")
+        # try both "." and "#" and recurse
+        springs2 = springs[:questionMarkIdx] + "#" + springs[questionMarkIdx + 1:]
+        springs2 = springs2.strip(".")
+        hashed2 = hashSpringsArrangement(springs2, arrangement)
+        a2 = 0, 0
+        if firstArrangementValid(springs2, arrangement):
+            firstArr = arrangement[0]
+            springs2 = springs2[firstArr:]
+            arrangement2 = arrangement[1:]
+            if partialSatisfiesArrangement(springs2, arrangement2):
+                a2 = solve3(springs2, arrangement2)
+                cache[hashSpringsArrangement(springs2, arrangement2)] = a2[0]
+        else:
+            # see if this makes anything valid for the first group in arrangement
+            if partialSatisfiesArrangement(springs2, arrangement):
+                a2 = solve3(springs2, arrangement)
+                cache[hashed2] = a2[0]
+
+        springs3 = springs[:questionMarkIdx] + "." + springs[questionMarkIdx + 1:]
+        springs3 = springs3.strip(".")
+        hashed3 = hashSpringsArrangement(springs3, arrangement)
+        a3 = 0, 0
+        if firstArrangementValid(springs3, arrangement):
+            firstArr = arrangement[0]
+            springs3 = springs3[firstArr:]
+            arrangement3 = arrangement[1:]
+            if partialSatisfiesArrangement(springs3, arrangement3):
+                a3 = solve3(springs3, arrangement3)
+                cache[hashSpringsArrangement(springs3, arrangement3)] = a3[0]
+        else:
+            # see if this makes anything valid for the first group in arrangement
+            if partialSatisfiesArrangement(springs3, arrangement):
+                a3 = solve3(springs3, arrangement)
+                cache[hashed3] = a3[0]
+        if hashed3 not in cache:
+            cache[hashed3] = 0
+
+        return a2[0] + a3[0], a2[1] + a3[1]
+    except:
+        # we're done
+        if satisfiesArrangement(springs, arrangement):
+            cache[hashed] = 1
+            return 1, 1
+        else:
+            cache[hashed] = 0
+            return 0, 1
+
+
 def part2():
     springGroups = parseInput(12)
 
@@ -284,10 +409,10 @@ def part2():
         # print(group)
         group.unfold()
         print("starting", group, group.numUnknownSprings, "; totalPossible: ", math.pow(2, group.numUnknownSprings))
-        processes.append(pool.apply_async(group.solve2, args=[group.springs]))
+        processes.append(pool.apply_async(solve3, args=[group.springs, group.arrangement]))
 
     for process in processes:
-        a, totalChecked, group = process.get()
+        a, totalChecked = process.get()
         print("finished", group, "; answer:", a, "; totalChecked:", totalChecked)
         answer += a
     print(answer)
