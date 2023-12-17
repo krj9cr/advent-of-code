@@ -47,37 +47,37 @@ def heuristic(goal, x2, y2):
 def getNextMoves(x, y, direction, steps_in_current_direction):
     nextMoves = []
     if direction == 0:  # up
-        if steps_in_current_direction <= 3:
+        if steps_in_current_direction < 3:
             # go up and straight
             nextMoves.append((x, y - 1, 0, steps_in_current_direction + 1))
         # turn left, go left
-        nextMoves.append((x - 1, y, 3, steps_in_current_direction))
+        nextMoves.append((x - 1, y, 3, 1))
         # turn right, go right
-        nextMoves.append((x + 1, y, 1, steps_in_current_direction))
+        nextMoves.append((x + 1, y, 1, 1))
     elif direction == 1:  # right
-        if steps_in_current_direction <= 3:
+        if steps_in_current_direction < 3:
             # go right and straight
             nextMoves.append((x + 1, y, 1, steps_in_current_direction + 1))
         # turn left, go up
-        nextMoves.append((x, y - 1, 0, steps_in_current_direction))
+        nextMoves.append((x, y - 1, 0, 1))
         # turn right, go down
-        nextMoves.append((x, y + 1, 2, steps_in_current_direction))
+        nextMoves.append((x, y + 1, 2, 1))
     elif direction == 2:  # down
-        if steps_in_current_direction <= 3:
+        if steps_in_current_direction < 3:
             # go down and straight
             nextMoves.append((x, y + 1, 2, steps_in_current_direction + 1))
         # turn left, go right
-        nextMoves.append((x + 1, y, 1, steps_in_current_direction))
+        nextMoves.append((x + 1, y, 1, 1))
         # turn right, go left
-        nextMoves.append((x - 1, y, 3, steps_in_current_direction))
+        nextMoves.append((x - 1, y, 3, 1))
     elif direction == 3:  # left
-        if steps_in_current_direction <= 3:
+        if steps_in_current_direction < 3:
             # go left and straight
             nextMoves.append((x - 1, y, 3, steps_in_current_direction + 1))
         # turn left, go down
-        nextMoves.append((x, y + 1, 2, steps_in_current_direction))
+        nextMoves.append((x, y + 1, 2, 1))
         # turn right, go up
-        nextMoves.append((x, y - 1, 0, steps_in_current_direction))
+        nextMoves.append((x, y - 1, 0, 1))
     return nextMoves
 
 # See: https://www.redblobgames.com/pathfinding/a-star/implementation.html
@@ -93,27 +93,27 @@ def a_star_search(board, starts, goal):
     # add start infos
     for (x, y, direction, steps_in_curr_direction) in starts:
         queue.put((x, y, direction, steps_in_curr_direction), board[y][x])
-        came_from[(x, y)] = None
-        cost_so_far[(x, y)] = board[y][x]
+        came_from[(x, y, direction)] = None
+        cost_so_far[(x, y, direction)] = board[y][x]
 
     while not queue.empty():
         x, y, direction, steps_in_current_direction = queue.get()
 
-        if (x, y) == goal:
-            break
+        # if (x, y) == goal:
+        #     break
 
         # for each next valid move (only straight, left, right, not backwards) and max 3 steps in one direction
         for x2, y2, direction2, steps_in_current_direction2 in getNextMoves(x, y, direction, steps_in_current_direction):
             # if we're not out of bounds
             if 0 <= y2 < len(board) and 0 <= x2 < len(board[y2]):
                 cost_to_move = board[y2][x2]  # cost to move is the number value in the board
-                new_cost = cost_so_far[(x, y)] + cost_to_move
+                new_cost = cost_so_far[(x, y, direction)] + cost_to_move
                 next_spot = (x2, y2, direction2, steps_in_current_direction2)
-                if (x2, y2) not in cost_so_far or new_cost < cost_so_far[(x2, y2)]:
-                    cost_so_far[(x2, y2)] = new_cost
-                    priority = new_cost #+ heuristic(goal, x2, y2)
+                if (x2, y2, direction2) not in cost_so_far or new_cost < cost_so_far[(x2, y2, direction2)]:
+                    cost_so_far[(x2, y2, direction2)] = new_cost
+                    priority = new_cost + heuristic(goal, x2, y2)
                     queue.put(next_spot, priority)
-                    came_from[(x2, y2)] = (x, y)
+                    came_from[(x2, y2, direction2)] = (x, y, direction)
     # return the end pos, too, because it'll have a direction and steps
     return came_from, cost_so_far, (x, y, direction, steps_in_current_direction)
 
@@ -134,7 +134,7 @@ def part1():
 
     # reconstruct path
     path = []
-    curr = came_from[endPos]
+    curr = came_from[(w - 1, h - 1, 1)]
     while curr is not None:
         print(curr)
         path.append(curr)
@@ -142,18 +142,18 @@ def part1():
     print(list(reversed(path)))
 
     grid2 = copy.deepcopy(grid)
-    for (i, j) in path:
-        grid2[j][i] = "#"
-        # if direction == 0:  # up
-        #     grid2[j][i] = "^"
-        # elif direction == 1:  # right
-        #     grid2[j][i] = ">"
-        # elif direction == 2:  # down
-        #     grid2[j][i] = "v"
-        # elif direction == 3:  # left
-        #     grid2[j][i] = "<"
+    for (i, j, direction) in path:
+        # grid2[j][i] = "#"
+        if direction == 0:  # up
+            grid2[j][i] = "^"
+        elif direction == 1:  # right
+            grid2[j][i] = ">"
+        elif direction == 2:  # down
+            grid2[j][i] = "v"
+        elif direction == 3:  # left
+            grid2[j][i] = "<"
     print_2d_grid(grid2)
-    print(cost_so_far[endPos])
+    print(cost_so_far[(w - 1, h - 1, 1)])
 
 
 def part2():
