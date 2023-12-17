@@ -4,7 +4,10 @@ def parseInput(day):
     dayf = "{:02d}".format(day)
     path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
     with open(path, 'r') as file:
-        lines = [line.strip() for line in file]
+        lines = []
+        for line in file:
+            line = line.strip()
+            lines.append(line)
         return lines
 
 def part1():
