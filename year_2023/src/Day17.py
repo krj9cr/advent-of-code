@@ -2,6 +2,7 @@ import copy
 import time
 import heapq
 import sys
+import queue
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -46,7 +47,7 @@ def printPath(path):
 
 def printPathGrid(grid, path):
     grid2 = copy.deepcopy(grid)
-    for (i, j, direction, _) in path:
+    for (i, j, direction) in path:
         if direction == 0:  # up
             grid2[j][i] = "^"
         elif direction == 1:  # right
@@ -65,138 +66,179 @@ def getPathCost(grid, path):
         cost += grid[j][i]
     return cost
 
-def heuristic(goal, x2, y2):
+def heuristic(goal, next):
     (x1, y1) = goal
+    (x2, y2) = next
     dist = abs(x1 - x2) + abs(y1 - y2)
     return dist
 
-bestPath = []
-bestPathCost = 99999
-
-# Function to find all possible paths in a matrix from the top-left cell to the bottom-right cell
-def findPaths(grid, path, starts):
-    queue = PriorityQueue()
-    global bestPathCost, bestPath
+def get_neighbors(grid, node):
+    x, y, direction = node
     w = len(grid[0])
     h = len(grid)
-
-    # Include the current cell in the path
-    for (i, j, direction, steps_in_curr_direction) in starts:
-        path.append((i, j, direction, steps_in_curr_direction))
-        cost = grid[j][i]
-        queue.put((cost, path, {}), cost)
-        print(queue)
-
-    while not queue.empty():
-        huer, (cost, path, cost_so_far) = queue.get()
-        # print(cost, path)
-
-        curr_pos = path[-1]
-        (i, j, direction, steps_in_curr_direction) = curr_pos
-
-        # If the bottom-right cell is reached, print the path
-        if i == w - 1 and j == h - 1:
-            path.append((i, j, direction, steps_in_curr_direction))
-            # printPath(path)
-            cost = getPathCost(grid, path)
-            if cost < bestPathCost:
-                bestPathCost = cost
-                bestPath = path
-                printPathGrid(grid, path)
-                print("BEST COST", bestPathCost)
-
-        # for all possible steps
-        for next_pos in getNextMoves(i, j, direction, steps_in_curr_direction):
-            (i2, j2, direction2, steps_in_curr_direction2) = next_pos
-            if 0 <= i2 < w and 0 <= j2 < h:
-                new_cost = cost + grid[j2][i2]
-                new_huer = huer + grid[j2][i2] + heuristic((w-1, h-1), i2, j2)
-                # if (next_pos not in cost_so_far or new_cost < cost_so_far[next_pos]) and new_cost < bestPathCost:
-                if (next_pos not in cost_so_far or new_cost < cost_so_far[next_pos]) and new_cost < bestPathCost:
-                    cost_so_far[next_pos] = new_cost
-                    queue.put((new_cost, path + [next_pos], cost_so_far), new_huer)
-
-# 0 up
-# 1 right
-# 2 down
-# 3 left
-def getNextMoves(x, y, direction, steps_in_current_direction):
-    nextMoves = []
-    if direction == 0:  # up
-        if steps_in_current_direction < 3:
-            # go up and straight
-            nextMoves.append((x, y - 1, direction, steps_in_current_direction + 1))
-        # turn right, go right
-        nextMoves.append((x + 1, y, 1, 1))
-        # turn left, go left
-        nextMoves.append((x - 1, y, 3, 1))
+    neighbors = []
+    if direction == 0:
+        # same direction
+        # next_cost = 0
+        # for i in range(1, 3):
+        #     x2, y2 = (x, y - i)
+        #     if 0 <= x2 < w and 0 <= y2 < h:
+        #         next_cost += grid[y2][x2]
+        #         neighbors.append((x2, y2, direction, next_cost))
+        # go left
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x - i, y
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 3, next_cost))
+        # go right
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x + i, y
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 1, next_cost))
     elif direction == 1:  # right
-        if steps_in_current_direction < 3:
-            # go right and straight
-            nextMoves.append((x + 1, y, direction, steps_in_current_direction + 1))
-        # turn right, go down
-        nextMoves.append((x, y + 1, 2, 1))
-        # turn left, go up
-        nextMoves.append((x, y - 1, 0, 1))
+        # same direction
+        # next_cost = 0
+        # for i in range(1, 3):
+        #     x2, y2 = (x + i, y)
+        #     if 0 <= x2 < w and 0 <= y2 < h:
+        #         next_cost += grid[y2][x2]
+        #         neighbors.append((x2, y2, direction, next_cost))
+        # go left, which is up
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x, y - i
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 0, next_cost))
+        # go right, which is down
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x, y + i
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 2, next_cost))
     elif direction == 2:  # down
-        if steps_in_current_direction < 3:
-            # go down and straight
-            nextMoves.append((x, y + 1, direction, steps_in_current_direction + 1))
-        # turn left, go right
-        nextMoves.append((x + 1, y, 1, 1))
-        # turn right, go left
-        nextMoves.append((x - 1, y, 3, 1))
+        # same direction
+        # next_cost = 0
+        # for i in range(1, 3):
+        #     x2, y2 = (x, y + i)
+        #     if 0 <= x2 < w and 0 <= y2 < h:
+        #         next_cost += grid[y2][x2]
+        #         neighbors.append((x2, y2, direction, next_cost))
+        # go left
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x - i, y
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 3, next_cost))
+        # go right
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x + i, y
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 1, next_cost))
     elif direction == 3:  # left
-        if steps_in_current_direction < 3:
-            # go left and straight
-            nextMoves.append((x - 1, y, direction, steps_in_current_direction + 1))
-        # turn left, go down
-        nextMoves.append((x, y + 1, 2, 1))
-        # turn right, go up
-        nextMoves.append((x, y - 1, 0, 1))
-    return nextMoves
-
+        # same direction
+        # next_cost = 0
+        # for i in range(1, 3):
+        #     x2, y2 = (x - i, y)
+        #     if 0 <= x2 < w and 0 <= y2 < h:
+        #         next_cost += grid[y2][x2]
+        #         neighbors.append((x2, y2, direction, next_cost))
+        # go right, which is up
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x, y - i
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 0, next_cost))
+        # go left, which is down
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x, y + i
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 2, next_cost))
+    else:  # direction is None, so we're at the start, so just go down and right
+        # go down
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x, y + i
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 2, next_cost))
+        # go right
+        next_cost = 0
+        for i in range(1, 4):
+            x2, y2 = x + i, y
+            if 0 <= x2 < w and 0 <= y2 < h:
+                next_cost += grid[y2][x2]
+                neighbors.append((x2, y2, 1, next_cost))
+    # x, y, direction, next_cost
+    return neighbors
 
 # 0 up
 # 1 right
 # 2 down
 # 3 left
 
+# TODO: this gets the example wrong but my input right :)
 def part1():
     grid, w, h = parseInput(17)
     # print_2d_grid(grid)
-    # print(w, h)
-    starts = [(1, 0, 1, 1), (0, 1, 2, 1)]
-    endPos = (w - 1, h - 1)
+    start = (0, 0, None)
+    goal = (w-1, h-1)
 
-    # print(sys.getrecursionlimit())
-    # sys.setrecursionlimit(10000)
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
+    came_from = dict()
+    cost_so_far = dict()
+    came_from[start] = None
+    cost_so_far[start] = 0
+
+    while not frontier.empty():
+        _, current = frontier.get()
+        x, y, direction = current
+
+        if (x, y) == goal:
+            break
+
+        for next in get_neighbors(grid, current):
+            x2, y2, direction2, cost2 = next
+            if 0 <= x2 < w and 0 <= y2 < h:
+                new_cost = cost_so_far[current] + cost2
+                if (x2, y2, direction2) not in cost_so_far or new_cost < cost_so_far[(x2, y2, direction2)]:
+                    cost_so_far[(x2, y2, direction2)] = new_cost
+                    priority = new_cost + heuristic(goal, (x2, y2))
+                    frontier.put((x2, y2, direction2), priority)
+                    came_from[(x2, y2, direction2)] = current
+
+    print("came_from", came_from)
+    endNode = None
+    for (x, y, direction) in came_from:
+        if (x, y) == goal:
+            endNode = (x, y, direction)
+            break
+    print("end", endNode)
 
     path = []
-    findPaths(grid, path, [(1, 0, 1, 1), (0, 1, 2, 1)])
-    print("bestpathcost", bestPathCost)
-    print(bestPath)
-    print(getPathCost(grid, bestPath))
+    current = endNode
+    while current != start:
+        path.append(current)
+        current = came_from[current]
+    path.append(start)  # optional
+    path.reverse()  # optional
+    print("path", path)
 
-    # paths = a_star_search(grid, starts, endPos)
-    #
-    # for (priority, path) in paths:
-    #     print((priority, path))
-    #     grid2 = copy.deepcopy(grid)
-    #     for (i, j, direction, _) in path:
-    #         # grid2[j][i] = "#"
-    #         if direction == 0:  # up
-    #             grid2[j][i] = "^"
-    #         elif direction == 1:  # right
-    #             grid2[j][i] = ">"
-    #         elif direction == 2:  # down
-    #             grid2[j][i] = "v"
-    #         elif direction == 3:  # left
-    #             grid2[j][i] = "<"
-    #     print_2d_grid(grid2)
-    #     print()
-
-# 857 too high
+    printPathGrid(grid, path)
+    print(cost_so_far)
+    print(cost_so_far[endNode])
 
 def part2():
     lines = parseInput(17)
