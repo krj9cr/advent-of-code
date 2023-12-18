@@ -114,6 +114,61 @@ def getNextMoves(x, y, direction, steps_in_current_direction):
 
     return nextMoves
 
+# TODO: move at least 4, max 10
+def getNextMoves2(x, y, direction, steps_in_current_direction):
+    nextMoves = []
+    if direction == 0:  # up
+        if steps_in_current_direction < 4:  # jump ahead
+            nextMoves.append((x, y - 1, direction, steps_in_current_direction + 1))
+        else:
+            if steps_in_current_direction < 10:
+                # go up and straight
+                nextMoves.append((x, y - 1, 0, steps_in_current_direction + 1))
+            # turn left, go left
+            nextMoves.append((x - 1, y, 3, 1))
+            # turn right, go right
+            nextMoves.append((x + 1, y, 1, 1))
+    elif direction == 1:  # right
+        if steps_in_current_direction < 4:  # jump ahead
+            nextMoves.append((x + 1, y, direction, steps_in_current_direction + 1))
+        else:
+            if steps_in_current_direction < 10:
+                # go right and straight
+                nextMoves.append((x + 1, y, 1, steps_in_current_direction + 1))
+            # turn left, go up
+            nextMoves.append((x, y - 1, 0, 1))
+            # turn right, go down
+            nextMoves.append((x, y + 1, 2, 1))
+    elif direction == 2:  # down
+        if steps_in_current_direction < 4:  # jump ahead
+            nextMoves.append((x, y + 1, direction, steps_in_current_direction + 1))
+        else:
+            if steps_in_current_direction < 10:
+                # go down and straight
+                nextMoves.append((x, y + 1, 2, steps_in_current_direction + 1))
+            # turn left, go right
+            nextMoves.append((x + 1, y, 1, 1))
+            # turn right, go left
+            nextMoves.append((x - 1, y, 3, 1))
+    elif direction == 3:  # left
+        if steps_in_current_direction < 4:  # jump ahead
+            nextMoves.append((x - 1, y, direction, steps_in_current_direction + 1))
+        else:
+            if steps_in_current_direction < 10:
+                # go left and straight
+                nextMoves.append((x - 1, y, 3, steps_in_current_direction + 1))
+            # turn left, go down
+            nextMoves.append((x, y + 1, 2, 1))
+            # turn right, go up
+            nextMoves.append((x, y - 1, 0, 1))
+    else:
+        # go down
+        nextMoves.append((x, y + 1, 2, 1))
+        # go right
+        nextMoves.append((x + 1, y, 1, 1))
+
+    return nextMoves
+
 def get_neighbors(grid, node):
     x, y, direction = node
     w = len(grid[0])
@@ -355,7 +410,6 @@ def get_neighbors2(grid, node):
 # 2 down
 # 3 left
 
-# TODO: this gets the example wrong but my input right :)
 def part1():
     grid, w, h = parseInput(17)
     # print_2d_grid(grid)
@@ -410,66 +464,66 @@ def part1():
 def part2():
     grid, w, h = parseInput(17)
     # print_2d_grid(grid)
-    start = (0, 0, None)
+    start = (0, 0, None, 0)
     goal = (w-1, h-1)
 
     # TESTING
-    print(get_neighbors2(grid, (1, 0, 1)))
+    # print(getNextMoves2(5, 5, 0, 4))
 
-    # frontier = PriorityQueue()
-    # frontier.put(start, 0)
-    # came_from = dict()
-    # cost_so_far = dict()
-    # came_from[start] = None
-    # cost_so_far[start] = 0
-    #
-    # while not frontier.empty():
-    #     _, current = frontier.get()
-    #     x, y, direction = current
-    #
-    #     if (x, y) == goal:
-    #         break
-    #
-    #     for next in get_neighbors2(grid, current):
-    #         x2, y2, direction2, cost2 = next
-    #         if 0 <= x2 < w and 0 <= y2 < h:
-    #             new_cost = cost_so_far[current] + cost2
-    #             if (x2, y2, direction2) not in cost_so_far or new_cost < cost_so_far[(x2, y2, direction2)]:
-    #                 cost_so_far[(x2, y2, direction2)] = new_cost
-    #                 priority = new_cost + heuristic(goal, (x2, y2))
-    #                 frontier.put((x2, y2, direction2), priority)
-    #                 came_from[(x2, y2, direction2)] = current
-    #
-    # print("came_from", came_from)
-    # endNode = None
-    # for (x, y, direction) in came_from:
-    #     if (x, y) == goal:
-    #         endNode = (x, y, direction)
-    #         break
-    # print("end", endNode)
-    #
-    # path = []
-    # current = endNode
-    # while current != start:
-    #     path.append(current)
-    #     current = came_from[current]
-    # path.append(start)  # optional
-    # path.reverse()  # optional
-    # print("path", path)
-    #
-    # printPathGrid(grid, path)
-    # print(cost_so_far)
-    # print(cost_so_far[endNode])
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
+    came_from = dict()
+    cost_so_far = dict()
+    came_from[start] = None
+    cost_so_far[start] = 0
+
+    while not frontier.empty():
+        _, current = frontier.get()
+        x, y, direction, steps = current
+
+        if (x, y) == goal:
+            break
+
+        for next in getNextMoves2(x, y, direction, steps):
+            x2, y2, direction2, steps2 = next
+            if 0 <= x2 < w and 0 <= y2 < h:
+                new_cost = cost_so_far[current] + grid[y2][x2]
+                if next not in cost_so_far or new_cost < cost_so_far[next]:
+                    cost_so_far[next] = new_cost
+                    priority = new_cost + heuristic(goal, (x2, y2))
+                    frontier.put(next, priority)
+                    came_from[next] = current
+
+    print("came_from", came_from)
+    endNode = None
+    for (x, y, direction, steps) in came_from:
+        if (x, y) == goal:
+            endNode = (x, y, direction, steps)
+            break
+    print("end", endNode)
+
+    path = []
+    current = endNode
+    while current != start:
+        path.append(current)
+        current = came_from[current]
+    path.append(start)  # optional
+    path.reverse()  # optional
+    print("path", path)
+
+    printPathGrid(grid, path)
+    print(cost_so_far)
+    print(cost_so_far[endNode])
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
