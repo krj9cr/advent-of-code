@@ -1,5 +1,6 @@
 import time
 from collections import deque
+from shapely.geometry import Polygon
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -115,74 +116,54 @@ def part2():
     print(digs2)
 
     startPos = (0, 0)
-    locations = {startPos: 0}
     vertices = [startPos]
+    numBoundaryPoints = 0
     x, y = startPos
     for (direction, steps) in digs2:
         if direction == "R":
-            for i in range(steps + 1):
-                locations[(x + i, y)] = 0
             x, y = x + steps, y
+            numBoundaryPoints += steps
             vertices.append((x, y))
         elif direction == "L":
-            for i in range(steps + 1):
-                locations[(x - i, y)] = 0
             x, y = x - steps, y
+            numBoundaryPoints += steps
             vertices.append((x, y))
         elif direction == "U":
-            for i in range(steps + 1):
-                locations[(x, y - i)] = 0
+            numBoundaryPoints += steps
             x, y = x, y - steps
             vertices.append((x, y))
         elif direction == "D":
-            for i in range(steps + 1):
-                locations[(x, y + i)] = 0
+            numBoundaryPoints += steps
             x, y = x, y + steps
             vertices.append((x, y))
-    points = set(list(locations.keys()) + [startPos])
-    # print(points)
     # print("vertices", vertices[:-1])
 
-    # find the minX/maxX and Y of all the vertices
-    minX = minY = 99999
-    maxX = maxY = 0
-    for (x, y) in vertices:
-        if x < minX:
-            minX = x
-        if x > maxX:
-            maxX = x
-        if y < minY:
-            minY = y
-        if y > maxY:
-            maxY = y
-    print("mins", minX, minY, "maxes", maxX, maxY)
+    # https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
+    def PolygonArea(corners):
+        n = len(corners)  # of corners
+        area = 0.0
+        for i in range(n):
+            j = (i + 1) % n
+            area += corners[i][0] * corners[j][1]
+            area -= corners[j][0] * corners[i][1]
+        area = abs(area) / 2.0
+        return area
 
-    # try to print the thing...?
-    # with open("myfile.txt", "w") as file1:
-    #     for j in range(minY, maxY + 1):
-    #         for i in range(minX, maxX + 1):
-    #             if (i, j) in points:
-    #                 file1.write("#")
-    #             else:
-    #                 file1.write(".")
-    #         file1.write("\n")
-
-    # we're going to "cheat" and just pick a point we know is inside and do a flood fill with bfs
-    # find some points near the top of the grid
-    # for x, y in points:
-    #     if y == minY:
-    #         print("minY point", x, y)
-    inside = (1, 1)  # example case and input case wow
-    seen = bfs_2d_grid(inside, points, minX, maxX, minY, maxY)
-    print(len(seen))
-    print(len(seen) + len(points))
+    area = PolygonArea(vertices)
+    # numBoundaryPoints = len(points)
+    # pick's theorem: https://en.wikipedia.org/wiki/Pick%27s_theorem
+    interior = area - (numBoundaryPoints / 2) + 1
+    print("area", area)
+    print("numBoundaryPoints", numBoundaryPoints)
+    print("interior", interior)
+    print("answer", numBoundaryPoints + interior)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
