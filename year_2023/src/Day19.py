@@ -32,6 +32,19 @@ class Workflow:
                 return self.rules[rule]
         return self.default
 
+    def negated_rules(self):
+        rules = []
+        for rule in self.rules:
+            next_workflow_name = self.rules[rule]
+            if next_workflow_name == "A" and self.default == "A":  # we can ignore this
+                continue
+            if "<" in rule:
+                rule = rule.replace("<", ">=")
+            elif ">" in rule:
+                rule = rule.replace(">", "<=")
+            rules.append(rule)
+        return rules
+
 def parseInput(day):
     dayf = "{:02d}".format(day)
     path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
@@ -82,20 +95,54 @@ def part1():
                 break
     print("answer", answer)
 
+rule_chains = []
+
+def get_rule_chain(workflows, workflow_name, rule_chain):
+    # print(workflow_name)
+    if workflow_name == "A":
+        rule_chains.append(rule_chain)
+    elif workflow_name == "R":
+        return  # do nothing
+    else:
+        workflow = workflows[workflow_name]
+        for rule in workflow.rules:
+            get_rule_chain(workflows, workflow.rules[rule], rule_chain + [rule])
+        # also take the default, after negating
+        get_rule_chain(workflows, workflow.default, rule_chain + workflow.negated_rules())
 
 def part2():
-    lines = parseInput(19)
-    print(lines)
+    workflows, _ = parseInput(19)
+
+    # what is the total?
+    # 4 possible numbers of 1 to 4000
+    # 4000^4 = 2.56e+14 = 2.45 * 10^14 = 256,000,000,000,000
+
+    # 256000000000000 - 167409079868000 = 88590920000000
+
+    # just to compare
+    # 256000000000000
+    # 167409079868000
+    #  88590920000000
+
+    # start with "in"
+    # follow each path "recursively", "and"-ing the conditions
+    # if we end in "A", keep that as a constraint
+    # if we end in "R", throw it out
+    # then we have a big set of constraints... and need to do maths
+
+    nextWorkFlow = "in"
+    get_rule_chain(workflows, nextWorkFlow, [])
+    print(rule_chains)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
