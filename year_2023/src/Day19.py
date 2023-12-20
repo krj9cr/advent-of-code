@@ -123,6 +123,7 @@ def part2():
     # 256000000000000
     # 167409079868000
     #  88590920000000
+    #
 
     # start with "in"
     # follow each path "recursively", "and"-ing the conditions
@@ -133,6 +134,20 @@ def part2():
     nextWorkFlow = "in"
     get_rule_chain(workflows, nextWorkFlow, [])
     print(rule_chains)
+
+    # first set is ['s<1351', 'a<2006', 'x<1416']
+    # x has 1416 possibilites or x>2662, which is 4000-2662 = 1338
+    # m has 4000 possibilities
+    # a has 2006 possibilities
+    # s has 1351 possibilities
+    # mult = 15350040384000
+
+    # promising? https://labix.org/doc/constraint/
+    from constraint import *
+    problem = Problem()
+    problem.addVariables(["x", "m", "a", "s"], range(1, 4001))
+    problem.addConstraint(InSetConstraint(set(range(1, 1356))), ["s"])
+
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
