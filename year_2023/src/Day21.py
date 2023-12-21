@@ -1,5 +1,4 @@
 import time
-from collections import deque
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -19,18 +18,13 @@ def parseInput(day):
             j += 1
         return startPos, rocks
 
-# TODO
-def print_grid(rocks):
-    True
-
-
 def part1():
     startPos, rocks = parseInput(21)
     print(startPos, rocks)
 
     num_steps = 64
 
-    elf_locations = set([startPos])
+    elf_locations = {startPos}
     for step in range(num_steps):
         elf_locations2 = set()
         for loc in elf_locations:
@@ -43,20 +37,34 @@ def part1():
         print(elf_locations)
     print(len(elf_locations))
 
-
 def part2():
-    lines = parseInput(21)
-    print(lines)
+    startPos, rocks = parseInput(21)
+    print(startPos, rocks)
+
+    num_steps = 6
+
+    elf_locations = {startPos}
+    for step in range(num_steps):
+        elf_locations2 = set()
+        for loc in elf_locations:
+            x, y = loc
+            for x2, y2 in ((x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1)):
+                nextPos = (x2, y2)
+                if nextPos not in rocks:
+                    elf_locations2.add(nextPos)
+        elf_locations = elf_locations2
+        print(elf_locations)
+    print(len(elf_locations))
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
