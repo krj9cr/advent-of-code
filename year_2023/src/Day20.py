@@ -179,18 +179,45 @@ def part1():
 
 
 def part2():
-    lines = parseInput(20)
-    print(lines)
+    modules = parseInput(20)
+    # for m in modules:
+    #     print(modules[m])
+
+    # add TestModules that are coded but don't exist
+    modules["output"] = TestModule("output", [])  # example 2
+    modules["rx"] = TestModule("rx", [])  # my input
+
+    for i in range(10000000):
+        if i % 1000000 == 0:
+            print(i)
+        pulse_queue = queue.Queue()
+
+        # simulate initial button push
+        pulse_queue.put(Pulse(PulseType.LOW, BUTTON, BROADCASTER))
+
+        # keep processing until there's no pulses left
+        while not pulse_queue.empty():
+            pulse = pulse_queue.get()
+            if pulse.destination_module == "rx" and pulse.pulse_type == PulseType.LOW:
+                break
+            # print(pulse)
+            module = modules[pulse.destination_module]
+            sent_pulses = module.process_pulse(pulse)
+            for sent_pulse in sent_pulses:
+                pulse_queue.put(sent_pulse)
+        # print("---")
+
+    print(i + 1)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
