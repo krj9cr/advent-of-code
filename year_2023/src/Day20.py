@@ -145,12 +145,12 @@ def parseInput(day):
 
 def part1():
     modules = parseInput(20)
-    for m in modules:
-        print(modules[m])
+    # for m in modules:
+    #     print(modules[m])
 
-    # add TestModule for example2
-    modules["output"] = TestModule("output", [])
-    modules["rx"] = TestModule("rx", [])
+    # add TestModules that are coded but don't exist
+    modules["output"] = TestModule("output", [])  # example 2
+    modules["rx"] = TestModule("rx", [])  # my input
 
     num_high = num_low = 0
 
@@ -167,14 +167,14 @@ def part1():
                 num_high += 1
             else:
                 num_low +=1
-            print(pulse)
+            # print(pulse)
             module = modules[pulse.destination_module]
             sent_pulses = module.process_pulse(pulse)
             for sent_pulse in sent_pulses:
                 pulse_queue.put(sent_pulse)
-        print("---")
+        # print("---")
 
-    print("high:", num_high, "low:", num_low)
+    # print("high:", num_high, "low:", num_low)
     print("answer:", num_high * num_low)
 
 
