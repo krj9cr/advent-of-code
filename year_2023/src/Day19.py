@@ -1,4 +1,6 @@
+import copy
 import time
+import portion as P
 
 class Part:
     def __init__(self, x, m, a, s):
@@ -12,6 +14,13 @@ class Part:
 
     def sum(self):
         return self.x + self.m + self.a + self.s
+
+def negate_rule(rule):
+    if "<" in rule:
+        rule = rule.replace("<", ">=")
+    elif ">" in rule:
+        rule = rule.replace(">", "<=")
+    return rule
 
 class Workflow:
     def __init__(self, name, rules, default):
@@ -36,12 +45,9 @@ class Workflow:
         rules = []
         for rule in self.rules:
             next_workflow_name = self.rules[rule]
-            if next_workflow_name == "A" and self.default == "A":  # we can ignore this
-                continue
-            if "<" in rule:
-                rule = rule.replace("<", ">=")
-            elif ">" in rule:
-                rule = rule.replace(">", "<=")
+            # if next_workflow_name == "A" and self.default == "A":  # we can ignore this
+            #     continue
+            rule = negate_rule(rule)
             rules.append(rule)
         return rules
 
@@ -105,10 +111,38 @@ def get_rule_chain(workflows, workflow_name, rule_chain):
         return  # do nothing
     else:
         workflow = workflows[workflow_name]
+        da_chain = copy.deepcopy(rule_chain)
         for rule in workflow.rules:
-            get_rule_chain(workflows, workflow.rules[rule], rule_chain + [rule])
+            get_rule_chain(workflows, workflow.rules[rule], da_chain + [rule])
+            da_chain.append(negate_rule(rule))
         # also take the default, after negating
         get_rule_chain(workflows, workflow.default, rule_chain + workflow.negated_rules())
+
+minValue = 1
+maxValue = 4000
+
+# NOTE: returns inclusive ranges
+def rule_to_interval(rule):
+    if "<=" in rule:
+        parts = rule.split("<=")
+        variable = parts[0]
+        value = int(parts[1])
+        return variable, [minValue, value]
+    elif ">=" in rule:
+        parts = rule.split(">=")
+        variable = parts[0]
+        value = int(parts[1])
+        return variable, [value, maxValue]
+    elif "<" in rule:
+        parts = rule.split("<")
+        variable = parts[0]
+        value = int(parts[1])
+        return variable, [minValue, value - 1]
+    elif ">" in rule:
+        parts = rule.split(">")
+        variable = parts[0]
+        value = int(parts[1])
+        return variable, [value + 1, maxValue]
 
 def part2():
     workflows, _ = parseInput(19)
@@ -132,21 +166,100 @@ def part2():
     # then we have a big set of constraints... and need to do maths
 
     nextWorkFlow = "in"
+    # print(workflows)
     get_rule_chain(workflows, nextWorkFlow, [])
-    print(rule_chains)
+    for chain in rule_chains:
+        print(chain)
 
     # first set is ['s<1351', 'a<2006', 'x<1416']
-    # x has 1416 possibilites or x>2662, which is 4000-2662 = 1338
+    # x has 1416 possibilities or x>2662, which is 4000-2662 = 1338
     # m has 4000 possibilities
     # a has 2006 possibilities
     # s has 1351 possibilities
     # mult = 15350040384000
+    # the problem is there are potentially overlapping possibilities in each rule chain
+
+    # convert rule_chains to intervals? for each x, m, a, s variable
+    interval_chains = []
+    for rule_chain in rule_chains:
+        intervals = {}
+        for rule in rule_chain:
+            variable, interval = rule_to_interval(rule)
+            if variable in intervals:
+                intervals[variable].append(interval)
+            else:
+                intervals[variable] = [interval]
+        interval_chains.append(intervals)
+        # print(rule_chain)
+        # print(intervals)
+        # print()
+    # print(interval_chains)
+
+    # try to "and" together intervals for each variable
+    for interval_chain in interval_chains:
+        for variable in interval_chain:
+            intervals = interval_chain[variable]
+            # print(intervals)
+            # intersect the intervals until there's only one left
+            final = P.open(intervals[0][0], intervals[0][1])
+            if len(intervals) > 1:
+                for i in range(1, len(intervals)):
+                    interval = intervals[i]
+                    p = P.open(interval[0], interval[1])
+                    final = final.intersection(p)
+            interval_chain[variable] = final
+        # print(interval_chain)
+        # print()
+
+    # make sure each variable is represented?
+    variables = ["x", "m", "a", "s"]
+    for interval_chain in interval_chains:
+        for variable in variables:
+            if variable not in interval_chain:
+                interval_chain[variable] = P.open(minValue, maxValue)
+        # print(interval_chain)
+
+    # try union-ing across chains?
+    # base = interval_chains[0]
+    # for i in range(1, len(interval_chains)):
+    #     interval_chain = interval_chains[i]
+    #     for variable in variables:
+    #         p1 = base[variable]
+    #         p2 = interval_chain[variable]
+    #         p3 = p1.union(p2)
+    #         base[variable] = p3
+    # print(base)
+
+    # let's just count up things to see where we're at
+    s = 0
+    for interval_chain in interval_chains:
+        m = 1
+        for variable in interval_chain:
+            p = interval_chain[variable]
+            m *= p.upper - p.lower + 1
+        print(interval_chain, m)
+        s += m
+    print(s)
+
+    # example answer
+    # 167409079868000
+    # 240695105228000 my answer
+
+    # print(interval_chains)
+    # merge any overlapping intervals: https://www.geeksforgeeks.org/merging-intervals/#
+    # then add up the possibilities for x, m, a, s, individually
+    # then multiply them together to get a count
 
     # promising? https://labix.org/doc/constraint/
-    from constraint import *
-    problem = Problem()
-    problem.addVariables(["x", "m", "a", "s"], range(1, 4001))
-    problem.addConstraint(InSetConstraint(set(range(1, 1356))), ["s"])
+    # problem = Problem()
+    # problem.addVariables(["x", "m", "a", "s"], range(1, 4001))
+    # problem.addConstraint(InSetConstraint(set(range(1, 1356))), ["s"])
+    # problem.addConstraint(InSetConstraint(set(range(1, 2006+1))), ["a"])
+    # problem.addConstraint(InSetConstraint(set(range(1, 1416+1))), ["x"])
+    # solutions = problem.getSolutions()
+    # print(solutions)
+    # print(len(solutions))
+
 
 
 if __name__ == "__main__":
