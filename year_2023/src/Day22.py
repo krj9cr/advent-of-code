@@ -105,6 +105,50 @@ def bricks_fall(bricks, check_if_fall=False):
                     return [], a_brick_fell
     return fallen_bricks, a_brick_fell
 
+
+# simulates falling and checks how many bricks fell
+def num_bricks_fall(bricks):
+    fallen_bricks = copy.deepcopy(bricks)
+    num_bricks = len(fallen_bricks)
+    num_bricks_fell = 0
+    for i in range(num_bricks):
+        brick = fallen_bricks[i]
+        # print(i, brick.minHeight, brick.points)
+        if brick.minHeight == 1:
+            continue
+        brick_fell = False
+        # try to make the brick fall
+        while True:
+            # update its points
+            fallen_points = [(p[0], p[1], p[2] - 1) for p in brick.points]
+            # check for collisions against all other bricks
+            collision = False
+            for j in range(num_bricks):
+                if i == j:
+                    continue
+                brick2 = fallen_bricks[j]
+                for p in fallen_points:
+                    if p in brick2.points:
+                        collision = True
+                        break
+                if collision:
+                    break
+            if collision:
+                break
+            else:
+                newMinHeight = get_min_height(fallen_points)
+                # check for hitting the bottom
+                if newMinHeight <= 0:
+                    break
+                # update the brick
+                brick.points = fallen_points
+                brick.minHeight = newMinHeight
+                fallen_bricks[i] = brick
+                brick_fell = True
+        if brick_fell:
+            num_bricks_fell += 1
+    return num_bricks_fell
+
 def part1():
     bricks = parseInput(22)
     # sort bricks by minHeight
@@ -140,21 +184,49 @@ def part1():
             disintegrate_count += 1
     print(disintegrate_count)
 
-
-
 def part2():
-    lines = parseInput(22)
-    print(lines)
+    bricks = parseInput(22)
+    # sort bricks by minHeight
+    bricks = sorted(bricks, key=lambda b: b.minHeight)
+
+    num_bricks = len(bricks)
+
+    # make bricks "fall"
+    bricks, _ = bricks_fall(bricks)
+
+    # print for debugging
+    print("Fallen")
+    # for i in range(num_bricks):
+    #     brick = bricks[i]
+    #     print(i, brick.minHeight, brick.points)
+
+    # sort bricks by minHeight again
+    bricks = sorted(bricks, key=lambda b: b.minHeight)
+    # check if each brick can be disintegrated
+    answer = 0
+    for i in range(num_bricks):
+        brick = bricks[i]
+        # remove the brick
+        # bricks_removed = bricks[:i] + bricks[i+1:]
+        # remove the brick, also only keep higher bricks
+        bricks_removed = bricks[:i] + bricks[i+1:]
+        # simulate falling again
+        # TODO: could probably do some kind of caching to improve performance
+        #       like keep track of "if brick A falls, then 12 bricks fall" and be able to look that up
+        num_bricks_fell = num_bricks_fall(bricks_removed)
+        print(i, brick.points, "fell:", num_bricks_fell)
+        answer += num_bricks_fell
+    print(answer)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
