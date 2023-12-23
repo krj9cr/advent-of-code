@@ -187,7 +187,9 @@ def part2():
     modules["output"] = TestModule("output", [])  # example 2
     modules["rx"] = TestModule("rx", [])  # my input
 
-    for i in range(10000000):
+    i = 0
+    while True:
+        print(modules["qt"])
         if i % 1000000 == 0:
             print(i)
         pulse_queue = queue.Queue()
@@ -206,6 +208,7 @@ def part2():
             for sent_pulse in sent_pulses:
                 pulse_queue.put(sent_pulse)
         # print("---")
+        i += 1
 
     print(i + 1)
 
