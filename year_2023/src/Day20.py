@@ -1,3 +1,4 @@
+import math
 import time
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -177,7 +178,6 @@ def part1():
     # print("high:", num_high, "low:", num_low)
     print("answer:", num_high * num_low)
 
-
 def part2():
     modules = parseInput(20)
     # for m in modules:
@@ -187,10 +187,12 @@ def part2():
     modules["output"] = TestModule("output", [])  # example 2
     modules["rx"] = TestModule("rx", [])  # my input
 
+    # find the first button press for when these output a "high" pulse
+    first_high = {"pl": None, "mz": None, "lz": None, "zm": None}
+
     i = 0
     while True:
-        print(modules["qt"])
-        if i % 1000000 == 0:
+        if i % 1000 == 0:
             print(i)
         pulse_queue = queue.Queue()
 
@@ -206,11 +208,26 @@ def part2():
             module = modules[pulse.destination_module]
             sent_pulses = module.process_pulse(pulse)
             for sent_pulse in sent_pulses:
+                # check if any sent_pulses are "high" for one of our special modules
+                if sent_pulse.source_module in first_high and sent_pulse.pulse_type == PulseType.HIGH and first_high[sent_pulse.source_module] is None:
+                    first_high[sent_pulse.source_module] = i + 1  # need + 1 for some reason
+
                 pulse_queue.put(sent_pulse)
         # print("---")
+
+        # check if all our special modules are filled out
+        all_done = True
+        for module_name in first_high:
+            if first_high[module_name] is None:
+                all_done = False
+                break
+        if all_done:
+            break
+
         i += 1
 
-    print(i + 1)
+    print(first_high)
+    print(math.lcm(*list(first_high.values())))
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
