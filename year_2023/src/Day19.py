@@ -32,6 +32,7 @@ class Workflow:
         return self.name + "{" + str(self.rules) + "," + self.default + "}"
 
     def check_rules(self, part: Part):
+        # these variables show as unused, but are needed for 'eval' to work
         x = part.x
         m = part.m
         a = part.a
@@ -151,14 +152,6 @@ def part2():
     # 4 possible numbers of 1 to 4000
     # 4000^4 = 2.56e+14 = 2.45 * 10^14 = 256,000,000,000,000
 
-    # 256000000000000 - 167409079868000 = 88590920000000
-
-    # just to compare
-    # 256000000000000
-    # 167409079868000
-    #  88590920000000
-    #
-
     # start with "in"
     # follow each path "recursively", "and"-ing the conditions
     # if we end in "A", keep that as a constraint
@@ -166,18 +159,9 @@ def part2():
     # then we have a big set of constraints... and need to do maths
 
     nextWorkFlow = "in"
-    # print(workflows)
     get_rule_chain(workflows, nextWorkFlow, [])
-    for chain in rule_chains:
-        print(chain)
-
-    # first set is ['s<1351', 'a<2006', 'x<1416']
-    # x has 1416 possibilities or x>2662, which is 4000-2662 = 1338
-    # m has 4000 possibilities
-    # a has 2006 possibilities
-    # s has 1351 possibilities
-    # mult = 15350040384000
-    # the problem is there are potentially overlapping possibilities in each rule chain
+    # for chain in rule_chains:
+    #     print(chain)
 
     # convert rule_chains to intervals? for each x, m, a, s variable
     interval_chains = []
@@ -211,24 +195,13 @@ def part2():
         # print(interval_chain)
         # print()
 
-    # make sure each variable is represented?
+    # make sure each variable is represented to do maths
     variables = ["x", "m", "a", "s"]
     for interval_chain in interval_chains:
         for variable in variables:
             if variable not in interval_chain:
                 interval_chain[variable] = P.open(minValue, maxValue)
         # print(interval_chain)
-
-    # try union-ing across chains?
-    # base = interval_chains[0]
-    # for i in range(1, len(interval_chains)):
-    #     interval_chain = interval_chains[i]
-    #     for variable in variables:
-    #         p1 = base[variable]
-    #         p2 = interval_chain[variable]
-    #         p3 = p1.union(p2)
-    #         base[variable] = p3
-    # print(base)
 
     # let's just count up things to see where we're at
     s = 0
@@ -237,37 +210,16 @@ def part2():
         for variable in interval_chain:
             p = interval_chain[variable]
             m *= p.upper - p.lower + 1
-        print(interval_chain, m)
+        # print(interval_chain, m)
         s += m
     print(s)
 
-    # example answer
-    # 167409079868000
-    # 240695105228000 my answer
-
-    # print(interval_chains)
-    # merge any overlapping intervals: https://www.geeksforgeeks.org/merging-intervals/#
-    # then add up the possibilities for x, m, a, s, individually
-    # then multiply them together to get a count
-
-    # promising? https://labix.org/doc/constraint/
-    # problem = Problem()
-    # problem.addVariables(["x", "m", "a", "s"], range(1, 4001))
-    # problem.addConstraint(InSetConstraint(set(range(1, 1356))), ["s"])
-    # problem.addConstraint(InSetConstraint(set(range(1, 2006+1))), ["a"])
-    # problem.addConstraint(InSetConstraint(set(range(1, 1416+1))), ["x"])
-    # solutions = problem.getSolutions()
-    # print(solutions)
-    # print(len(solutions))
-
-
-
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
