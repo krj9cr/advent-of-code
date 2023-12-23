@@ -34,12 +34,12 @@ def print_grid(paths, forest, slopes, w, h):
                 print(char, end="")
         print()
 
-def get_neighbors(x, y, forest, slopes, w, h):
+def get_neighbors(x, y, forest, slopes, w, h, slippery_slopes=True):
     neighbors = []
     # check if our current spot is a slope
     # apparently the input only contains ">" and "v" slopes, no "^" or "<"
     # we also just assume all slopes correctly contain an open path spot next to them
-    if (x, y) in slopes:
+    if slippery_slopes and (x, y) in slopes:
         char = slopes[(x, y)]
         if char == ">":
             neighbors.append((x + 1, y))
@@ -59,16 +59,16 @@ def get_neighbors(x, y, forest, slopes, w, h):
 
 hikes = []
 
-def dfs(hike, x, y, endPos, forest, slopes, w, h):
+def dfs(hike, x, y, endPos, forest, slopes, w, h, slippery_slopes=True):
     # check if done
     if (x, y) == endPos:
         hikes.append(hike)
         return
 
     # try each valid neighbor
-    for (x2, y2) in get_neighbors(x, y, forest, slopes, w, h):
+    for (x2, y2) in get_neighbors(x, y, forest, slopes, w, h, slippery_slopes):
         if (x2, y2) not in hike:
-            dfs(hike + [(x, y)], x2, y2, endPos, forest, slopes, w, h)
+            dfs(hike + [(x, y)], x2, y2, endPos, forest, slopes, w, h, slippery_slopes)
 
     # if we get here, the path got stuck? so doing nothing is fine
     # print("stuck on hike:", hike)
@@ -97,18 +97,37 @@ def part1():
     print("max hike:", max_hike)
 
 def part2():
-    lines = parseInput(23)
-    print(lines)
+    sys.setrecursionlimit(10000)
+
+    paths, forest, slopes, w, h = parseInput(23)
+    startPos = (1, 0)
+    endPos = (w - 2, h - 1)
+    # print(paths)
+    # print(forest)
+    # print(slopes)
+    # print(w, h)
+    # print(startPos, endPos)
+    # print()
+    # print_grid(paths, forest, slopes, w, h)
+
+    dfs([], startPos[0], startPos[1], endPos, forest, slopes, w, h, slippery_slopes=False)
+    max_hike = 0
+    for hike in hikes:
+        dist = len(hike)
+        # print(dist, hike)
+        if dist > max_hike:
+            max_hike = dist
+    print("max hike:", max_hike)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
