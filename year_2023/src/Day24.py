@@ -2,6 +2,7 @@ import time
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
+from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 
 class Hailstone:
     def __init__(self, position, velocity):
@@ -81,7 +82,6 @@ def part1():
     print("answer", answer)
 
 # some ideas: https://math.stackexchange.com/questions/4131973/find-a-line-that-crosses-multiple-line-segments
-# https://realpython.com/linear-programming-python/#using-pulp
 
 # there is some line with position lp, and velocity lv
 # where for each Hailstone with position hp, and velocity hv
@@ -90,21 +90,55 @@ def part1():
 # e.g.
 # hp2 + hv2 * t2 = lp + lv * t2
 # hp3 + hv3 * t3 = lp + lv * t3
-# ...
-# solving for lp and lv
+# better to split it up by x, y, z separately, less variables and easier to see the equations
+# hp1x + hv1x * t1 = lpx + lvx * t1
+# hp1y + hv1y * t1 = lpy + lvy * t1
+# hp1z + hv1z * t1 = lpz + lvz * t1
+# hp2x + hv2x * t2 = lpx + lvx * t2
+# hp2y + hv2y * t2 = lpy + lvy * t2
+# hp2z + hv2z * t2 = lpz + lvz * t2
+# variables: lpx, lpy, lpz, lvx, lvy, lvz, and each t*
+# constraints: t1 > 0, t2 > t1, etc. or just t2 > 0
+
+# Try to follow https://realpython.com/linear-programming-python/#using-pulp
 def part2():
-    lines = parseInput(24)
-    print(lines)
+    hailstones = parseInput(24)
+
+    # Create the model
+    model = LpProblem(name="small-problem")  # , sense=LpMaximize) ???
+
+    # Initialize the decision variables
+    lpx = LpVariable(name="lpx", lowBound=0)
+    lpy = LpVariable(name="lpy", lowBound=0)
+    lpz = LpVariable(name="lpz", lowBound=0)
+    lvx = LpVariable(name="lvx", lowBound=0)
+    lvy = LpVariable(name="lvy", lowBound=0)
+    lvz = LpVariable(name="lvz", lowBound=0)
+
+    # Add the constraints to the model
+    model += (2 * lpx + lpy <= 20, "red_constraint")
+    model += lpx + 2 * lpy
+
+    print(model)
+    # Solve the problem
+    status = model.solve()
+
+    print(f"status: {model.status}, {LpStatus[model.status]}")
+    print(f"objective: {model.objective.value()}")
+    for var in model.variables():
+        print(f"{var.name}: {var.value()}")
+    for name, constraint in model.constraints.items():
+        print(f"{name}: {constraint.value()}")
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
