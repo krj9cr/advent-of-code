@@ -58,11 +58,17 @@ def get_neighbors(x, y, forest, slopes, w, h, slippery_slopes=True):
     return neighbors
 
 hikes = []
+maxHike = 0
 
 def dfs(hike, x, y, endPos, forest, slopes, w, h, slippery_slopes=True):
+    global maxHike
     # check if done
     if (x, y) == endPos:
-        hikes.append(hike)
+        # hikes.append(hike)
+        dist = len(hike)
+        if dist > maxHike:
+            maxHike = dist
+            print("maxHike", maxHike)
         return
 
     # try each valid neighbor
@@ -111,13 +117,15 @@ def part2():
     # print_grid(paths, forest, slopes, w, h)
 
     dfs([], startPos[0], startPos[1], endPos, forest, slopes, w, h, slippery_slopes=False)
-    max_hike = 0
-    for hike in hikes:
-        dist = len(hike)
-        # print(dist, hike)
-        if dist > max_hike:
-            max_hike = dist
-    print("max hike:", max_hike)
+    # max_hike = 0
+    # for hike in hikes:
+    #     dist = len(hike)
+    #     # print(dist, hike)
+    #     if dist > max_hike:
+    #         max_hike = dist
+    # print("max hike:", max_hike)
+
+# 5966 too low
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
