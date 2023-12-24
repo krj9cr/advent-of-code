@@ -80,7 +80,18 @@ def part1():
             print()
     print("answer", answer)
 
+# some ideas: https://math.stackexchange.com/questions/4131973/find-a-line-that-crosses-multiple-line-segments
+# https://realpython.com/linear-programming-python/#using-pulp
 
+# there is some line with position lp, and velocity lv
+# where for each Hailstone with position hp, and velocity hv
+# hp + hv * t = lp + lv * t
+# for some t >=0, where t is likely different for each hailstone
+# e.g.
+# hp2 + hv2 * t2 = lp + lv * t2
+# hp3 + hv3 * t3 = lp + lv * t3
+# ...
+# solving for lp and lv
 def part2():
     lines = parseInput(24)
     print(lines)
