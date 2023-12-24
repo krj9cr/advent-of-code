@@ -76,10 +76,16 @@ def dfs(hike, x, y, endPos, forest, slopes, w, h, slippery_slopes=True):
             print("maxHike", maxHike)
         return
 
+    # TODO: idea: break things into segments? only make decisions at crossroads?
+    hike2 = hike + [(x, y)]
     # try each valid neighbor
     for (x2, y2) in get_neighbors(x, y, forest, slopes, w, h, slippery_slopes):
-        if (x2, y2) not in hike:
-            dfs(hike + [(x, y)], x2, y2, endPos, forest, slopes, w, h, slippery_slopes)
+        num_neighbors = len(get_neighbors(x2, y2, forest, slopes, w, h, slippery_slopes))
+        if num_neighbors == 1:  # just go for it
+            dfs(hike2, x2, y2, endPos, forest, slopes, w, h, slippery_slopes)
+        elif num_neighbors > 1:  # crossroad
+            if (x2, y2) not in hike:
+                dfs(hike2, x2, y2, endPos, forest, slopes, w, h, slippery_slopes)
 
     # if we get here, the path got stuck? so doing nothing is fine
     # print("stuck on hike:", hike)
