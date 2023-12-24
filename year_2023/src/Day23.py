@@ -1,3 +1,4 @@
+import copy
 import sys
 import time
 
@@ -34,7 +35,11 @@ def print_grid(paths, forest, slopes, w, h):
                 print(char, end="")
         print()
 
+neighbor_cache = {}
+
 def get_neighbors(x, y, forest, slopes, w, h, slippery_slopes=True):
+    if (x, y) in neighbor_cache:
+        return neighbor_cache[(x, y)]
     neighbors = []
     # check if our current spot is a slope
     # apparently the input only contains ">" and "v" slopes, no "^" or "<"
@@ -55,9 +60,9 @@ def get_neighbors(x, y, forest, slopes, w, h, slippery_slopes=True):
                 # check if not forest
                 if (x2, y2) not in forest:
                     neighbors.append((x2, y2))
+    neighbor_cache[(x, y)] = neighbors
     return neighbors
 
-hikes = []
 maxHike = 0
 
 def dfs(hike, x, y, endPos, forest, slopes, w, h, slippery_slopes=True):
@@ -94,13 +99,13 @@ def part1():
     # print_grid(paths, forest, slopes, w, h)
 
     dfs([], startPos[0], startPos[1], endPos, forest, slopes, w, h)
-    max_hike = 0
-    for hike in hikes:
-        dist = len(hike)
-        # print(dist, hike)
-        if dist > max_hike:
-            max_hike = dist
-    print("max hike:", max_hike)
+    # max_hike = 0
+    # for hike in hikes:
+    #     dist = len(hike)
+    #     # print(dist, hike)
+    #     if dist > max_hike:
+    #         max_hike = dist
+    # print("max hike:", max_hike)
 
 def part2():
     sys.setrecursionlimit(10000)
@@ -126,6 +131,8 @@ def part2():
     # print("max hike:", max_hike)
 
 # 5966 too low
+# 6500 too low
+# 9460 max as that's how many paths/slopes there are
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
