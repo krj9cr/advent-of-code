@@ -3,6 +3,8 @@ from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
+from scipy.optimize import fsolve
+
 
 class Hailstone:
     def __init__(self, position, velocity):
@@ -108,16 +110,25 @@ def part2():
     model = LpProblem(name="small-problem")  # , sense=LpMaximize) ???
 
     # Initialize the decision variables
-    lpx = LpVariable(name="lpx", lowBound=0)
-    lpy = LpVariable(name="lpy", lowBound=0)
-    lpz = LpVariable(name="lpz", lowBound=0)
-    lvx = LpVariable(name="lvx", lowBound=0)
-    lvy = LpVariable(name="lvy", lowBound=0)
-    lvz = LpVariable(name="lvz", lowBound=0)
+    lpx = LpVariable(name="lpx", lowBound=0, cat='Integer')
+    lpy = LpVariable(name="lpy", lowBound=0, cat='Integer')
+    lpz = LpVariable(name="lpz", lowBound=0, cat='Integer')
+    lvx = LpVariable(name="lvx", cat='Integer')
+    lvy = LpVariable(name="lvy", cat='Integer')
+    lvz = LpVariable(name="lvz", cat='Integer')
 
+    t_variables = []
     # Add the constraints to the model
-    model += (2 * lpx + lpy <= 20, "red_constraint")
-    model += lpx + 2 * lpy
+    for i in range(len(hailstones)):
+        hailstone = hailstones[i]
+        t = LpVariable(name="t" + str(i), lowBound=0, cat='Integer')
+        t_variables.append(t)
+        model += (hailstone.position[0] + (hailstone.velocity[0] * t) == lpx + (lvx * t),
+                  "hailstone" + str(i))
+        # model += (hailstone.position[1] + hailstone.velocity[1] * t_variables[i] == lpy + lvy * t_variables[i],
+        #           "hailstone" + str(i))
+        # model += (hailstone.position[2] + hailstone.velocity[2] * t_variables[i] == lpz + lvz * t_variables[i],
+        #           "hailstone" + str(i))
 
     print(model)
     # Solve the problem
