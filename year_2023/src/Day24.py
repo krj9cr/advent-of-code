@@ -1,9 +1,11 @@
+import math
 import time
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
-from scipy.optimize import fsolve
+from scipy.optimize import minimize, fsolve
+import numpy as np
 
 
 class Hailstone:
@@ -106,40 +108,56 @@ def part1():
 def part2():
     hailstones = parseInput(24)
 
+    def equations(vars):
+        # lpx, lpy, lpz, lvx, lvy, lvz = vars
+
+        eq = []
+        for i in range(len(hailstones)):
+            t = 6 + i
+            hailstone = hailstones[i]
+            eq.append(((hailstone.position[0] + (hailstone.velocity[0] * t)) - (vars[0] + (vars[3] * vars[t]))))
+            eq.append(((hailstone.position[1] + hailstone.velocity[1] * vars[t]) - (vars[1] + vars[4] * vars[t])))
+            eq.append(((hailstone.position[2] + hailstone.velocity[2] * vars[t]) - (vars[2] + vars[5] * vars[t])))
+
+        return eq
+
+    result = fsolve(equations, [1] * (3 * (len(hailstones))))
+    print(result)
+
     # Create the model
-    model = LpProblem(name="small-problem")  # , sense=LpMaximize) ???
-
-    # Initialize the decision variables
-    lpx = LpVariable(name="lpx", lowBound=0, cat='Integer')
-    lpy = LpVariable(name="lpy", lowBound=0, cat='Integer')
-    lpz = LpVariable(name="lpz", lowBound=0, cat='Integer')
-    lvx = LpVariable(name="lvx", cat='Integer')
-    lvy = LpVariable(name="lvy", cat='Integer')
-    lvz = LpVariable(name="lvz", cat='Integer')
-
-    t_variables = []
-    # Add the constraints to the model
-    for i in range(len(hailstones)):
-        hailstone = hailstones[i]
-        t = LpVariable(name="t" + str(i), lowBound=0, cat='Integer')
-        t_variables.append(t)
-        model += (hailstone.position[0] + (hailstone.velocity[0] * t) == lpx + (lvx * t),
-                  "hailstone" + str(i))
-        # model += (hailstone.position[1] + hailstone.velocity[1] * t_variables[i] == lpy + lvy * t_variables[i],
-        #           "hailstone" + str(i))
-        # model += (hailstone.position[2] + hailstone.velocity[2] * t_variables[i] == lpz + lvz * t_variables[i],
-        #           "hailstone" + str(i))
-
-    print(model)
-    # Solve the problem
-    status = model.solve()
-
-    print(f"status: {model.status}, {LpStatus[model.status]}")
-    print(f"objective: {model.objective.value()}")
-    for var in model.variables():
-        print(f"{var.name}: {var.value()}")
-    for name, constraint in model.constraints.items():
-        print(f"{name}: {constraint.value()}")
+    # model = LpProblem(name="small-problem")  # , sense=LpMaximize) ???
+    #
+    # # Initialize the decision variables
+    # lpx = LpVariable(name="lpx", lowBound=0, cat='Integer')
+    # lpy = LpVariable(name="lpy", lowBound=0, cat='Integer')
+    # lpz = LpVariable(name="lpz", lowBound=0, cat='Integer')
+    # lvx = LpVariable(name="lvx", cat='Integer')
+    # lvy = LpVariable(name="lvy", cat='Integer')
+    # lvz = LpVariable(name="lvz", cat='Integer')
+    #
+    # t_variables = []
+    # # Add the constraints to the model
+    # for i in range(len(hailstones)):
+    #     hailstone = hailstones[i]
+    #     t = LpVariable(name="t" + str(i), lowBound=0, cat='Integer')
+    #     t_variables.append(t)
+    #     model += (hailstone.position[0] + (hailstone.velocity[0] * t) == lpx + (lvx * t),
+    #               "hailstone" + str(i))
+    #     # model += (hailstone.position[1] + hailstone.velocity[1] * t_variables[i] == lpy + lvy * t_variables[i],
+    #     #           "hailstone" + str(i))
+    #     # model += (hailstone.position[2] + hailstone.velocity[2] * t_variables[i] == lpz + lvz * t_variables[i],
+    #     #           "hailstone" + str(i))
+    #
+    # print(model)
+    # # Solve the problem
+    # status = model.solve()
+    #
+    # print(f"status: {model.status}, {LpStatus[model.status]}")
+    # print(f"objective: {model.objective.value()}")
+    # for var in model.variables():
+    #     print(f"{var.name}: {var.value()}")
+    # for name, constraint in model.constraints.items():
+    #     print(f"{name}: {constraint.value()}")
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
