@@ -66,7 +66,7 @@ def part1():
     minXY = 200000000000000
     maxXY = 400000000000000
     area = Polygon([(minXY, minXY), (minXY, maxXY), (maxXY, maxXY), (maxXY, minXY)])
-    print("area", area)
+    # print("area", area)
 
     answer = 0
     num_hailstones = len(hailstones)
@@ -77,17 +77,17 @@ def part1():
                 continue
             hailstone2 = hailstones[j]
             intersection = hailstone1.intersects(hailstone2)
-            print(hailstone1)
-            print(hailstone2)
-            print("intersects", intersection)
+            # print(hailstone1)
+            # print(hailstone2)
+            # print("intersects", intersection)
             # check if within area
             if intersection:
                 point = Point(intersection)
                 contains = area.contains(point)
-                print("contained in area:", contains)
+                # print("contained in area:", contains)
                 if contains:
                     answer += 1
-            print()
+            # print()
     print("answer", answer)
 
 # some ideas: https://math.stackexchange.com/questions/4131973/find-a-line-that-crosses-multiple-line-segments
@@ -133,10 +133,10 @@ def part2():
         equations.append(((hailstone.position[1] + hailstone.velocity[1] * symbols[i]) - (lpy + lvy * symbols[i])))
         equations.append(((hailstone.position[2] + hailstone.velocity[2] * symbols[i]) - (lpz + lvz * symbols[i])))
     symbols = [lpx, lpy, lpz, lvx, lvy, lvz] + symbols
-    print("eq", equations)
-    print("symbols", symbols)
+    # print("eq", equations)
+    # print("symbols", symbols)
     a = solve(equations, symbols, dict=True)[0]
-    print(a)
+    # print(a)
     print(a[lpx] + a[lpy] + a[lpz])
 
     # try to use scipy... didn't work because the number of variables has to match the number of functions
@@ -194,11 +194,11 @@ def part2():
     #     print(f"{name}: {constraint.value()}")
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
