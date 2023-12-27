@@ -1,4 +1,5 @@
 import math
+import sys
 import time
 
 import sympy
@@ -110,7 +111,7 @@ def part1():
 def part2():
     hailstones = parseInput(24)
 
-    # try to use sympy, this one can actually solve the example!
+    # try to use sympy, this one can actually do it!
     # https://docs.sympy.org/latest/guides/solving/solve-system-of-equations-algebraically.html
 
     # for assumptions, see https://docs.sympy.org/latest/modules/core.html#module-sympy.core.assumptions
@@ -123,7 +124,8 @@ def part2():
 
     equations = []
     symbols = []
-    for i in range(len(hailstones)):
+    # note: we can just look at the first three stones... this actually finishes
+    for i in range(3):
         symbols.append(sympy.Symbol('t' + str(i), integer=True, positive=True))
         hailstone = hailstones[i]
         # the equations are assumed to =0
@@ -137,7 +139,7 @@ def part2():
     print(a)
     print(a[lpx] + a[lpy] + a[lpz])
 
-    # try to use scipy
+    # try to use scipy... didn't work because the number of variables has to match the number of functions
     # def equations(vars):
     #     # lpx, lpy, lpz, lvx, lvy, lvz = vars
     #
@@ -155,6 +157,7 @@ def part2():
     # print(result)
 
     # Try to use pulp: https://realpython.com/linear-programming-python/#using-pulp
+    # didn't work because of non-linear programming (multiplying two variables together was not allowed)
     # Create the model
     # model = LpProblem(name="small-problem")  # , sense=LpMaximize) ???
     #
