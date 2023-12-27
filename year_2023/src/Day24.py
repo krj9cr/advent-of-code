@@ -1,17 +1,8 @@
-import math
-import sys
 import time
-
 import sympy
-from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
-from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
-from scipy.optimize import minimize, fsolve
-import numpy as np
-# import sympy
 from sympy import solve
-from sympy.abc import x, y, z
 
 class Hailstone:
     def __init__(self, position, velocity):
@@ -60,8 +51,8 @@ def part1():
     hailstones = parseInput(24)
 
     # example
-    minXY = 7
-    maxXY = 20
+    # minXY = 7
+    # maxXY = 20
     # input
     minXY = 200000000000000
     maxXY = 400000000000000
