@@ -1,4 +1,3 @@
-import copy
 import sys
 import time
 from collections import deque
@@ -149,27 +148,16 @@ def bfs_to_crossroad(x, y, crossroads, forest, w, h, startPos=None):
                 seen.add(nextPos)
 
 def part2():
-    sys.setrecursionlimit(10000)
-
     paths, forest, slopes, w, h = parseInput(23)
     startPos = (1, 0)
     endPos = (w - 2, h - 1)
-    # endPos = (135, 147)  # change this to be the last crossroad
-    # print(paths)
-    # print(forest)
-    # print(slopes)
-    # print(w, h)
     print(startPos, endPos)
-    # print()
-    # print_grid(paths, forest, slopes, w, h)
-
-    # dfs([], startPos[0], startPos[1], endPos, forest, slopes, w, h, slippery_slopes=False)
 
     # idea: just look at crossroads and start/end points
     # find each crossroad in the grid (spots that have at least 3 neighbors without slippery slopes)
     crossroads = find_crossroads(forest, w, h).union({startPos, endPos})
-    print(sorted(list(crossroads)))
-    print()
+    # print(sorted(list(crossroads)))
+    # print()
     # find the distance between each crossroad and its... "adjacent" crossroads
     # for each crossroad, go in each direction and do bfs to get distances
     crossroad_distances = {}
@@ -226,11 +214,13 @@ def part2():
 # 9460 max as that's how many paths/slopes there are
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
+
+    neighbor_cache = {}
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
