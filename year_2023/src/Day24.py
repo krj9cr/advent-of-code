@@ -1,12 +1,16 @@
 import math
 import time
+
+import sympy
 from shapely.geometry import LineString
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 from pulp import LpMaximize, LpProblem, LpStatus, lpSum, LpVariable
 from scipy.optimize import minimize, fsolve
 import numpy as np
-
+# import sympy
+from sympy import solve
+from sympy.abc import x, y, z
 
 class Hailstone:
     def __init__(self, position, velocity):
@@ -94,7 +98,7 @@ def part1():
 # e.g.
 # hp2 + hv2 * t2 = lp + lv * t2
 # hp3 + hv3 * t3 = lp + lv * t3
-# better to split it up by x, y, z separately, less variables and easier to see the equations
+# better to split it up by x, y, z separately, easier to see the equations
 # hp1x + hv1x * t1 = lpx + lvx * t1
 # hp1y + hv1y * t1 = lpy + lvy * t1
 # hp1z + hv1z * t1 = lpz + lvz * t1
@@ -102,28 +106,55 @@ def part1():
 # hp2y + hv2y * t2 = lpy + lvy * t2
 # hp2z + hv2z * t2 = lpz + lvz * t2
 # variables: lpx, lpy, lpz, lvx, lvy, lvz, and each t*
-# constraints: t1 > 0, t2 > t1, etc. or just t2 > 0
-
-# Try to follow https://realpython.com/linear-programming-python/#using-pulp
+# constraints: each t > 0, we can probably also assume lp's are > 0
 def part2():
     hailstones = parseInput(24)
 
-    def equations(vars):
-        # lpx, lpy, lpz, lvx, lvy, lvz = vars
+    # try to use sympy, this one can actually solve the example!
+    # https://docs.sympy.org/latest/guides/solving/solve-system-of-equations-algebraically.html
 
-        eq = []
-        for i in range(len(hailstones)):
-            t = 6 + i
-            hailstone = hailstones[i]
-            eq.append(((hailstone.position[0] + (hailstone.velocity[0] * t)) - (vars[0] + (vars[3] * vars[t]))))
-            eq.append(((hailstone.position[1] + hailstone.velocity[1] * vars[t]) - (vars[1] + vars[4] * vars[t])))
-            eq.append(((hailstone.position[2] + hailstone.velocity[2] * vars[t]) - (vars[2] + vars[5] * vars[t])))
+    # for assumptions, see https://docs.sympy.org/latest/modules/core.html#module-sympy.core.assumptions
+    lpx = sympy.Symbol('lpx', integer=True, positive=True)
+    lpy = sympy.Symbol('lpy', integer=True, positive=True)
+    lpz = sympy.Symbol('lpz', integer=True, positive=True)
+    lvx = sympy.Symbol('lvx', integer=True)
+    lvy = sympy.Symbol('lvy', integer=True)
+    lvz = sympy.Symbol('lvz', integer=True)
 
-        return eq
+    equations = []
+    symbols = []
+    for i in range(len(hailstones)):
+        symbols.append(sympy.Symbol('t' + str(i), integer=True, positive=True))
+        hailstone = hailstones[i]
+        # the equations are assumed to =0
+        equations.append(((hailstone.position[0] + (hailstone.velocity[0] * symbols[i])) - (lpx + (lvx * symbols[i]))))
+        equations.append(((hailstone.position[1] + hailstone.velocity[1] * symbols[i]) - (lpy + lvy * symbols[i])))
+        equations.append(((hailstone.position[2] + hailstone.velocity[2] * symbols[i]) - (lpz + lvz * symbols[i])))
+    symbols = [lpx, lpy, lpz, lvx, lvy, lvz] + symbols
+    print("eq", equations)
+    print("symbols", symbols)
+    a = solve(equations, symbols, dict=True)[0]
+    print(a)
+    print(a[lpx] + a[lpy] + a[lpz])
 
-    result = fsolve(equations, [1] * (3 * (len(hailstones))))
-    print(result)
+    # try to use scipy
+    # def equations(vars):
+    #     # lpx, lpy, lpz, lvx, lvy, lvz = vars
+    #
+    #     eq = []
+    #     for i in range(len(hailstones)):
+    #         t = 6 + i
+    #         hailstone = hailstones[i]
+    #         eq.append(((hailstone.position[0] + (hailstone.velocity[0] * t)) - (vars[0] + (vars[3] * vars[t]))))
+    #         eq.append(((hailstone.position[1] + hailstone.velocity[1] * vars[t]) - (vars[1] + vars[4] * vars[t])))
+    #         eq.append(((hailstone.position[2] + hailstone.velocity[2] * vars[t]) - (vars[2] + vars[5] * vars[t])))
+    #
+    #     return eq
+    #
+    # result = fsolve(equations, [1] * (3 * (len(hailstones))))
+    # print(result)
 
+    # Try to use pulp: https://realpython.com/linear-programming-python/#using-pulp
     # Create the model
     # model = LpProblem(name="small-problem")  # , sense=LpMaximize) ???
     #
