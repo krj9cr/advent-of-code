@@ -1,3 +1,4 @@
+import copy
 import math
 import time
 import matplotlib.pyplot as plt
@@ -41,12 +42,6 @@ def part1():
         print(elf_locations)
     print(len(elf_locations))
 
-# python modulo does weird things with negatives
-# https://stackoverflow.com/questions/3883004/how-does-the-modulo-operator-work-on-negative-numbers-in-python
-# def newMod(a, b):
-#     res = a % b
-#     return res if not res else res - b if a < 0 else res
-
 def get_tile(pos, w, h):
     x, y = pos
     x2 = math.floor(x / w)
@@ -71,6 +66,17 @@ def print_center_tile(elf_locations, rocks, w, h):
                 print(".", end="")
         print()
 
+def print_area(elf_locations, rocks, minX, maxX, minY, maxY):
+    for j in range(minX, maxX):
+        for i in range(minY, maxY):
+            if (i, j) in elf_locations:
+                print("O", end="")
+            elif (i, j) in rocks:
+                print("#", end="")
+            else:
+                print(".", end="")
+        print()
+
 # insight:
 # once the center tile gets filled out, spots "alternate" between on and off
 # ...also the rate at which we grow might be something tha can be graphed and predicted
@@ -80,22 +86,28 @@ def part2():
     # print(w, h)
 
     # takes 20 minutes to do 1000
-    num_steps = 1000
+    num_steps = 30
 
-    # cache rocks for given tiles to not recompute
-    tile_rocks = {}
+    orig_rocks = copy.deepcopy(rocks)
+    seen_tiles = set()
 
     elf_locations = {startPos}
-    steps_plt = []
-    step_counts = []
+    minX = minY = 0
+    maxX = w
+    maxY = h
+    # steps_plt = []
+    # step_counts = []
     for step in range(num_steps):
-        if step % 100 == 0:
+        if step % 1 == 0:
             print("step", step)
             # print("elf locations", len(elf_locations))
             # print(elf_locations)
+            # steps_plt.append(step)
+            # step_counts.append(len(elf_locations))
             # print_center_tile(elf_locations, rocks, w, h)
-            steps_plt.append(step)
-            step_counts.append(len(elf_locations))
+            print_area(elf_locations, rocks, minX, maxX, minY, maxY)
+        print(seen_tiles)
+        print()
         elf_locations2 = set()
         for loc in elf_locations:
             x, y = loc
@@ -104,35 +116,26 @@ def part2():
                 # idea: compute where the rocks are dynamically?
                 # figure out what tile we're in
                 tile = get_tile(loc, w, h)
-                # then for each rock, get that tile's rock coordinates (by multiplying by tile coordinates?)
-                rocks2 = set()
-                if tile in tile_rocks:
-                    rocks2 = tile_rocks[tile]
-                else:
-                    for rock in rocks:
-                        rocks2.add(rock_to_tile(rock, tile, w, h))
-                    tile_rocks[tile] = rocks2
+                if tile not in seen_tiles:
+                    # get all that tiles rocks
+                    for rock in orig_rocks:
+                        new_rock = rock_to_tile(rock, tile, w, h)
+                        rocks.add(new_rock)
+                    seen_tiles.add(tile)
                 # then check if this pos is in that list of rocks
-                if nextPos not in rocks2:
+                if nextPos not in rocks:
                     elf_locations2.add(nextPos)
+                    # update mins
+                    if x2 < minX:
+                        minX = x
+                    if x2 > maxX:
+                        maxX = x
+                    if y2 < minY:
+                        minY = y2
+                    if y2 > maxY:
+                        maxY = y2
         elf_locations = elf_locations2
         # print(elf_locations)
-    steps_plt.append(num_steps)
-    answer = len(elf_locations)
-    step_counts.append(answer)
-    print(answer)
-    plt.plot(steps_plt, step_counts, '.')
-    # plt.show()
-
-    interpolator = np.polyfit(steps_plt, step_counts, 2)
-    evaluate = [6, 10, 50, 100, 500, 1000, 5000]
-    print(evaluate)
-    # results = interpolator(evaluate)
-    results = np.polyval(interpolator, evaluate)
-    print(results)
-
-    plt.plot(evaluate, results, 'r')
-    plt.show()
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
