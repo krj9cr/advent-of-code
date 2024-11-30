@@ -9,19 +9,12 @@ def parseInput(day):
 
 def part1():
     lines = parseInput(1)
-    nums = []
+
     for line in lines:
-        numStr = ""
-        for char in line:
-            if char.isdecimal():
-                numStr += char
-        num = int(numStr[0] + numStr[-1])
-        nums.append(num)
-    print(sum(nums))
+        print(line)
 
 def part2():
     lines = parseInput(1)
-    nums = []
 
     for line in lines:
         print(line)
