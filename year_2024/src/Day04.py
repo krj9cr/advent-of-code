@@ -29,7 +29,13 @@ def goInDir(grid, dir, x, y, nextLetter):
 
 def checkDir(grid, dir, x, y):
     next = goInDir(grid, dir, x, y, "M")
-
+    if next:
+        next2 = goInDir(grid, dir, next[0], next[1], "A")
+        if next2:
+            next3 = goInDir(grid, dir, next2[0], next2[1], "S")
+            if next3:
+                return True
+    return False
 
 
 def part1():
@@ -45,27 +51,9 @@ def part1():
                 # check 8 conditions for directions
                 curr = (x, y)
                 # up
-                dir = (0, -1)
-                (x2, y2) = tuple(map(sum, zip(curr, dir)))
-                if checkBounds(lines, x2, y2):
-                    nextItem = lines[y2][x2]
-                    print(x2, y2, ":", nextItem)
-                    if nextItem == "M":
-
-                # down
-                dir = (0, 1)
-                # left
-                dir = (-1, 0)
-                # right
-                dir = (1, 0)
-                # up left
-                dir = (-1, -1)
-                # up right
-                dir = (1, -1)
-                # down left
-                dir = (-1, 1)
-                # down right
-                dir = (1, 1)
+                for dir in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
+                    if checkDir(lines, dir, x, y):
+                        count += 1
 
     print(count)
 
