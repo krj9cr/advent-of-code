@@ -18,12 +18,20 @@ def checkBounds(grid, x, y):
         return True
     return False
 
+def getDirLetter(grid, dir, x, y):
+    curr = (x, y)
+    (x2, y2) = tuple(map(sum, zip(curr, dir)))
+    if checkBounds(grid, x2, y2):
+        nextItem = grid[y2][x2]
+        # print(x2, y2, ":", nextItem)
+        return nextItem
+
 def goInDir(grid, dir, x, y, nextLetter):
     curr = (x, y)
     (x2, y2) = tuple(map(sum, zip(curr, dir)))
     if checkBounds(grid, x2, y2):
         nextItem = grid[y2][x2]
-        print(x2, y2, ":", nextItem)
+        # print(x2, y2, ":", nextItem)
         if nextItem == nextLetter:
             return x2, y2
 
@@ -60,16 +68,42 @@ def part1():
 def part2():
     lines = parseInput(4)
     print(lines)
+    count = 0
+    for y in range(0, len(lines)):
+        row = lines[y]
+        for x in range(0, len(row)):
+            item = row[x]
+            if item == "A":
+                print(x, y)
+                firstDiag = False
+                # first diag
+                one = (-1, -1)
+                oneLetter = getDirLetter(lines, one, x, y)
+                two = (1, 1)
+                twoLetter = getDirLetter(lines, two, x, y)
+                if (oneLetter == "M" and twoLetter == "S") or (oneLetter == "S" and twoLetter == "M"):
+                    firstDiag = True
+                    print("FIRST DIAG", oneLetter, twoLetter)
+                # second diag
+                one = (1, -1)
+                oneLetter = getDirLetter(lines, one, x, y)
+                two = (-1, 1)
+                twoLetter = getDirLetter(lines, two, x, y)
+                if ((oneLetter == "M" and twoLetter == "S") or (oneLetter == "S" and twoLetter == "M")) and firstDiag:
+                    count += 1
+                    print("COUNTING", x, y)
+
+    print(count)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
