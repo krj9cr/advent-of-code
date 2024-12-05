@@ -18,8 +18,8 @@ def parseInput(day):
                 continue
             if processRules:
                 linesplit = line.split("|")
-                key = int(linesplit[1])
-                value = int(linesplit[0])
+                key = int(linesplit[0])
+                value = int(linesplit[1])
                 if rules.get(key):
                     rules[key].add(value)
                 else:
@@ -34,27 +34,38 @@ def part1():
     print(rules)
     print(updates)
 
+    good = []
     # for each update
-    update = updates[0]
-    # keep list of seen pages
-    seen = set()
-    # for each item in update
-    for item in update:
-        print("ITEM", item)
-        print("seen: ", seen)
-        # check dict, have we seen any pages in the list? do they intersect?
-        rulePages = rules.get(item)
-        if rulePages:
-            print("rulepages", rulePages)
-            intersection = seen.intersection(rulePages)
-            print("intersection", intersection)
-            if len(intersection) > 0:
-                # rule is violated
-                break
-            else:
-                # rule is good, keep going
-                seen.add(item)
-                continue
+    for update in updates:
+        # keep list of seen pages
+        seen = set()
+        violated = False
+        # for each item in update
+        for item in update:
+            print("ITEM", item)
+            seen.add(item)
+            print("seen: ", seen)
+            # check dict, have we seen any pages in the list? do they intersect?
+            rulePages = rules.get(item)
+            if rulePages:
+                print("rulepages", rulePages)
+                intersection = seen.intersection(rulePages)
+                print("intersection", intersection)
+                if len(intersection) > 0:
+                    # rule is violated
+                    print("VIOLATED")
+                    violated = True
+                    break
+                else:
+                    # rule is good, keep going
+                    continue
+        if not violated:
+            middleIndex = int((len(update) - 1) / 2)
+            good.append(update[middleIndex])
+            print("GOOD TO GO")
+    print(good)
+    print(sum(good))
+
 
 def part2():
     lines = parseInput(5)
