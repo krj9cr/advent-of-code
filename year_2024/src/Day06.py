@@ -85,6 +85,7 @@ def runSim(grid, guardStart):
             guardDir = nextGuardDir
             guardLoc = nextGuardLoc
             seen[guardLoc] = guardDir
+            # TODO... smarter thing would be to keep track of all the directions we've been at at this location, I think
             steps += 1
         if steps > len(grid) * len(grid[0]):
             print("steps", steps)
