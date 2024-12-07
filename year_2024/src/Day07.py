@@ -56,19 +56,20 @@ def part2():
         for comb in itertools.product(["+", "*", "||"], repeat=len(nums)-1):
             # print(comb)
             comb = list(comb)
-            nums_comb = copy.deepcopy(nums)
-            # evaluate da rest?
-            while len(nums_comb) > 1:
+            agg = nums[0]
+            for i in range(1, len(nums)):
+                n = nums[i]
                 op = comb.pop()
                 if op == "+":
-                    nums_comb[0:2] = [nums_comb[0] + nums_comb[1]]
+                    agg = agg + n
                 elif op == "*":
-                    nums_comb[0:2] = [nums_comb[0] * nums_comb[1]]
+                    agg = agg * n
                 else:
-                    nums_comb[0:2] = [int(str(nums_comb[0]) + str(nums_comb[1]))]
-                # print(nums_comb)
-            if answer == nums_comb[0]:
-                print("YAY")
+                    agg = int(str(agg) + str(n))
+                if agg > answer:
+                    break
+            if answer == agg:
+                # print("YAY")
                 total += answer
                 break
 
