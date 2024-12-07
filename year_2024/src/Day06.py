@@ -1,3 +1,4 @@
+import copy
 import time
 
 def parseInput(day):
@@ -71,6 +72,7 @@ def runSim(grid, guardStart):
     guardDir = "^"
     guardLoc = guardStart
     seen = {guardLoc: guardDir}
+    steps = 0
     while True:
         nextGuardLoc, nextGuardDir = guardStep(grid, guardDir, guardLoc)
         # guard walked off the map case (no loop)
@@ -83,6 +85,13 @@ def runSim(grid, guardStart):
             guardDir = nextGuardDir
             guardLoc = nextGuardLoc
             seen[guardLoc] = guardDir
+            # TODO... smarter thing would be to keep track of all the directions we've been at at this location, I think
+            steps += 1
+        if steps > len(grid) * len(grid[0]):
+            print("steps", steps)
+            # assume loop....?
+            print("ASSUMING LOOP")
+            return True
 
 def part1():
     grid = parseInput(6)
@@ -105,6 +114,24 @@ def part1():
 def part2():
     grid = parseInput(6)
     guardStart = getGuardStart(grid)
+
+    total = 0
+    for j in range(len(grid)):
+        row = grid[j]
+        for i in range(len(row)):
+            item = grid[j][i]
+            if item == ".":
+                # just start with one
+                simGrid = copy.deepcopy(grid)
+                # add an obstacle
+                simGrid[j][i] = "#"
+                loop = runSim(simGrid, guardStart)
+                if loop:
+                    print(i, j, " LOOP")
+                    total += 1
+                else:
+                    print(i, j, " NOT LOOP")
+    print(total)
 
 
 if __name__ == "__main__":
