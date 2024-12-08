@@ -55,18 +55,72 @@ def part1():
     print(len(antinodes))
 
 def part2():
-    lines = parseInput(8)
-    print(lines)
+    grid = parseInput(8)
+    w = len(grid[0])
+    h = len(grid)
+    print(grid)
+    print(w, h)
+    antennae = {}
+    for j in range(h):
+        for i in range(w):
+            item = grid[j][i]
+            if item != ".":
+                if antennae.get(item):
+                    antennae[item].append((i, j))
+                else:
+                    antennae[item] = [(i, j)]
+    print(antennae)
+    antinodes = set()
+    # for all the antenna frequencies
+    for frequency in antennae:
+        freq_antennae = antennae[frequency]
+        print(frequency)
+        # for each pair of antennae of the same frequency
+        for antenna1, antenna2 in itertools.combinations(freq_antennae, 2):
+            # compute anti nodes
+            x1, y1 = antenna1[0], antenna1[1]
+            x2, y2 = antenna2[0], antenna2[1]
+            if antenna1[0] > antenna2[0]:
+                x2, y2 = antenna1[0], antenna1[1]
+                x1, y1 = antenna2[0], antenna2[1]
+            rise = (y2 - y1)
+            run = (x2 - x1)
+            # get one point ahead and one behind
+            # NOW, get all points ahead and behind, pick one point
+            print((x1, y1), (x2, y2), rise, run)
+            start1, start2 = x1, y1
+            antinodes.add((start1, start2))
+            before1, before2 = start1 - run, start2 - rise
+            while 0 <= before1 < w and 0 <= before2 < h:
+                print("before", before1, before2)
+                antinodes.add((before1, before2))
+                before1, before2 = before1 - run, before2 - rise
+            after1, after2 = start1 + run, start2 + rise
+            while 0 <= after1 < w and 0 <= after2 < h:
+                print("after", after1, after2)
+                antinodes.add((after1, after2))
+                after1, after2 = after1 + run, after2 + rise
+    print(antinodes)
+    print(len(antinodes))
+
+    for j in range(h):
+        for i in range(w):
+            item = grid[j][i]
+            if (i, j) in antinodes:
+                print("#", end="")
+            else:
+                print(item, end="")
+        print()
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
