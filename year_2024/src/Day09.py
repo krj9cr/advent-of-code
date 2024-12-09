@@ -1,4 +1,6 @@
 import time
+from collections import OrderedDict
+
 
 
 def parseInput(day):
@@ -92,65 +94,158 @@ def part2():
     line = parseInput(9)
     blocks = []
     storage = []
+    files = OrderedDict()
+    free_space = OrderedDict()
     num_free_spots = 0
+    # create storage array
     for i in range(len(line)):
         size = int(line[i])
         if i % 2 == 0:
             id = int((i / 2))
+            files[id] = (size, len(storage))
             for j in range(size):
                 storage.append(id)
         else:
             num_free_spots += 1
+            free_space[len(storage)] = size
             for j in range(size):
                 storage.append(".")
-    # print(storage)
+    print(storage)
     total_size = len(storage)
+    print("total size", total_size)
+    # print(files)
+    # print(free_space)
 
-    # find first free spot
+
+    # find first free spot and how big it is
     free_idx = 0
+    free_spots = 0
+    found_free = False
     for i in range(total_size):
         item = storage[i]
-        if item == ".":
+        if not found_free and item == ".":
             free_idx = i
-            break
-    # print(free_idx)
-    # print(num_free_spots)
+            found_free = True
+        if found_free:
+            if item == ".":
+                free_spots += 1
+            else:
+                break
+    print("next free idx", free_idx, "free_spots", free_spots)
 
-    # find last file spot
-    file_idx = total_size - 1
-    for i in range(file_idx, -1, -1):
-        item = storage[i]
-        if item != ".":
-            file_idx = i
-            break
-    # print(file_idx)
+    # find last file spot, and how big it is
+    # file_idx = total_size - 1
+    # file_size = 0
+    # found_file = False
+    # file_num = 0
+    # for i in range(file_idx, -1, -1):
+    #     item = storage[i]
+    #     if not found_file and item != ".":
+    #         file_idx = i
+    #         found_file = True
+    #         file_num = item
+    #     if found_file:
+    #         if item == file_num:
+    #             file_size += 1
+    #             file_idx = i
+    #         else:
+    #             break
+    # print("file_num", file_num, "file index:", file_idx, "file_Size", file_size)
+
+    # find last file spot, and how big it is
+    curr_file = files.popitem(last=True)
+    print(curr_file)
+    print(free_space)
+    file_idx = curr_file[1][1]
+    file_size = curr_file[1][0]
+    file_num = curr_file[0]
+    print("file_num", file_num, "file index:", file_idx, "file_Size", file_size)
 
     count = 0
     while True:
-        storage[free_idx] = storage[file_idx]
-        storage[file_idx] = "."
+        if file_size <= free_spots:
+            print("MOVING ITEM", file_num)
+            # move da file wholly
+            storage[free_idx:free_idx+file_size] = [file_num] * file_size
+            storage[file_idx:file_idx+file_size] = ["."] * file_size
 
-        # find next free spot
-        for i in range(free_idx + 1, total_size):
-            item = storage[i]
-            if item == ".":
-                free_idx = i
+            # find last file spot, and how big it is
+            if len(files) <= 1:
                 break
+            curr_file = files.popitem(last=True)
+            file_idx = curr_file[1][1]
+            file_size = curr_file[1][0]
+            file_num = curr_file[0]
+            # print(curr_file, files)
+            # print("file_num", file_num, "file index:", file_idx, "file_Size", file_size)
 
-        # find next file spot
-        for i in range(file_idx - 1, -1, -1):
-            item = storage[i]
-            if item != ".":
-                file_idx = i
-                break
-        # print(free_idx, file_idx)
+            # find first free spot
+            free_idx = 0
+            free_spots = 0
+            found_free = False
+            for i in range(0, total_size):
+                item = storage[i]
+                if not found_free and item == ".":
+                    free_idx = i
+                    found_free = True
+                if found_free:
+                    if item == ".":
+                        free_spots += 1
+                    else:
+                        break
+            # print("next free idx", free_idx, "free_spots", free_spots)
+            # print(storage)
+            # print()
+        else:
+            # the file won't fit in this free spot
+            # find next free spot
+            prev_size = free_spots
+            free_spots = 0
+            found_free = False
+            for i in range(free_idx+prev_size, total_size):
+                item = storage[i]
+                if not found_free and item == ".":
+                    free_idx = i
+                    found_free = True
+                if found_free:
+                    if item == ".":
+                        free_spots += 1
+                    else:
+                        break
+            # print("file_num", file_num, "file index:", file_idx, "file_Size", file_size)
+            # print("next free idx", free_idx, "free_spots", free_spots)
 
-        # print(storage)
+            # couldn't find a spot for this file, so move on
+            if free_idx >= file_idx:
+                print("MOVING ON")
+                # find last file spot, and how big it is
+                if len(files) <= 1:
+                    break
+                curr_file = files.popitem(last=True)
+                file_idx = curr_file[1][1]
+                file_size = curr_file[1][0]
+                file_num = curr_file[0]
+                # print("file_num", file_num, "file index:", file_idx, "file_Size", file_size)
+
+                # find first free spot
+                free_idx = 0
+                free_spots = 0
+                found_free = False
+                for i in range(0, total_size):
+                    item = storage[i]
+                    if not found_free and item == ".":
+                        free_idx = i
+                        found_free = True
+                    if found_free:
+                        if item == ".":
+                            free_spots += 1
+                        else:
+                            break
+                # print("next free idx", free_idx, "free_spots", free_spots)
+
         count += 1
         # if count > 10:
         #     break
-        if free_idx > file_idx:
-            break
 
     # get answer
     total = 0
@@ -158,9 +253,10 @@ def part2():
         item = storage[i]
         if item != ".":
             total += i * storage[i]
-        else:
-            break
-    print(total)
+    print(storage)
+    print("TOTAL", total)
+
+# 6423318527425 too high
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
