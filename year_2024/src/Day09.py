@@ -163,7 +163,15 @@ def part2():
 
     count = 0
     while True:
-        if file_size <= free_spots:
+        if file_size == 0:
+            curr_file = files.popitem(last=True)
+            file_idx = curr_file[1][1]
+            file_size = curr_file[1][0]
+            file_num = curr_file[0]
+            # print(curr_file, files)
+            # print("file_num", file_num, "file index:", file_idx, "file_Size", file_size)
+
+        if file_size <= free_spots and free_idx < file_idx:
             print("MOVING ITEM", file_num)
             # move da file wholly
             storage[free_idx:free_idx+file_size] = [file_num] * file_size
@@ -225,6 +233,7 @@ def part2():
                 file_idx = curr_file[1][1]
                 file_size = curr_file[1][0]
                 file_num = curr_file[0]
+                # print(curr_file, files)
                 # print("file_num", file_num, "file index:", file_idx, "file_Size", file_size)
 
                 # find first free spot
@@ -243,6 +252,8 @@ def part2():
                             break
                 # print("next free idx", free_idx, "free_spots", free_spots)
 
+            # print(storage)
+            # print()
         count += 1
         # if count > 10:
         #     break
@@ -255,8 +266,6 @@ def part2():
             total += i * storage[i]
     print(storage)
     print("TOTAL", total)
-
-# 6423318527425 too high
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
