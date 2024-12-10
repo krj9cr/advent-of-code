@@ -73,19 +73,59 @@ def part1():
                 print_2d_grid(grid, path)
     print(total)
 
+def bfs_2d_grid_part2(grid, curr, nines, seen_ends):
+    x, y = curr
+    currentItem = grid[y][x]
+    if (x, y) in nines:
+        # print("AT end", x,y)
+        if seen_ends.get((x, y)):
+            seen_ends[(x, y)] += 1
+        else:
+            seen_ends[(x, y)] = 1
+    for x2, y2 in ((x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1)):
+        if 0 <= x2 < len(grid[0]) and 0 <= y2 < len(grid):
+            nextItem = grid[y2][x2]
+            if nextItem - currentItem == 1:
+                bfs_2d_grid_part2(grid, (x2, y2), nines, seen_ends)
+    # print(seen_ends)
+    return seen_ends
+
 def part2():
-    lines = parseInput(10)
-    print(lines)
+    grid = parseInput(10)
+    # print_2d_grid(grid)
+
+    nines = set()
+    # find 9's
+    for j in range(len(grid)):
+        row = grid[j]
+        for i in range(len(row)):
+            item = row[i]
+            if item == 9:
+                nines.add((i, j))
+    # print(nines)
+
+    # find zeros
+    total = 0
+    for j in range(len(grid)):
+        row = grid[j]
+        for i in range(len(row)):
+            item = row[i]
+            if item == 0:
+                seen = bfs_2d_grid_part2(grid, (i, j), nines, {})
+                # print("SEEN:", seen)
+                for nine in seen:
+                    total += seen[nine]
+    print(total)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
