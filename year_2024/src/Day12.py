@@ -118,6 +118,42 @@ def part2():
     # something like: https://en.wikipedia.org/wiki/Gift_wrapping_algorithm ?
     for garden_plot in garden_plots:
         print(garden_plot)
+        # Sort the points by Y, then by X, which puts them in grid order
+        sorted_y_points = list(garden_plot.points)
+        sorted_y_points.sort(key=lambda x: x[1])
+        sorted_y_points.sort(key=lambda x: x[0])
+        print("Sorted Points", sorted_y_points)
+        print()
+
+        # Starting with the upper-left-most point, which is guaranteed to have at least 2 sides
+        # check the left, and lower 2 cells, if they match the letter, we count the sides differently
+        #  4   3   3   3   2   2
+        #  XA  XX  XA  XA  XX  XX
+        # AA? AA? XX? AX? XX? AX?
+        # depending on the layout, we recurse to the next relevant cells, maybe just finding all the cells on the edge
+
+        # then for each cell on the edge, count its sides
+
+        # maybe do a separate pass for holes? ughudlkj
+
+
+        '''
+        algorithm jarvis(S) is
+            // S is the set of points
+            // P will be the set of points which form the convex hull. Final set size is i.
+            pointOnHull := leftmost point in S // which is guaranteed to be part of the CH(S)
+            i := 0
+            repeat
+                P[i] := pointOnHull
+                endpoint := S[0]      // initial endpoint for a candidate edge on the hull
+                for j from 0 to |S| do
+                    // endpoint == pointOnHull is a rare case and can happen only when j == 1 and a better endpoint has not yet been set for the loop
+                    if (endpoint == pointOnHull) or (S[j] is on left of line from P[i] to endpoint) then
+                        endpoint := S[j]   // found greater left turn, update endpoint
+                i := i + 1
+                pointOnHull := endpoint
+            until endpoint == P[0]      // wrapped around to first hull point
+        '''
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
