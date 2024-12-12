@@ -35,7 +35,7 @@ def find_garden_plot(first, letter, grid, garden_plot, seen, garden_seen=set()):
     garden_plot.points.add(first)
 
     garden_seen.add(first)
-    print("...at", first)
+    # print("...at", first)
     i, j = first
     for x2, y2 in ((i, j - 1), (i - 1, j), (i + 1, j), (i, j + 1)):
         if 0 <= x2 < len(grid[0]) and 0 <= y2 < len(grid):
@@ -43,7 +43,7 @@ def find_garden_plot(first, letter, grid, garden_plot, seen, garden_seen=set()):
             if item2 == letter:
                 if (x2, y2) in garden_seen:
                     continue
-                print("...found", (x2, y2))
+                # print("...found", (x2, y2))
                 garden_plot.points.add((x2, y2))
                 garden_seen.add((x2, y2))
                 # seen.add((x2, y2))
@@ -52,12 +52,12 @@ def find_garden_plot(first, letter, grid, garden_plot, seen, garden_seen=set()):
                 garden_plot.perimeter += 1
         else:
             garden_plot.perimeter += 1
-    print("seen", letter, (i, j))
+    # print("seen", letter, (i, j))
     seen.add((i, j))
 
 def part1():
     grid = parseInput(12)
-    print_2d_grid(grid)
+    # print_2d_grid(grid)
 
     seen = set()
     garden_plots = []
@@ -83,7 +83,7 @@ def part1():
                         garden_plot = GardenPlot()
                         find_garden_plot((i, j), item, grid, garden_plot, seen)
                         garden_plots.append(garden_plot)
-                        print("seen", item2, (i, j))
+                        # print("seen", item2, (i, j))
                         seen.add((x2, y2))
                     else:
                         loner += 1
@@ -104,23 +104,30 @@ def part1():
     total = 0
     for garden_plot in garden_plots:
         garden_plot.area = len(garden_plot.points)
-        print(garden_plot)
+        # print(garden_plot)
         total += garden_plot.area * garden_plot.perimeter
     print("TOTAL", total)
+    return garden_plots
 
 def part2():
-    lines = parseInput(12)
-    print(lines)
+    grid = parseInput(12)
+    # print_2d_grid(grid)
+    garden_plots = part1()
+
+    # for each garden plot, somehow compute the number of sides
+    # something like: https://en.wikipedia.org/wiki/Gift_wrapping_algorithm ?
+    for garden_plot in garden_plots:
+        print(garden_plot)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
