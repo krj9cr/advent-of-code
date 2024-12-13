@@ -1,6 +1,7 @@
 import sys
 import time
 import re
+import math
 
 class Machine:
     def __init__(self):
@@ -78,20 +79,49 @@ def part1():
 
     print(total)
 
+'''
+A * a_x + B * b_x = prize_x
+A * a_y + B * b_y = prize_y
 
+Cramer's rule:
+A = (prize_x*b_y - prize_y*b_x) / (a_x*b_y - a_y*b_x)
+B = (a_x*prize_y - a_y*prize_x) / (a_x*b_y - a_y*b_x)
+'''
 def part2():
-    lines = parseInput(13)
-    print(lines)
+    machines = parseInput(13)
+
+    for machine in machines:
+        machine.prize_x += 10000000000000
+        machine.prize_y += 10000000000000
+
+    total = 0
+    for machine in machines:
+        print(machine)
+
+        det = (machine.a_x * machine.b_y - machine.a_y * machine.b_x)
+        i_a = (machine.prize_x * machine.b_y - machine.prize_y * machine.b_x) // det
+        i_b = (machine.prize_y * machine.a_x - machine.prize_x * machine.a_y) // det
+
+        x = machine.a_x * i_a + machine.b_x * i_b
+        y = machine.a_y * i_a + machine.b_y * i_b
+        if machine.prize_x == x and machine.prize_y == y:
+            print("Made it in A presses:", i_a, "and B presses:", i_b)
+
+            cost = i_a * 3 + i_b * 1
+            print("cost", cost)
+            total += cost
+
+    print(total)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
