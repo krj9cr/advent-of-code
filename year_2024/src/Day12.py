@@ -109,51 +109,149 @@ def part1():
     print("TOTAL", total)
     return garden_plots
 
+def checkBounds(point, grid):
+    x2, y2 = point
+    if 0 <= x2 < len(grid[0]) and 0 <= y2 < len(grid):
+        return True
+    return False
+
 def part2():
     grid = parseInput(12)
     # print_2d_grid(grid)
     garden_plots = part1()
 
+    total = 0
     # for each garden plot, somehow compute the number of sides
     # something like: https://en.wikipedia.org/wiki/Gift_wrapping_algorithm ?
     for garden_plot in garden_plots:
         print(garden_plot)
+        letter = garden_plot.letter
+        sides_total = 0
+
+        side_points = set()
+        # Do a recursive traversal and save all the cells that have a side
+        for (x, y) in garden_plot.points:
+            i, j = (x, y)
+            item = grid[y][x]
+            for x2, y2 in ((i, j - 1), (i - 1, j), (i + 1, j), (i, j + 1)):
+                if 0 <= x2 < len(grid[0]) and 0 <= y2 < len(grid):
+                    item2 = grid[y2][x2]
+                    if item != item2:
+                        side_points.add((x, y))
+                else:
+                    side_points.add((x, y))
+        print("Side points", side_points)
+
         # Sort the points by Y, then by X, which puts them in grid order
-        sorted_y_points = list(garden_plot.points)
-        sorted_y_points.sort(key=lambda x: x[1])
-        sorted_y_points.sort(key=lambda x: x[0])
-        print("Sorted Points", sorted_y_points)
+        sorted_points = list(side_points)
+        sorted_points.sort(key=lambda x: x[1])
+        print("Sorted Points", sorted_points)
+
+        first_j = sorted_points[0][1]
+        last_j = sorted_points[-1][1]
+        rows = []
+        for j in range(first_j, last_j+1):
+            row = []
+            for (x, y) in sorted_points:
+                if j == y:
+                    row.append((x,y))
+            if len(row) > 0:
+                rows.append(row)
+        sorted_points.sort(key=lambda x: x[0])
+        first_i = sorted_points[0][0]
+        last_i = sorted_points[-1][0]
+        cols = []
+        for i in range(first_i, last_i+1):
+            col = []
+            for (x, y) in sorted_points:
+                if i == x:
+                    col.append((x, y))
+            if len(col) > 0:
+                cols.append(col)
+        print(rows)
+        print(cols)
+
+        # check which items have a top, group them together if adjacent
+        for row in rows:
+            has_top = []
+            has_bottom = []
+            for (x, y) in row:
+                # TOPS
+                x2, y2 = (x, y - 1)
+                in_bounds = checkBounds((x2, y2), grid)
+                if not in_bounds or (in_bounds and grid[y2][x2] != letter):
+                    has_top.append((x, y))
+                # BOTTOMS
+                x2, y2 = (x, y + 1)
+                in_bounds = checkBounds((x2, y2), grid)
+                if not in_bounds or (in_bounds and grid[y2][x2] != letter):
+                    has_bottom.append((x, y))
+            # group the ones that have tops
+            has_top.sort(key=lambda x: x[0])
+            if len(has_top) > 0:
+                curr_x = has_top[0][0]
+                groups = 0
+                for (x, y) in has_top:
+                    if x - curr_x != 1:
+                        groups += 1
+                    curr_x = x
+                print("row tops:", has_top, groups)
+                sides_total += groups
+            # group the ones that have bottoms
+            has_bottom.sort(key=lambda x: x[0])
+            if len(has_bottom) > 0:
+                curr_x = has_bottom[0][0]
+                groups = 0
+                for (x, y) in has_bottom:
+                    if x - curr_x != 1:
+                        groups += 1
+                    curr_x = x
+                print("row bottoms:", has_bottom, groups)
+                sides_total += groups
+
+        ### OK
+        # check which items have a LEFT and RIGHT, group them together if adjacent
+        for col in cols:
+            has_left = []
+            has_right = []
+            for (x, y) in col:
+                # LEFTS
+                x2, y2 = (x - 1, y)
+                in_bounds = checkBounds((x2, y2), grid)
+                if not in_bounds or (in_bounds and grid[y2][x2] != letter):
+                    has_left.append((x, y))
+                # BOTTOMS
+                x2, y2 = (x + 1, y)
+                in_bounds = checkBounds((x2, y2), grid)
+                if not in_bounds or (in_bounds and grid[y2][x2] != letter):
+                    has_right.append((x, y))
+            # group the ones that have lefts
+            has_left.sort(key=lambda x: x[1])
+            if len(has_left) > 0:
+                curr_y = has_left[0][1]
+                groups = 0
+                for (x, y) in has_left:
+                    if y - curr_y != 1:
+                        groups += 1
+                    curr_y = y
+                print("col lefts:", has_left, groups)
+                sides_total += groups
+            # group the ones that have bottoms
+            has_right.sort(key=lambda x: x[1])
+            if len(has_right) > 0:
+                curr_y = has_right[0][1]
+                groups = 0
+                for (x, y) in has_right:
+                    if y - curr_y != 1:
+                        groups += 1
+                    curr_y = y
+                print("col rights:", has_right, groups)
+                sides_total += groups
+        print("Total sides: ", sides_total)
+        total += garden_plot.area * sides_total
         print()
+    print("TOTAL", total)
 
-        # Starting with the upper-left-most point, which is guaranteed to have at least 2 sides
-        # check the left, and lower 2 cells, if they match the letter, we count the sides differently
-        #  4   3   3   3   2   2
-        #  XA  XX  XA  XA  XX  XX
-        # AA? AA? XX? AX? XX? AX?
-        # depending on the layout, we recurse to the next relevant cells, maybe just finding all the cells on the edge
-
-        # then for each cell on the edge, count its sides
-
-        # maybe do a separate pass for holes? ughudlkj
-
-
-        '''
-        algorithm jarvis(S) is
-            // S is the set of points
-            // P will be the set of points which form the convex hull. Final set size is i.
-            pointOnHull := leftmost point in S // which is guaranteed to be part of the CH(S)
-            i := 0
-            repeat
-                P[i] := pointOnHull
-                endpoint := S[0]      // initial endpoint for a candidate edge on the hull
-                for j from 0 to |S| do
-                    // endpoint == pointOnHull is a rare case and can happen only when j == 1 and a better endpoint has not yet been set for the loop
-                    if (endpoint == pointOnHull) or (S[j] is on left of line from P[i] to endpoint) then
-                        endpoint := S[j]   // found greater left turn, update endpoint
-                i := i + 1
-                pointOnHull := endpoint
-            until endpoint == P[0]      // wrapped around to first hull point
-        '''
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
