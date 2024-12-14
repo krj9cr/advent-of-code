@@ -86,23 +86,58 @@ def part1():
     print(quad1, quad2, quad3, quad4)
     print(quad1 * quad2 * quad3 * quad4)
 
-
-# 87476760 too low
-
+def get_num_neighbors(point, points, w, h):
+    x, y = point
+    neighbors = []
+    for nx, ny in (x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1):
+        if 0 <= nx < w and 0 <= ny < h and (nx ,ny) in points:
+            neighbors.append([nx, ny])
+    return len(neighbors)
 
 def part2():
-    lines = parseInput(14)
-    print(lines)
+    robots = parseInput(14)
+
+    # example width/height
+    w = 11
+    h = 7
+    # actual width/height
+    w = 101
+    h = 103
+
+    steps = 100
+    while True:
+        points = []
+        for robot in robots:
+            # print(robot)
+            # project out where it will be after steps, modded by size
+            p2_x = (robot.p_x + (robot.v_x * steps))
+            p2_y = (robot.p_y + (robot.v_y * steps))
+            point = (p2_x % w, p2_y % h)
+            points.append(point)
+            # print(math.fmod(p2_x, w), math.fmod(p2_y, h))
+        # print_points(points, w, h)
+
+        # if more than 10 points have at least 2 adjacent neighbors...?
+        num_close_points = 0
+        for point in points:
+            num = get_num_neighbors(point, points, w, h)
+            if num >= 4:
+                num_close_points += 1
+        if num_close_points >= 15:
+            print_points(points, w, h)
+            print(steps)
+            break
+        steps += 1
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
