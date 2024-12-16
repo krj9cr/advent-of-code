@@ -38,7 +38,6 @@ def heuristic(goal, x2, y2):
 # start  - a tuple of numbers representing the starting coordinate in the 2d grid
 # goal   - a tuple of numbers representing the ending coordinate in the 2d grid
 def a_star_search(board, start, direction, goal):
-    # init
     queue = PriorityQueue()
     came_from = {}  # keeps track of our path to the goal
     cost_so_far = {}  # keeps track of cost to arrive at ((x, y))
@@ -59,7 +58,6 @@ def a_star_search(board, start, direction, goal):
         down = (x, y + 1)
         left = (x - 1, y)
         right = (x + 1, y)
-
         # for each adjacent square
         for x2, y2 in (up, down, left, right):
             newDirection = direction
@@ -75,7 +73,6 @@ def a_star_search(board, start, direction, goal):
                         newDirection = "^"
                     else:
                         newDirection = "v"
-
             elif direction == "<":
                 if (x2, y2) == left:
                     cost_to_move = 1
@@ -182,6 +179,8 @@ def part1():
 
 # Adapted from https://stackoverflow.com/questions/60847450/path-finding-in-2d-map-with-python
 def find_paths_util(board, w, h, curr, direction, goal, visited, best_cost, path, cost_so_far, paths):
+    # print("at", curr)
+    x, y = curr
     # if at the end, return something
     if curr == goal:
         if cost_so_far == best_cost:
@@ -192,10 +191,8 @@ def find_paths_util(board, w, h, curr, direction, goal, visited, best_cost, path
     if cost_so_far > best_cost:
         return
 
-    # mark current cell as visited
-    # print("at", curr)
-    x, y = curr
-    visited[x][y] = True
+    # mark current cell as visited, keep track of cost_so_far
+    visited[y][x] = True
 
     # if valid cell
     # if y < 0 or y >= h or x < 0 or x >= w or board[y][x] == "#":?
@@ -259,7 +256,7 @@ def find_paths_util(board, w, h, curr, direction, goal, visited, best_cost, path
                     newDirection = ">"
 
         # don't proceed if out of bounds or wall, or visited
-        if y2 < 0 or y2 >= h or x2 < 0 or x2 >= w or board[y2][x2] == "#" or (x2, y2) in path:
+        if y2 < 0 or y2 >= h or x2 < 0 or x2 >= w or board[y2][x2] == "#" or visited[y2][x2] == True:
             continue
 
         path.append((x2, y2))
@@ -267,7 +264,7 @@ def find_paths_util(board, w, h, curr, direction, goal, visited, best_cost, path
         path.pop()
 
     # Unmark current cell as visited
-    visited[x][y] = False
+    visited[y][x] = False
 
     return paths
 
@@ -284,7 +281,7 @@ def part2():
     print(best_cost)
 
     # now find all possible paths that match this cost
-    visited = [[False] * h for _ in range(w)]
+    visited = [[False] * w for _ in range(h)]
 
     path = [start]
     paths = []
