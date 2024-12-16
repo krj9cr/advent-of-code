@@ -1,4 +1,5 @@
 import copy
+import sys
 import time
 import heapq
 
@@ -177,6 +178,120 @@ def part1():
 #########
 '''
 
+
+# See: https://www.redblobgames.com/pathfinding/a-star/implementation.html
+# board  - a 2d array of strings or numbers
+# start  - a tuple of numbers representing the starting coordinate in the 2d grid
+# goal   - a tuple of numbers representing the ending coordinate in the 2d grid
+def a_star_search2(board, start, goal):
+    queue = PriorityQueue()
+    came_from = {}  # keeps track of our path to the goal
+    cost_so_far = {}  # keeps track of cost to arrive at ((x, y))
+
+    # add start infos
+    queue.put((start[0], start[1], ">"), 0)
+    came_from[(start[0], start[1])] = None
+    cost_so_far[(start[0], start[1])] = 0
+
+    paths = []
+    best_cost = sys.maxsize
+
+    while not queue.empty():
+        x, y, direction = queue.get()
+        # print("at", x, y, direction)
+
+        # TODO: modify to save off paths and keep going, stop when we reach a cost that's greater?
+        if (x, y) == goal:
+            da_cost = cost_so_far[goal]
+            print("MADE IT", da_cost)
+
+            curr = goal
+            path = []
+            while curr is not None and curr != start:
+                path.append(curr)
+                curr = came_from[curr]
+
+            paths.append(path[:])
+            print(path)
+            print(len(path))
+            print_path(board, len(board[0]), len(board), path)
+            came_from = {}
+            # for item in queue.elements:
+            #     print(item)
+            if da_cost <= best_cost:
+                best_cost = da_cost
+            else:
+                return paths
+
+        up = (x, y - 1)
+        down = (x, y + 1)
+        left = (x - 1, y)
+        right = (x + 1, y)
+        # for each adjacent square
+        for x2, y2 in (up, down, left, right):
+            newDirection = direction
+            if direction == ">":
+                if (x2, y2) == right:
+                    cost_to_move = 1
+                elif (x2, y2) == left:
+                    cost_to_move = 2000 + 1
+                    newDirection = "<"
+                else:
+                    cost_to_move = 1000 + 1
+                    if (x2, y2) == up:
+                        newDirection = "^"
+                    else:
+                        newDirection = "v"
+            elif direction == "<":
+                if (x2, y2) == left:
+                    cost_to_move = 1
+                elif (x2, y2) == right:
+                    cost_to_move = 2000 + 1
+                    newDirection = ">"
+                else:
+                    cost_to_move = 1000 + 1
+                    if (x2, y2) == up:
+                        newDirection = "^"
+                    else:
+                        newDirection = "v"
+            elif direction == "v":
+                if (x2, y2) == down:
+                    cost_to_move = 1
+                elif (x2, y2) == up:
+                    cost_to_move = 2000 + 1
+                    newDirection = "^"
+                else:
+                    cost_to_move = 1000 + 1
+                    if (x2, y2) == left:
+                        newDirection = "<"
+                    else:
+                        newDirection = ">"
+            elif direction == "^":
+                if (x2, y2) == up:
+                    cost_to_move = 1
+                elif (x2, y2) == down:
+                    cost_to_move = 2000 + 1
+                    newDirection = "v"
+                else:
+                    cost_to_move = 1000 + 1
+                    if (x2, y2) == left:
+                        newDirection = "<"
+                    else:
+                        newDirection = ">"
+            # Try to move
+            new_cost = cost_so_far[(x, y)] + cost_to_move
+            # if we're not out of bounds
+            if 0 <= y2 < len(board) and 0 <= x2 < len(board[y2]):
+                next_spot = (x2, y2)
+                if board[y2][x2] != "#":
+                    if next_spot not in cost_so_far or new_cost <= cost_so_far[next_spot]:
+                        cost_so_far[next_spot] = new_cost
+                        priority = new_cost + heuristic(goal, x2, y2)
+                        queue.put((next_spot[0], next_spot[1], newDirection), priority)
+                        came_from[next_spot] = (x, y)
+    return paths
+
+
 # Adapted from https://stackoverflow.com/questions/60847450/path-finding-in-2d-map-with-python
 def find_paths_util(board, w, h, curr, direction, goal, visited, best_cost, path, cost_so_far, paths):
     # print("at", curr)
@@ -269,8 +384,6 @@ def find_paths_util(board, w, h, curr, direction, goal, visited, best_cost, path
     return paths
 
 
-
-
 def part2():
     grid = parseInput(16)
 
@@ -280,21 +393,51 @@ def part2():
     best_cost, start, end = part1()
     print(best_cost)
 
+
+    # REDO with just astar
+    paths = a_star_search2(grid, start, end)
+    total = 0
+    points = {start, end}
+    for path in paths:
+        print(len(path))
+        total += len(path)
+        print(path)
+        for key in path:
+            points.add(key)
+    print("number of paths", len(paths))
+    print("total", len(points))
+
+
+    # count em up
+    # points = {start, end}
+    # for (came_from, cost_so_far) in paths:
+    #     # reconstruct path
+    #     curr = end
+    #     path = []
+    #     while curr is not None or curr != start:
+    #         points.add(curr)
+    #         path.append(curr)
+    #         curr = came_from[curr]
+    print_path(grid, w, h, points)
+    # print("points", points)
+    # print("num_points", len(points))
+
+
     # now find all possible paths that match this cost
-    visited = [[False] * w for _ in range(h)]
-
-    path = [start]
-    paths = []
-    paths = find_paths_util(grid, w, h, start, ">", end, visited, best_cost, path, 0, paths)
-
-    print(paths)
-    print("num_paths", len(paths))
-
-    points = set()
-    for path, cost in paths:
-        for point in path:
-            points.add(point)
-    print("num_points", len(points))
+    # visited = [[False] * w for _ in range(h)]
+    #
+    # path = [start]
+    # paths = []
+    # paths = find_paths_util(grid, w, h, start, ">", end, visited, best_cost, path, 0, paths)
+    #
+    # print(paths)
+    # print("num_paths", len(paths))
+    #
+    # points = set()
+    # for path, cost in paths:
+    #     for point in path:
+    #         points.add(point)
+    # print("num_points", len(points))
 
 
 
