@@ -43,13 +43,13 @@ def a_star_search(board, start, direction, goal):
     cost_so_far = {}  # keeps track of cost to arrive at ((x, y))
 
     # add start infos
-    queue.put((start[0], start[1]), 0)
-    came_from[((start[0], start[1]), ">")] = None
-    cost_so_far[((start[0], start[1]), ">")] = 0
+    queue.put((start[0], start[1], ">"), 0)
+    came_from[(start[0], start[1])] = None
+    cost_so_far[(start[0], start[1])] = 0
 
     while not queue.empty():
-        x, y = queue.get()
-        print(x, y)
+        x, y, direction = queue.get()
+        print("at", x, y, direction)
 
         if (x, y) == goal:
             break
@@ -71,9 +71,9 @@ def a_star_search(board, start, direction, goal):
                 else:
                     cost_to_move = 1000 + 1
                     if (x2, y2) == up:
-                        newDirection == "^"
+                        newDirection = "^"
                     else:
-                        newDirection == "v"
+                        newDirection = "v"
 
             elif direction == "<":
                 if (x2, y2) == left:
@@ -84,9 +84,9 @@ def a_star_search(board, start, direction, goal):
                 else:
                     cost_to_move = 1000 + 1
                     if (x2, y2) == up:
-                        newDirection == "^"
+                        newDirection = "^"
                     else:
-                        newDirection == "v"
+                        newDirection = "v"
             elif direction == "v":
                 if (x2, y2) == down:
                     cost_to_move = 1
@@ -96,9 +96,9 @@ def a_star_search(board, start, direction, goal):
                 else:
                     cost_to_move = 1000 + 1
                     if (x2, y2) == left:
-                        newDirection == "<"
+                        newDirection = "<"
                     else:
-                        newDirection == ">"
+                        newDirection = ">"
             elif direction == "^":
                 if (x2, y2) == up:
                     cost_to_move = 1
@@ -108,22 +108,23 @@ def a_star_search(board, start, direction, goal):
                 else:
                     cost_to_move = 1000 + 1
                     if (x2, y2) == left:
-                        newDirection == "<"
+                        newDirection = "<"
                     else:
-                        newDirection == ">"
+                        newDirection = ">"
             # Try to move
-            if ((x, y), direction) in cost_so_far:
-                print(cost_so_far.get((x, y), direction))
-                new_cost = cost_so_far[((x, y), direction)] + cost_to_move
-                # if we're not out of bounds
-                if 0 <= y2 < len(board) and 0 <= x2 < len(board[y2]):
-                    next_spot = ((x2, y2), newDirection)
-                    if board[y2][x2] != "#":
-                        if next_spot not in cost_so_far or new_cost < cost_so_far[next_spot]:
-                            cost_so_far[next_spot] = new_cost
-                            priority = new_cost + heuristic(goal, x2, y2)
-                            queue.put(next_spot[0], priority)
-                            came_from[next_spot] = ((x, y), direction)
+            # if (x, y) in cost_so_far:
+            #     print(cost_so_far.get((x, y), direction))
+            new_cost = cost_so_far[(x, y)] + cost_to_move
+            # if we're not out of bounds
+            if 0 <= y2 < len(board) and 0 <= x2 < len(board[y2]):
+                next_spot = (x2, y2)
+                if board[y2][x2] != "#":
+                    if next_spot not in cost_so_far or new_cost < cost_so_far[next_spot]:
+                        cost_so_far[next_spot] = new_cost
+                        priority = new_cost + heuristic(goal, x2, y2)
+                        queue.put((next_spot[0], next_spot[1], newDirection), priority)
+                        print("adding", next_spot[0], next_spot[1], newDirection)
+                        came_from[next_spot] = (x, y)
     return came_from, cost_so_far
 
 def print_path(grid, w, h, path):
@@ -131,7 +132,7 @@ def print_path(grid, w, h, path):
         for i in range(w):
             item = grid[j][i]
             if (i, j) in path:
-                print(path[(i, j)], end="")
+                print("X", end="")
             else:
                 print(item, end="")
         print()
@@ -161,16 +162,24 @@ def part1():
     came_from, cost_so_far = a_star_search(grid, start, direction, end)
     print(came_from)
     print(cost_so_far)
-    print(cost_so_far[(end, ">")])
+    print(cost_so_far[end])
     # reconstruct path
     curr = end
-    path = {}
+    path = []
     while curr is not None:
-        (curr, dir) = came_from[curr]
-        path[curr] = dir
+        curr = came_from[curr]
+        path.append(curr)
     print(path)
     print_path(grid, w, h, path)
-    print(cost_so_far[(end, ">")])
+    print(cost_so_far[end])
+
+'''
+#########
+#......E#
+#.......#
+#S......#
+#########
+'''
 
 def part2():
     lines = parseInput(16)
