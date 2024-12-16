@@ -1,3 +1,4 @@
+import copy
 import time
 import heapq
 
@@ -49,7 +50,7 @@ def a_star_search(board, start, direction, goal):
 
     while not queue.empty():
         x, y, direction = queue.get()
-        print("at", x, y, direction)
+        # print("at", x, y, direction)
 
         if (x, y) == goal:
             break
@@ -123,7 +124,7 @@ def a_star_search(board, start, direction, goal):
                         cost_so_far[next_spot] = new_cost
                         priority = new_cost + heuristic(goal, x2, y2)
                         queue.put((next_spot[0], next_spot[1], newDirection), priority)
-                        print("adding", next_spot[0], next_spot[1], newDirection)
+                        # print("adding", next_spot[0], next_spot[1], newDirection)
                         came_from[next_spot] = (x, y)
     return came_from, cost_so_far
 
@@ -156,44 +157,160 @@ def part1():
             elif item == "E":
                 end = (i, j)
 
-    print("start", start)
-    print("end", end)
-
     came_from, cost_so_far = a_star_search(grid, start, direction, end)
-    print(came_from)
-    print(cost_so_far)
-    print(cost_so_far[end])
+    # print(came_from)
+    # print(cost_so_far)
+    # print(cost_so_far[end])
     # reconstruct path
     curr = end
     path = []
     while curr is not None:
         curr = came_from[curr]
         path.append(curr)
-    print(path)
-    print_path(grid, w, h, path)
+    # print(path)
+    # print_path(grid, w, h, path)
     print(cost_so_far[end])
+    return cost_so_far[end], start, end
 
 '''
 #########
 #......E#
-#.......#
+#.#####.#
 #S......#
 #########
 '''
 
+# Adapted from https://stackoverflow.com/questions/60847450/path-finding-in-2d-map-with-python
+def find_paths_util(board, w, h, curr, direction, goal, visited, best_cost, path, cost_so_far, paths):
+    # if at the end, return something
+    if curr == goal:
+        if cost_so_far == best_cost:
+            paths.append((path[:], cost_so_far))  # append copy of current path
+            print("Made it to end, paths so far", len(paths))
+        return
+
+    if cost_so_far > best_cost:
+        return
+
+    # mark current cell as visited
+    # print("at", curr)
+    x, y = curr
+    visited[x][y] = True
+
+    # if valid cell
+    # if y < 0 or y >= h or x < 0 or x >= w or board[y][x] == "#":?
+        # Use bfs on path in all valid directions
+
+    # try moving to all 4 points... each one is a new path
+    up = (x, y - 1)
+    down = (x, y + 1)
+    left = (x - 1, y)
+    right = (x + 1, y)
+    for x2, y2 in (up, down, left, right):
+        newDirection = direction
+        cost_to_move = 1
+        if direction == ">":
+            if (x2, y2) == right:
+                cost_to_move = 1
+            elif (x2, y2) == left:
+                cost_to_move = 2000 + 1
+                newDirection = "<"
+            else:
+                cost_to_move = 1000 + 1
+                if (x2, y2) == up:
+                    newDirection = "^"
+                else:
+                    newDirection = "v"
+        elif direction == "<":
+            if (x2, y2) == left:
+                cost_to_move = 1
+            elif (x2, y2) == right:
+                cost_to_move = 2000 + 1
+                newDirection = ">"
+            else:
+                cost_to_move = 1000 + 1
+                if (x2, y2) == up:
+                    newDirection = "^"
+                else:
+                    newDirection = "v"
+        elif direction == "v":
+            if (x2, y2) == down:
+                cost_to_move = 1
+            elif (x2, y2) == up:
+                cost_to_move = 2000 + 1
+                newDirection = "^"
+            else:
+                cost_to_move = 1000 + 1
+                if (x2, y2) == left:
+                    newDirection = "<"
+                else:
+                    newDirection = ">"
+        elif direction == "^":
+            if (x2, y2) == up:
+                cost_to_move = 1
+            elif (x2, y2) == down:
+                cost_to_move = 2000 + 1
+                newDirection = "v"
+            else:
+                cost_to_move = 1000 + 1
+                if (x2, y2) == left:
+                    newDirection = "<"
+                else:
+                    newDirection = ">"
+
+        # don't proceed if out of bounds or wall, or visited
+        if y2 < 0 or y2 >= h or x2 < 0 or x2 >= w or board[y2][x2] == "#" or (x2, y2) in path:
+            continue
+
+        path.append((x2, y2))
+        find_paths_util(board, w, h, (x2, y2), newDirection, goal, visited, best_cost, path, cost_so_far + cost_to_move, paths)
+        path.pop()
+
+    # Unmark current cell as visited
+    visited[x][y] = False
+
+    return paths
+
+
+
+
 def part2():
-    lines = parseInput(16)
-    print(lines)
+    grid = parseInput(16)
+
+    h = len(grid)
+    w = len(grid[0])
+
+    best_cost, start, end = part1()
+    print(best_cost)
+
+    # now find all possible paths that match this cost
+    visited = [[False] * h for _ in range(w)]
+
+    path = [start]
+    paths = []
+    paths = find_paths_util(grid, w, h, start, ">", end, visited, best_cost, path, 0, paths)
+
+    print(paths)
+    print("num_paths", len(paths))
+
+    points = set()
+    for path, cost in paths:
+        for point in path:
+            points.add(point)
+    print("num_points", len(points))
+
+
+
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
