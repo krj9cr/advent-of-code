@@ -190,35 +190,38 @@ def a_star_search2(board, start, goal):
 
     # add start infos
     queue.put((start[0], start[1], ">"), 0)
-    came_from[(start[0], start[1])] = None
-    cost_so_far[(start[0], start[1])] = 0
+    came_from[((start[0], start[1]), ">")] = None
+    cost_so_far[((start[0], start[1]), ">")] = 0
 
     paths = []
     best_cost = sys.maxsize
 
     while not queue.empty():
         x, y, direction = queue.get()
-        # print("at", x, y, direction)
+        c = cost_so_far[((x, y), direction)]
+        print("at", x, y, direction, c)
 
         # TODO: modify to save off paths and keep going, stop when we reach a cost that's greater?
         if (x, y) == goal:
-            da_cost = cost_so_far[goal]
-            print("MADE IT", da_cost)
-
-            curr = goal
-            path = []
-            while curr is not None and curr != start:
-                path.append(curr)
-                curr = came_from[curr]
-
-            paths.append(path[:])
-            print(path)
-            print(len(path))
-            print_path(board, len(board[0]), len(board), path)
-            came_from = {}
+            da_cost = cost_so_far[(goal, direction)]
+            # came_from = {}
             # for item in queue.elements:
             #     print(item)
             if da_cost <= best_cost:
+                print("MADE IT", da_cost)
+
+                curr = goal
+                curr_dir = direction
+                path = []
+                while curr is not None and curr != start:
+                    path.append(curr)
+                    (a, b), curr_dir = came_from[(curr, curr_dir)]
+                    curr = (a, b)
+
+                paths.append(path[:])
+                print(path)
+                print(len(path))
+                print_path(board, len(board[0]), len(board), path)
                 best_cost = da_cost
             else:
                 return paths
@@ -279,16 +282,16 @@ def a_star_search2(board, start, goal):
                     else:
                         newDirection = ">"
             # Try to move
-            new_cost = cost_so_far[(x, y)] + cost_to_move
+            new_cost = cost_so_far[((x, y), direction)] + cost_to_move
             # if we're not out of bounds
             if 0 <= y2 < len(board) and 0 <= x2 < len(board[y2]):
                 next_spot = (x2, y2)
                 if board[y2][x2] != "#":
-                    if next_spot not in cost_so_far or new_cost <= cost_so_far[next_spot]:
-                        cost_so_far[next_spot] = new_cost
+                    if (next_spot, newDirection) not in cost_so_far or new_cost <= cost_so_far[(next_spot, newDirection)]:
+                        cost_so_far[(next_spot, newDirection)] = new_cost
                         priority = new_cost + heuristic(goal, x2, y2)
                         queue.put((next_spot[0], next_spot[1], newDirection), priority)
-                        came_from[next_spot] = (x, y)
+                        came_from[(next_spot, newDirection)] = ((x, y), direction)
     return paths
 
 
@@ -394,7 +397,6 @@ def part2():
     print(best_cost)
 
 
-    # REDO with just astar
     paths = a_star_search2(grid, start, end)
     total = 0
     points = {start, end}
@@ -407,39 +409,7 @@ def part2():
     print("number of paths", len(paths))
     print("total", len(points))
 
-
-    # count em up
-    # points = {start, end}
-    # for (came_from, cost_so_far) in paths:
-    #     # reconstruct path
-    #     curr = end
-    #     path = []
-    #     while curr is not None or curr != start:
-    #         points.add(curr)
-    #         path.append(curr)
-    #         curr = came_from[curr]
     print_path(grid, w, h, points)
-    # print("points", points)
-    # print("num_points", len(points))
-
-
-    # now find all possible paths that match this cost
-    # visited = [[False] * w for _ in range(h)]
-    #
-    # path = [start]
-    # paths = []
-    # paths = find_paths_util(grid, w, h, start, ">", end, visited, best_cost, path, 0, paths)
-    #
-    # print(paths)
-    # print("num_paths", len(paths))
-    #
-    # points = set()
-    # for path, cost in paths:
-    #     for point in path:
-    #         points.add(point)
-    # print("num_points", len(points))
-
-
 
 
 if __name__ == "__main__":
