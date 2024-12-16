@@ -178,6 +178,16 @@ def part1():
 #########
 '''
 
+def reconstruct(curr, curr_dir, came_from, points=set()):
+    points.add(curr)
+    if (curr, curr_dir) in came_from:
+        came_froms = came_from[(curr, curr_dir)]
+        if came_froms is not None:
+            for (a, b), curr_dir in came_froms:
+                points.union(reconstruct((a, b), curr_dir, came_from, points))
+        return points
+    else:
+        return points
 
 # See: https://www.redblobgames.com/pathfinding/a-star/implementation.html
 # board  - a 2d array of strings or numbers
@@ -204,21 +214,15 @@ def a_star_search2(board, start, goal):
         # TODO: modify to save off paths and keep going, stop when we reach a cost that's greater?
         if (x, y) == goal:
             da_cost = cost_so_far[(goal, direction)]
-            # came_from = {}
-            # for item in queue.elements:
-            #     print(item)
             if da_cost <= best_cost:
                 print("MADE IT", da_cost)
+                print("came_from", came_from)
 
                 curr = goal
                 curr_dir = direction
-                path = []
-                while curr is not None and curr != start:
-                    path.append(curr)
-                    (a, b), curr_dir = came_from[(curr, curr_dir)]
-                    curr = (a, b)
+                path = reconstruct(curr, curr_dir, came_from)
 
-                paths.append(path[:])
+                paths.append(path)
                 print(path)
                 print(len(path))
                 print_path(board, len(board[0]), len(board), path)
@@ -291,7 +295,10 @@ def a_star_search2(board, start, goal):
                         cost_so_far[(next_spot, newDirection)] = new_cost
                         priority = new_cost + heuristic(goal, x2, y2)
                         queue.put((next_spot[0], next_spot[1], newDirection), priority)
-                        came_from[(next_spot, newDirection)] = ((x, y), direction)
+                        if (next_spot, newDirection) in came_from:
+                            came_from[(next_spot, newDirection)].append(((x, y), direction))
+                        else:
+                            came_from[(next_spot, newDirection)] = [((x, y), direction)]
     return paths
 
 
