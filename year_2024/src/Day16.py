@@ -1,4 +1,3 @@
-import copy
 import sys
 import time
 import heapq
@@ -224,7 +223,7 @@ def a_star_search2(board, start, goal):
             da_cost = cost_so_far[(goal, direction)]
             if da_cost <= best_cost:
                 print("MADE IT", da_cost)
-                print("came_from", came_from)
+                # print("came_from", came_from)
 
                 curr = goal
                 curr_dir = direction
@@ -243,7 +242,7 @@ def a_star_search2(board, start, goal):
         left = (x - 1, y)
         right = (x + 1, y)
         # for each adjacent square
-        for x2, y2 in (up, down, left, right):
+        for x2, y2 in (down, right, up, left):
             newDirection = direction
             if direction == ">":
                 if (x2, y2) == right:
@@ -304,9 +303,9 @@ def a_star_search2(board, start, goal):
                         priority = new_cost + heuristic(goal, x2, y2)
                         queue.put((next_spot[0], next_spot[1], newDirection), priority)
                         if (next_spot, newDirection) in came_from:
-                            came_from[(next_spot, newDirection)].append(((x, y), direction))
+                            came_from[(next_spot, newDirection)].add(((x, y), direction))
                         else:
-                            came_from[(next_spot, newDirection)] = [((x, y), direction)]
+                            came_from[(next_spot, newDirection)] = {((x, y), direction)}
     return paths
 
 
