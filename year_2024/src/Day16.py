@@ -178,13 +178,21 @@ def part1():
 #########
 '''
 
-def reconstruct(curr, curr_dir, came_from, points=set()):
-    points.add(curr)
+def reconstruct(curr, curr_dir, came_from, points={}):
+    if curr in points:
+        points[curr] += 1
+    else:
+        points[curr] = 1
+    # check for cycles idk
+    for point in points:
+        if points[point] >= 1000:
+            return points
+    # follow through
     if (curr, curr_dir) in came_from:
         came_froms = came_from[(curr, curr_dir)]
         if came_froms is not None:
             for (a, b), curr_dir in came_froms:
-                points.union(reconstruct((a, b), curr_dir, came_from, points))
+                points.update(reconstruct((a, b), curr_dir, came_from, points))
         return points
     else:
         return points
@@ -209,7 +217,7 @@ def a_star_search2(board, start, goal):
     while not queue.empty():
         x, y, direction = queue.get()
         c = cost_so_far[((x, y), direction)]
-        print("at", x, y, direction, c)
+        # print("at", x, y, direction, c)
 
         # TODO: modify to save off paths and keep going, stop when we reach a cost that's greater?
         if (x, y) == goal:
@@ -223,9 +231,9 @@ def a_star_search2(board, start, goal):
                 path = reconstruct(curr, curr_dir, came_from)
 
                 paths.append(path)
-                print(path)
+                # print(path)
                 print(len(path))
-                print_path(board, len(board[0]), len(board), path)
+                # print_path(board, len(board[0]), len(board), path)
                 best_cost = da_cost
             else:
                 return paths
@@ -401,23 +409,24 @@ def part2():
     w = len(grid[0])
 
     best_cost, start, end = part1()
-    print(best_cost)
+    print("best_cost", best_cost)
 
 
     paths = a_star_search2(grid, start, end)
     total = 0
     points = {start, end}
     for path in paths:
-        print(len(path))
+        # print(len(path))
         total += len(path)
-        print(path)
+        # print(path)
         for key in path:
             points.add(key)
+    print_path(grid, w, h, points)
     print("number of paths", len(paths))
     print("total", len(points))
 
-    print_path(grid, w, h, points)
 
+# 524 too low
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
