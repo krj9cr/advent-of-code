@@ -130,7 +130,13 @@ def part2():
     input_size = len(program)
     print("input", input_str)
 
-    a = 0
+    # a = 35184372050000
+
+    # A: 40000000013320      0,3,5,0,1,0,1,1,5,0,4,4,5,0,1,1 len: 16
+    # A: 50000000021238      5,1,7,3,0,1,0,0,3,5,5,3,0,0,3,1 len: 16
+    # A: 60000000031623      0,6,1,2,3,2,1,0,5,3,0,6,4,6,6,1 len: 16
+
+    a = 70000000000000
     while True:
         registers["A"] = a
         registers["B"] = 0
@@ -165,7 +171,7 @@ def part2():
         output_str = ','.join([str(o) for o in output])
         if input_str == output_str:
             break
-        print("A:", a, "    ", output_str)
+        print("A:", a, "    ", output_str, "len:", len(output))
 
         a += 1
 
