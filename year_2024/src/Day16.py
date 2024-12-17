@@ -424,9 +424,6 @@ def part2():
     print("number of paths", len(paths))
     print("total", len(points))
 
-
-# 524 too low
-
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
     # start = time.perf_counter()
