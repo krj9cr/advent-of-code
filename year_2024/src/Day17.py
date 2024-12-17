@@ -124,18 +124,60 @@ def part1():
 
 
 def part2():
-    lines = parseInput(17)
-    print(lines)
+    registers, program = parseInput(17)
+
+    input_str = ','.join([str(o) for o in program])
+    input_size = len(program)
+    print("input", input_str)
+
+    a = 0
+    while True:
+        registers["A"] = a
+        registers["B"] = 0
+        registers["C"] = 0
+
+        # run program
+        ip = 0
+        output = []
+        longer_output = False
+        while ip < len(program) - 1:
+            opcode = program[ip]
+            operand = program[ip+1]
+            result = opcodes[opcode](operand, registers)
+            # jump, resets instruction pointer
+            if opcode == 3:
+                if result is not None:
+                    ip = result
+                    # do not increase ip by 2
+                    continue
+            # save output
+            elif opcode == 5:
+                if result is not None:
+                    output.append(result)
+                    if len(output) > input_size:
+                        longer_output = True
+                        print("Longer output", ','.join([str(o) for o in output]))
+                        break
+            ip += 2
+
+        if longer_output:
+            break
+        output_str = ','.join([str(o) for o in output])
+        if input_str == output_str:
+            break
+        print("A:", a, "    ", output_str)
+
+        a += 1
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
