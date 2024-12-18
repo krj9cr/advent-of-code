@@ -97,6 +97,52 @@ opcodes = {
     7: cdv
 }
 
+def decToOctal(n):
+
+    # array to store
+    # octal number
+    octalNum = [0] * 100
+
+    # counter for octal
+    # number array
+    i = 0
+    while (n != 0):
+
+        # storing remainder
+        # in octal array
+        octalNum[i] = n % 8
+        n = int(n / 8)
+        i += 1
+
+    # printing octal number
+    # array in reverse order
+    for j in range(i - 1, -1, -1):
+        print(octalNum[j], end="")
+
+def octalToDecimal(n):
+    num = n
+    dec_value = 0
+
+    # Initializing base value
+    # to 1, i.e 8^0
+    base = 1
+
+    temp = num
+    while (temp):
+        # Extracting last digit
+        last_digit = temp % 10
+        temp = int(temp / 10)
+
+        # Multiplying last digit
+        # with appropriate base
+        # value and adding it
+        # to dec_value
+        dec_value += last_digit * base
+
+        base = base * 8
+
+    return dec_value
+
 def part1():
     registers, program = parseInput(17)
     print(registers)
@@ -235,14 +281,20 @@ def part2():
     # A: 265401060000000      2,0,4,7,4,0,6,0,0,0,4,1,5,5,3,0 len: 16
     # A: 265401061600000      6,2,1,0,1,0,0,0,0,0,4,1,5,5,3,0 len: 16
     # 265401061600000 TOO LOW OMG
-    a = 265401061600000
     # ran 265401061600000 through to the below
     # A: 265401067870000      6,5,7,7,6,0,0,2,3,0,5,1,5,5,3,0 len: 16
-
+    # A: 265401158030000      5,5,0,7,0,1,0,6,4,0,5,1,5,5,3,0 len: 16
+    # A: 265401158290000      4,0,5,4,2,5,2,1,4,0,5,1,5,5,3,0 len: 16
+    # A: 265401215880000      6,2,6,4,6,0,5,0,7,1,5,1,5,5,3,0 len: 16
     # A: 265401061610000      4,0,0,1,1,0,0,0,3,0,5,1,5,5,3,0 len: 16
     # A: 265401070000000      7,5,1,3,1,2,0,4,3,0,5,1,5,5,3,0 len: 16
     # A: 265401100000000      6,6,1,6,2,2,6,2,6,0,5,1,5,5,3,0 len: 16
     # A: 265401200000000      0,7,5,1,4,0,0,0,3,1,5,1,5,5,3,0 len: 16
+    # A: 265401207400000      4,1,3,6,2,4,1,4,3,1,5,1,5,5,3,0 len: 16
+    # A: 265401228150000      1,1,2,7,6,4,4,0,7,1,5,1,5,5,3,0 len: 16
+    # A: 265401230120000      0,5,4,7,0,5,6,0,6,1,5,1,5,5,3,0 len: 16
+    # left off here
+
     # A: 265402027400000      6,6,6,6,6,5,0,5,7,0,5,1,5,5,3,0 len: 16
     # A: 265405027400000      2,6,4,7,2,4,6,5,1,6,7,3,5,5,3,0 len: 16
     # A: 265410027400000      6,2,6,0,1,1,7,0,5,1,1,3,5,5,3,0 len: 16
@@ -261,48 +313,67 @@ def part2():
     # A: 281000000175046      5,6,0,2,2,1,5,4,4,6,4,7,6,0,0,0 len: 16
     # A: 281400000330000      2,3,0,7,4,1,7,0,3,6,7,0,1,0,0,0 len: 16
     # A: 281440000550000      0,1,3,2,3,4,5,4,6,4,0,4,0,0,0,0 len: 16
+    # A: 281474976710655      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 len: 16
     # A: 281500000175046      longer output
 
-    while True:
-        registers["A"] = a
-        registers["B"] = 0
-        registers["C"] = 0
+    # A:  35184372088832 = 8^15
 
-        # run program
-        ip = 0
-        output = []
-        longer_output = False
-        while ip < len(program) - 1:
-            opcode = program[ip]
-            operand = program[ip+1]
-            result = opcodes[opcode](operand, registers)
-            # jump, resets instruction pointer
-            if opcode == 3:
-                if result is not None:
-                    ip = result
-                    # do not increase ip by 2
-                    continue
-            # save output
-            elif opcode == 5:
-                if result is not None:
-                    output.append(result)
-                    if len(output) > input_size:
-                        longer_output = True
-                        print("Longer output", ','.join([str(o) for o in output]))
-                        break
-            ip += 2
+    # A: 281474976710604
+    # A: 281474976710656 = 8^16
 
-        if longer_output:
-            break
-        output_str = ','.join([str(o) for o in output])
-        if input_str == output_str:
-            break
-        # print("A:", a, "    ", output_str, "len:", len(output))
-        if a % 10000 == 0:
-            print("A:", a, "    ", output_str, "len:", len(output))
+    a = 265401230120000
+    # min octal 7426061202652100
+    # max octal 7777777777777777
+    a_octal = 74260527  # closest we got
+    a_octal = 7426042720  # also close...?
+    a_octal = 74310030314  # SO CLOSE
+    a_octal = 7431603036601633  # NOT RIGHT OMG
+    a_octal = 7431003036601633
+    a = octalToDecimal(a_octal)
 
+    # 265601188299675 matches... how what
+    # 265652727907227 not right
 
-        a += 1
+    # while True:
+    registers["A"] = a
+    registers["B"] = 0
+    registers["C"] = 0
+
+    # run program
+    ip = 0
+    output = []
+    longer_output = False
+    while ip < len(program) - 1:
+        opcode = program[ip]
+        operand = program[ip+1]
+        result = opcodes[opcode](operand, registers)
+        # jump, resets instruction pointer
+        if opcode == 3:
+            if result is not None:
+                ip = result
+                # do not increase ip by 2
+                continue
+        # save output
+        elif opcode == 5:
+            if result is not None:
+                output.append(result)
+                if len(output) > input_size:
+                    longer_output = True
+                    print("Longer output", ','.join([str(o) for o in output]), len(output))
+                    break
+        ip += 2
+    output_str = ','.join([str(o) for o in output])
+
+    # if longer_output:
+    #     break
+    if input_str == output_str:
+        print("MATCH")
+    #     break
+    # print("A:", a, "    ", output_str, "len:", len(output))
+    # # if a % 10000 == 0:
+    # #     print("A:", a, "    ", output_str, "len:", len(output))
+    #
+    # a += 1
 
     print("A:", a, "    ", output_str, "len:", len(output))
 
