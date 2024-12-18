@@ -126,18 +126,52 @@ def part1():
 
 
 def part2():
-    lines = parseInput(18)
-    print(lines)
+    bytes = parseInput(18)
+
+    w = 71
+    h = 71
+    # w = 7
+    # h = 7
+
+    # Initialize grid
+    grid = []
+    for j in range(h):
+        row = []
+        for i in range(w):
+            row.append(".")
+        grid.append(row)
+    # print_2d_grid(grid)
+
+    # Add bytes
+    for i in range(len(bytes)):
+        (x, y) = bytes[i]
+        print(x,",",y, sep="")
+        grid[y][x] = "#"
+        # print_2d_grid(grid)
+
+        # Search for path
+        start = (0, 0)
+        end = (w - 1, h -1)
+        came_from, cost_so_far = a_star_search(grid, start, end)
+        # print(came_from, cost_so_far)
+        if cost_so_far.get(end) is None:
+            print("No path to end")
+            print_2d_grid(grid)
+            print(x,",",y, sep="")
+            break
+        else:
+            print("Path to end")
+
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
