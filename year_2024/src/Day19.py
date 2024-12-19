@@ -1,6 +1,5 @@
 import time
 from itertools import groupby
-import re
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -75,18 +74,73 @@ def part1():
     print("TOTAL", total)
 
 def part2():
-    lines = parseInput(19)
-    print(lines)
+    towels, patterns = parseInput(19)
+    # print(towels)
+    # print(patterns)
+
+    print("num towels", len(towels))
+    print("num patterns", len(patterns))
+
+    # sort by length so we don't match on a single letter first (since it's greedy)
+    towels.sort()
+    towels.sort(key=lambda x: len(x), reverse=True)
+    # print(towels)
+
+    towels_dict = {}
+    for k, g in groupby(towels, key=lambda x: x[0]):
+        if towels_dict.get(k):
+            towels_dict[k] += list(g)
+        else:
+            towels_dict[k] = list(g)
+    # sort by longest to shortest
+    for k in towels_dict:
+        towels_dict[k].sort(key=lambda x: len(x), reverse=True)
+    # print(towels_dict)
+
+    memo = {}
+
+    def has_match(pattern, towels):
+        # print("checking", pattern)
+        if pattern == "":
+            return 1
+        if memo.get(pattern) is not None:
+            return memo[pattern]
+        # print(memo)
+        next_letter = pattern[0]
+        if len(pattern) == 1:
+            if next_letter in towels:
+                return 1
+        total_ways_to_match = 0
+        if towels_dict.get(next_letter):
+            # print(towels_dict[next_letter])
+            for towel in towels_dict[next_letter]:
+                if pattern.startswith(towel):
+                    # print("match", towel, "going with", pattern[len(towel):])
+                    total_ways_to_match += has_match(pattern[len(towel):], towels)
+        memo[pattern] = total_ways_to_match
+        return total_ways_to_match
+
+    total = 0
+    for pattern in patterns:
+        print("PATTERN", pattern)
+        count = has_match(pattern, towels)
+        if count > 0:
+            print("  match", count)
+            total += count
+        else:
+            print("  no match", count)
+
+    print("TOTAL", total)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
