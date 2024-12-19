@@ -22,49 +22,57 @@ def parseInput(day):
 
 def part1():
     towels, patterns = parseInput(19)
-    print(towels)
-    print(patterns)
+    # print(towels)
+    # print(patterns)
 
-    print(len(towels))
-    print(len(patterns))
+    print("num towels", len(towels))
+    print("num patterns", len(patterns))
 
     # sort by length so we don't match on a single letter first (since it's greedy)
     towels.sort()
     towels.sort(key=lambda x: len(x), reverse=True)
-    print(towels)
+    # print(towels)
 
-    # towels_dict = {}
-    # for k, g in groupby(towels, key=lambda x: x[0]):
-    #     if towels_dict.get(k):
-    #         towels_dict[k] += list(g)
-    #     else:
-    #         towels_dict[k] = list(g)
-    # # sort by longest to shortest
-    # for k in towels_dict:
-    #     towels_dict[k].sort(key=lambda x: len(x), reverse=True)
+    towels_dict = {}
+    for k, g in groupby(towels, key=lambda x: x[0]):
+        if towels_dict.get(k):
+            towels_dict[k] += list(g)
+        else:
+            towels_dict[k] = list(g)
+    # sort by longest to shortest
+    for k in towels_dict:
+        towels_dict[k].sort(key=lambda x: len(x), reverse=True)
     # print(towels_dict)
 
-    # generate regex
-    reg = "("
-    for towel in towels:
-        reg += towel + "|"
-    reg += ")*"
-    print(reg)
-    reg = re.compile(reg)
+    memo = {}
 
-    # try to match each pattern
+    def has_match(pattern):
+        if pattern == "":
+            return True
+        if memo.get(pattern) is not None:
+            return memo[pattern]
+        # print("checking", pattern)
+        next_letter = pattern[0]
+        if towels_dict.get(next_letter):
+            towels = towels_dict[next_letter]
+            for towel in towels:
+                if pattern.startswith(towel):
+                    if has_match(pattern[len(towel):]):
+                        memo[pattern] = True
+                        return True
+        memo[pattern] = False
+        return False
+
     total = 0
     for pattern in patterns:
-        match = re.match(reg, pattern)
-        # print(match)
-        if match.group(0) == pattern:
-            # print(pattern, "match")
+        print("PATTERN", pattern)
+        if has_match(pattern):
+            print("  match")
             total += 1
         else:
-            print(pattern, "no match")
-    print("TOTAL", total)
+            print("  no match")
 
-# 295 too low
+    print("TOTAL", total)
 
 def part2():
     lines = parseInput(19)
