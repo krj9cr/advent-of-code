@@ -158,78 +158,6 @@ def get_diamond(grid, w, h, point, n=20):
                     points.append((i, j))
     return points
 
-def testing():
-    grid = parseInput(20)
-    # print(grid)
-
-    h = len(grid)
-    w = len(grid[0])
-    start = None
-    end = None
-    # find start and end
-    for j in range(h):
-        for i in range(w):
-            item = grid[j][i]
-            if item == "S":
-                start = (i, j)
-            elif item == "E":
-                end = (i, j)
-
-    # print(start, end)
-
-    def find_path(da_grid, s=start, e=end):
-        came_from, cost_so_far = a_star_search(da_grid, s, e)
-
-        if cost_so_far[e]:
-            curr = e
-            path = []
-            while curr is not None:
-                path.append(curr)
-                curr = came_from[curr]
-            # print_2d_grid(grid, path)
-            return cost_so_far[e], path
-        return None, None
-
-    # find the initial path
-    initial_race_length, initial_path = find_path(grid)
-    print("INITIAL RACE LENGTH", initial_race_length)
-
-    total = 0
-    savings = {}
-    # dumb part 2 extension: ...along the initial path... for every spot, try "activating" the cheat
-    # for cheat_start in reversed(initial_path):
-    #     if cheat_start == end:
-    #         continue
-    cheat_start = (1, 3)
-    print("cheat_start", cheat_start)
-    # from the cheat spot, take all unique "." points within 20 steps and call that the "end" cheat spot
-    # generate all points from this point within 20 steps
-    cheat_end_points = get_diamond(grid, w, h, cheat_start, 20)
-    # print(cheat_end_points)
-    print_2d_grid(grid, cheat_end_points)
-
-    # find path from start to cheat_start
-    if start == cheat_start:
-        path_length1 = 0
-    else:
-        path_length1, path1 = find_path(grid, start, cheat_start)
-
-    # effectively "erase" the walls/steps within the cheat path
-    for cheat_end in cheat_end_points:
-        # TODO: maybe we can not worry about paths where like... savings isn't enough somehow...
-        # find path from cheat_end to end
-        if end == cheat_end:
-            path_length2 = 0
-        else:
-            path_length2, path2 = find_path(grid, cheat_end, end)
-        # add in manhattan distance length between cheat_start and cheat_end
-        if path_length1 is not None and path_length2 is not None:
-            path_length3 = manhattan(cheat_start, cheat_end)
-            race_length = path_length1 + path_length2 + path_length3
-            print_2d_grid(grid, path1+path2)
-            length_savings = initial_race_length - race_length
-            print("cheat_end", cheat_end, "len", race_length, "savings", length_savings)
-
 def part2():
     grid = parseInput(20)
     # print(grid)
@@ -248,7 +176,10 @@ def part2():
                 end = (i, j)
     # print(start, end)
 
+    memo = {}
     def find_path(da_grid, s=start, e=end):
+        if memo.get((s, e)) is not None:
+            return memo[(s, e)]
         came_from, cost_so_far = a_star_search(da_grid, s, e)
 
         if cost_so_far[e]:
@@ -258,7 +189,9 @@ def part2():
                 path.append(curr)
                 curr = came_from[curr]
             # print_2d_grid(grid, path)
+            memo[(s, e)] = (cost_so_far[e], path)
             return cost_so_far[e], path
+        memo[(s, e)] = (None, None)
         return None, None
 
     # find the initial path
@@ -268,13 +201,13 @@ def part2():
     total = 0
     savings = {}
     # dumb part 2 extension: ...along the initial path... for every spot, try "activating" the cheat
-    for cheat_start in reversed(initial_path):
+    for i, cheat_start in enumerate(reversed(initial_path)):
         if cheat_start == end:
             continue
-        print("cheat_start", cheat_start)
+        print(i, "cheat_start", cheat_start)
         # from the cheat spot, take all unique "." points within 20 steps and call that the "end" cheat spot
         # generate all points from this point within 20 steps
-        cheat_end_points = get_diamond(grid, w, h, cheat_start, 20)
+        cheat_end_points = get_diamond(grid, w, h, cheat_start, 21)
         # print(cheat_end_points)
         # print_2d_grid(grid, cheat_end_points)
 
@@ -282,24 +215,27 @@ def part2():
         if start == cheat_start:
             path_length1 = 0
         else:
-            path_length1, path1 = find_path(grid, start, cheat_start)
+            path_length1, _ = find_path(grid, start, cheat_start)
 
         # effectively "erase" the walls/steps within the cheat path
         for cheat_end in cheat_end_points:
             # TODO: maybe we can not worry about paths where like... savings isn't enough somehow...
+            path_length3 = manhattan(cheat_start, cheat_end)
+            # if manhattan(start, cheat_start) + path_length3 + manhattan(cheat_end, end) >= initial_race_length:
+            #     continue
+
             # find path from cheat_end to end
             if end == cheat_end:
                 path_length2 = 0
             else:
-                path_length2, path2 = find_path(grid, cheat_end, end)
+                path_length2, _ = find_path(grid, cheat_end, end)
             # add in manhattan distance length between cheat_start and cheat_end
             if path_length1 is not None and path_length2 is not None:
-                path_length3 = manhattan(cheat_start, cheat_end)
                 race_length = path_length1 + path_length2 + path_length3
                 # print_2d_grid(grid, path1+path2)
                 length_savings = initial_race_length - race_length
                 # print("cheat_end", cheat_end, "len", race_length, "savings", length_savings)
-                if length_savings >= 50:
+                if length_savings >= 100:
                     total += 1
                     if savings.get(length_savings) is not None:
                         savings[length_savings] += 1
@@ -322,9 +258,3 @@ if __name__ == "__main__":
     part2()
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
-    # start = time.perf_counter()
-    # testing()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
