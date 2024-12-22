@@ -149,7 +149,7 @@ def part1():
 
 memo = {}
 def aaa(directions, depth=0):
-    if depth >= 2:
+    if depth >= 3:
         return directions
     result = ""
     # if memo.get(directions) is not None:
@@ -161,6 +161,9 @@ def aaa(directions, depth=0):
             # if substring == "":
             #     print("UH OH")
             #     sys.exit(1)
+
+            # TODO: something with memoization or summing/combining must not be right...?
+
             if memo.get(substring) is None:
                 # print("sub", substring)
                 sub_directions = get_directions("A" + substring, dir_pad_directions)
