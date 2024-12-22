@@ -1,6 +1,5 @@
+import sys
 import time
-import heapq
-import itertools
 
 def parseInput(day):
     dayf = "{:02d}".format(day)
@@ -12,126 +11,15 @@ def parseInput(day):
             lines.append(line)
         return lines
 
-# A custom priority queue used for A Star Search below
-class PriorityQueue:
-    def __init__(self):
-        self.elements = []
-
-    def empty(self):
-        return len(self.elements) == 0
-
-    def put(self, item, priority):
-        heapq.heappush(self.elements, (priority, item))
-
-    def get(self):
-        return heapq.heappop(self.elements)[1]
-
-# guesses the cost of going from current position to goal
-# should always underestimate the actual cost
-def heuristic(goal, x2, y2):
-    (x1, y1) = goal
-    dist = abs(x1 - x2) + abs(y1 - y2)
-    return dist
-
-def a_star_search(pad_dict, start_key, goal_key):
-    start = pad_dict[start_key]
-    goal = pad_dict[goal_key]
-    queue = PriorityQueue()
-    came_from = {}  # keeps track of our path to the goal
-    cost_so_far = {}  # keeps track of cost to arrive at ((x, y))
-
-    # add start infos
-    queue.put((start[0], start[1]), 0)
-    came_from[(start[0], start[1])] = (None, None)
-    cost_so_far[(start[0], start[1])] = 0
-    direction = None
-
-    while not queue.empty():
-        x, y = queue.get()
-
-        if (x, y) == goal:
-            break
-
-        up = (x, y - 1)
-        down = (x, y + 1)
-        left = (x - 1, y)
-        right = (x + 1, y)
-        # for each adjacent square
-        for x2, y2 in (up, down, left, right):
-            cost_to_move = 1
-            next_spot = (x2, y2)
-            newDirection = ">"
-            if next_spot == up:
-                newDirection = "^"
-            elif next_spot == down:
-                newDirection = "v"
-            elif next_spot == left:
-                newDirection = "<"
-            if newDirection != direction:
-                cost_to_move += 3
-            new_cost = cost_so_far[(x, y)] + cost_to_move
-            if (x2, y2) in pad_dict.values():
-                if next_spot not in cost_so_far or new_cost < cost_so_far[next_spot]:
-                    cost_so_far[next_spot] = new_cost
-                    priority = new_cost + heuristic(goal, x2, y2)
-                    queue.put((next_spot[0], next_spot[1]), priority)
-                    came_from[next_spot] = ((x, y), newDirection)
-                    direction = newDirection
-    return came_from, cost_so_far
-
-memo = {}
-
-def find_path(pad_dict, start_key, goal_key):
-    if start_key == goal_key:
-        return []
-    if memo.get((start_key, goal_key)) is not None:
-        return memo[(start_key, goal_key)]
-    came_from, cost_so_far = a_star_search(pad_dict, start_key, goal_key)
-    end = pad_dict[goal_key]
-
-    if cost_so_far[end]:
-        curr = end
-        path = []
-        directions = []
-        direction = ""
-        while curr is not None:
-            path.append(curr)
-            if direction != "":
-                directions.append(direction)
-            curr, direction = came_from[curr]
-        # print_2d_grid(grid, path)
-        memo[(start_key, goal_key)] = directions
-        return directions
-    return None
-
-def print_2d_grid(grid, points=None):
-    for j in range(len(grid)):
-        row = grid[j]
-        for i in range(len(row)):
-            item = row[i]
-            if points and (i,j) in points:
-                print("O", end="")
-            else:
-                print(item, end="")
-        print()
-    print()
-
-arrow_weights = {
-    "<": 3,
-    "v": 2,
-    "^": 1,
-    ">": 1
-}
-
 def get_directions(code, pad):
-    directions = []
+    directions = ""
     for i in range(len(code) - 1):
         c1 = code[i]
         c2 = code[i + 1]
-        sub_directions = []
+        sub_directions = ""
         if c1 != c2:
-            sub_directions = pad[(c1, c2)]
-        directions += sub_directions + ["A"]
+            sub_directions = ''.join(pad[(c1, c2)])
+        directions += sub_directions + "A"
     return directions
 
 numeric_keypad = [
@@ -259,19 +147,85 @@ def part1():
     print(total)
     print(memo)
 
+memo = {}
+def aaa(directions, depth=0):
+    if depth >= 2:
+        return directions
+    result = ""
+    # if memo.get(directions) is not None:
+    #     return memo[directions]
+    substring = ""
+    for char in directions:
+        substring += char
+        if char == "A":
+            # if substring == "":
+            #     print("UH OH")
+            #     sys.exit(1)
+            if memo.get(substring) is None:
+                # print("sub", substring)
+                sub_directions = get_directions("A" + substring, dir_pad_directions)
+                # print("sub directions", sub_directions)
+                # memo[substring] = sub_directions
+            else:
+                sub_directions = memo[substring]
+            print(depth, substring, "=>", sub_directions)
+            idek = aaa(sub_directions, depth+1)
+            result += idek
+            substring = ""
+    memo[directions] = result
+    print(depth, "res", directions, "=>", result)
+    return result
+
+# 218187266 too low
+# 146318050
+
+'''
+<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+v<<A>>^A<A>AvA<^AA>A<vAAA>^A
+<A^A>^^AvvvA
+029A
+
+Here are all the counts for 029A all the way to 25: 
+4, 12, 28, 68, 164, 404, 998, 2482, 6166, 15340, 38154, 94910, 236104, 587312, 1461046, 3634472, 9041286, 22491236, 55949852, 139182252, 346233228, 861298954, 2142588658, 5329959430, 13258941912, 32983284966, 82050061710 
+
+'''
+
+
 def part2():
-    lines = parseInput(21)
-    print(lines)
+    codes = parseInput(21)
+
+    total = 0
+    for i in range(len(codes)):
+        code = codes[i]
+        # it always starts and ends at A
+        code = "A" + code
+        print("code", code)
+        directions = get_directions(code, num_pad_directions)
+        print("numeric pad", directions)
+
+        ya = aaa(directions)
+        # print(ya)
+        # print(memo)
+
+        # print(len(ya))
+
+        lengh_of_seq = len(ya)
+        numeric_code = int(code[1:-1])
+        print(lengh_of_seq, "*", numeric_code)
+        print()
+        total += lengh_of_seq * numeric_code
+
+    print(total)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
