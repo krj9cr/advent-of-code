@@ -82,19 +82,36 @@ def part2():
     first_prices = secret_prices[first_secret]
 
     window_size = 4
+    max_cost = 0
     for i in range(len(first_diffs) - window_size + 1):
-        changes = first_diffs[i: i + window_size]
-        if changes[0] == -2 and changes[1] == 1 and changes[2] == -1 and changes[3] == 3:
-            first_cost = first_prices[i+window_size]
-            print(changes, first_cost)
-            # try finding the first value in other secret_diffs where that sequence occurs, it could not occur, too
+        first_changes = first_diffs[i: i + window_size]
+
+        # first, just make sure we got the right number
+        # if first_changes == [-2, 1, -1, 3]:
+        first_cost = first_prices[i+window_size]
+        total_cost = first_cost
+        # print(first_changes, first_cost)
+
+        # try finding the first value in other secret_diffs where that sequence occurs, it could not occur, too
+        for s in range(1, len(secrets)):
+            secret = secrets[s]
+            diffs = secret_diffs[secret]
+            prices = secret_prices[secret]
+
+            for j in range(len(diffs) - window_size + 1):
+                changes = diffs[j: j + window_size]
+                if changes == first_changes:
+                    cost = prices[j + window_size]
+                    total_cost += cost
+                    # print("SAME", secret, cost)
+        if total_cost > max_cost:
+            max_cost = total_cost
+            print("best cost", total_cost, first_changes)
 
     # sum everything
     # find the max
 
-    total = 0
-
-    print("Total", total)
+# 1881 too low
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
