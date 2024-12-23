@@ -36,18 +36,29 @@ def part1():
     print(total)
 
 def part2():
-    lines = parseInput(23)
-    print(lines)
+    G, nodes, edges = parseInput(23)
+    print(G)
+
+    max_length = 0
+    max_clique = None
+    for clique in nx.enumerate_all_cliques(G):
+        clique_length = len(clique)
+        if clique_length > max_length:
+            max_length = clique_length
+            max_clique = clique
+    print(max_length, max_clique)
+    print(','.join(sorted(max_clique)))
+
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
