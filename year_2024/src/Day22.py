@@ -76,7 +76,7 @@ def part2():
         secret_diffs[secret] = diffs
     print(secret_diffs)
 
-    # do a sliding window of size 4 over the first sequence
+    # do a sliding window of size 4 over the first sequence... returns the wrong answers!
     first_secret = secrets[0]
     first_diffs = secret_diffs[first_secret]
     first_prices = secret_prices[first_secret]
@@ -84,7 +84,9 @@ def part2():
     window_size = 4
     max_cost = 0
     for i in range(len(first_diffs) - window_size + 1):
+        # print(i, i + window_size)
         first_changes = first_diffs[i: i + window_size]
+        # print(first_changes)
 
         # first, just make sure we got the right number
         # if first_changes == [-2, 1, -1, 3]:
@@ -103,15 +105,15 @@ def part2():
                 if changes == first_changes:
                     cost = prices[j + window_size]
                     total_cost += cost
+                    break
                     # print("SAME", secret, cost)
         if total_cost > max_cost:
             max_cost = total_cost
             print("best cost", total_cost, first_changes)
 
-    # sum everything
-    # find the max
-
+# 1781 too low
 # 1881 too low
+# 1918 too high
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
