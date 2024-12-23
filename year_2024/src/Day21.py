@@ -193,7 +193,7 @@ Here are all the counts for 029A all the way to 25:
 
 '''
 
-def try_again(directions, keys):
+def try_again(directions):
     if memo.get(directions) is not None:
         # print("memo'd", directions, "=>", memo[directions])
         return memo[directions]
@@ -209,17 +209,65 @@ def try_again(directions, keys):
         char = directions[i]
         substring += char
         if char == "A":
-            sub_directions = try_again(substring, keys)
+            sub_directions = try_again(substring)
             # print("sub", substring, "=>", sub_directions)
             result += sub_directions
 
             substring = ""
-    memo[directions] = result
+    # memo[directions] = result
     # print("result", len(result), result)
+    return result
+
+def split_directions_in_half(directions):
+    mid = len(directions) // 2
+    # find the closest "A" and split on that
+    while directions[mid] != "A":
+        mid -= 1
+    mid += 1
+    first = directions[:mid]
+    second = directions[mid:]
+    if first == "" or second == "":
+        if directions.count("A") == 2:
+            substring = ""
+            substrings = []
+            for i in range(len(directions)):
+                char = directions[i]
+                substring += char
+                if char == "A":
+                    substrings.append(substring)
+                    substring = ""
+            return substrings
+        else:
+            print("UH OH, coudln't split", directions)
+            sys.exit(1)
+
+    return first, second
+
+def try_again2(directions):
+    if memo.get(directions) is not None:
+        # print("memo'd", directions, "=>", memo[directions])
+        return memo[directions]
+    if directions.count("A") <= 1:
+        sub_directions = get_directions("A"+directions, dir_pad_directions)
+        memo[directions] = sub_directions
+        return sub_directions
+
+    # split in half
+    first_half, second_half = split_directions_in_half(directions)
+    # print("splitting", first_half, second_half)
+    first_result = try_again2(first_half)
+    second_result = try_again2(second_half)
+
+    memo[first_half] = first_result
+    memo[second_half] = second_result
+
+    result = first_result + second_result
+    memo[directions] = result
     return result
 
 
 def part2():
+    sys.setrecursionlimit(10000)
     codes = parseInput(21)
 
     total = 0
@@ -232,9 +280,9 @@ def part2():
         print("numeric pad", directions)
 
         for d in range(25):
-            memo_keys = list(memo.keys())
-            memo_keys.sort(key=lambda x: len(x))
-            new_directions = try_again(directions, memo_keys)
+            # memo_keys = list(memo.keys())
+            # memo_keys.sort(key=lambda x: len(x))
+            new_directions = try_again(directions)
             print(d, len(new_directions))
             directions = new_directions
             # print(memo)
