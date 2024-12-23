@@ -37,6 +37,8 @@ def part2():
     secrets = parseInput(22)
     print(secrets)
 
+    NUM_ROUNDS = 2000
+
     secret_prices = {}
     for secret in secrets:
         print(secret)
@@ -45,7 +47,7 @@ def part2():
         # print(secret, ":", price)
         secret_prices[secret] = [price]
         og_secret = secret
-        for i in range(2000):
+        for i in range(NUM_ROUNDS):
             one = secret * 64
             newSecret = secret ^ one
             newSecret = newSecret % 16777216
@@ -76,44 +78,39 @@ def part2():
         secret_diffs[secret] = diffs
     print(secret_diffs)
 
-    # do a sliding window of size 4 over the first sequence... returns the wrong answers!
-    first_secret = secrets[0]
-    first_diffs = secret_diffs[first_secret]
-    first_prices = secret_prices[first_secret]
+    windows = {}  # [1,2,3,4] => [cost, ...]
+    secrets_seen_windows = {}  # secret_idx => set(seen_windows)
+
+    for s in range(len(secrets)):
+        secrets_seen_windows[s] = set()
 
     window_size = 4
-    max_cost = 0
-    for i in range(len(first_diffs) - window_size + 1):
-        # print(i, i + window_size)
-        first_changes = first_diffs[i: i + window_size]
-        # print(first_changes)
-
-        # first, just make sure we got the right number
-        # if first_changes == [-2, 1, -1, 3]:
-        first_cost = first_prices[i+window_size]
-        total_cost = first_cost
-        # print(first_changes, first_cost)
-
-        # try finding the first value in other secret_diffs where that sequence occurs, it could not occur, too
-        for s in range(1, len(secrets)):
-            secret = secrets[s]
+    for s in range(len(secrets)):
+        secret = secrets[s]
+        for i in range(NUM_ROUNDS - window_size + 1):
             diffs = secret_diffs[secret]
             prices = secret_prices[secret]
+            window = diffs[i: i + window_size]
+            window_str = ','.join([str(num) for num in window])
 
-            for j in range(len(diffs) - window_size + 1):
-                changes = diffs[j: j + window_size]
-                if changes == first_changes:
-                    cost = prices[j + window_size]
-                    total_cost += cost
-                    break
-                    # print("SAME", secret, cost)
-        if total_cost > max_cost:
-            max_cost = total_cost
-            print("best cost", total_cost, first_changes)
+            if window_str in secrets_seen_windows[s]:
+                continue
+            secrets_seen_windows[s].add(window_str)
 
-# 1781 too low
-# 1881 too low
-# 1918 too high
+            cost = prices[i+window_size]
+            if windows.get(window_str) is not None:
+                windows[window_str].append(cost)
+            else:
+                windows[window_str] = [cost]
+
+    max_cost = 0
+    best_window = None
+    for window in windows:
+        cost = sum(windows[window])
+        if cost > max_cost:
+            max_cost = cost
+            best_window = window
+    print(best_window, max_cost)
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
