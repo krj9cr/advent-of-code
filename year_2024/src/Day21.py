@@ -1,4 +1,3 @@
-import functools
 import sys
 import time
 
@@ -155,118 +154,32 @@ Here are all the counts for 029A all the way to 25:
 4, 12, 28, 68, 164, 404, 998, 2482, 6166, 15340, 38154, 94910, 236104, 587312, 1461046, 3634472, 9041286, 22491236, 55949852, 139182252, 346233228, 861298954, 2142588658, 5329959430, 13258941912, 32983284966, 82050061710 
 '''
 
-def try_again(directions):
-    # if directions == "":
-    #     return ""
-    if memo.get(directions) is not None:
-        # print("memo'd", directions, "=>", memo[directions])
-        return memo[directions]
-    if directions.count("A") <= 2:
-        sub_directions = get_directions("A"+directions, dir_pad_directions)
-        memo[directions] = sub_directions
-        return sub_directions
+def get_directions2(c1, c2, level=2):
+    # print(level, c1+c2)
+    if memo.get((c1, c2, level)) is not None:
+        return memo[(c1, c2, level)]
 
-    i = 0
-    num_directions = len(directions)
-    # split on the first A
-    while i < num_directions:
-        if directions[i] == "A":
-            first = directions[:i+1]
-            second = directions[i+1:]
-            # print("splitting", first, second)
-            first_directions = try_again(first)
-            second_directions = try_again(second)
-
-            # memoize?
-            memo[first] = first_directions
-            memo[second] = second_directions
-            # print("memo'd", first, "=>", first_directions)
-            # print("memo'd", second, "=>", second_directions)
-
-            result = first_directions + second_directions
-            memo[first+second] = result
-            # print("memo'd", first+second, "=>", result)
-            return result
-
-        i += 1
-
-    # memo[directions] = result
-    # print("result", len(result), result)
-    print("UH OH idk")
-    sys.exit(1)
-    # return result
-
-def split_directions_in_half(directions):
-    mid = len(directions) // 2
-    # find the closest "A" and split on that
-    while directions[mid] != "A":
-        mid -= 1
-    mid += 1
-    first = directions[:mid]
-    second = directions[mid:]
-    if first == "" or second == "":
-        if directions.count("A") == 2:
-            substring = ""
-            substrings = []
-            for i in range(len(directions)):
-                char = directions[i]
-                substring += char
-                if char == "A":
-                    substrings.append(substring)
-                    substring = ""
-            return substrings
-        else:
-            print("UH OH, coudln't split", directions)
-            sys.exit(1)
-
-    return first, second
-
-def try_again2(directions):
-    if memo.get(directions) is not None:
-        # print("memo'd", directions, "=>", memo[directions])
-        return memo[directions]
-    if directions.count("A") <= 2:
-        sub_directions = get_directions("A"+directions, dir_pad_directions)
-        memo[directions] = sub_directions
-        return sub_directions
-
-    # split in half
-    first_half, second_half = split_directions_in_half(directions)
-    # print("splitting", first_half, second_half)
-    first_result = try_again2(first_half)
-    second_result = try_again2(second_half)
-
-    result = first_result + second_result
-    if len(directions) <= 100000000:
-        memo[first_half] = first_result
-        memo[second_half] = second_result
-        memo[directions] = result
-    return result
-
-def get_directions2(directions, level=2):
-    if memo.get(directions) is not None:
-        return memo[directions]
     # get the new directions
-    new_directions = ""
-    for i in range(len(directions) - 1):
-        c1 = directions[i]
-        c2 = directions[i + 1]
-        sub_directions = ""
-        if c1 != c2:
-            sub_directions = ''.join(dir_pad_directions[(c1, c2)])
-        new_directions += sub_directions + "A"
-    print(level, len(new_directions))
+    sub_directions = ""
+    if c1 != c2:
+        sub_directions = ''.join(dir_pad_directions[(c1, c2)])
+    new_directions = sub_directions + "A"
+    # print(level, len(new_directions), new_directions)
 
     if level == 0:
         return len(new_directions)
 
     # recursive cost for this
-    res = get_directions2(new_directions, level-1)
-    memo[directions] = res
-    return res
+    new_directions = "A" + new_directions
+    results = []
+    for i in range(len(new_directions)-1):
+        results.append(get_directions2(new_directions[i], new_directions[i+1], level-1))
+    answer = sum(results)
+    # print(level, "answer", answer)
+    memo[(c1, c2, level)] = answer
+    return answer
 
 def part2():
-    sys.setrecursionlimit(5000)
     codes = parseInput(21)
 
     total = 0
@@ -278,26 +191,18 @@ def part2():
         directions = get_directions(code, num_pad_directions)
         print("numeric pad", directions)
 
-        # IDK
-        directions = get_directions2(directions, 25)
-        print("wow", directions)
+        directions = "A" + directions
+        results = []
+        for j in range(len(directions)-1):
+            results.append(get_directions2(directions[j], directions[j+1], 24))
+        answer = sum(results)
+        print("wow", answer)
 
-        # OLD
-        # for d in range(25):
-        #     # memo_keys = list(memo.keys())
-        #     # memo_keys.sort(key=lambda x: len(x))
-        #     new_directions = try_again2(directions)
-        #     print(d, len(new_directions))
-        #     directions = new_directions
-            # print(memo)
-
-        # print(len(ya))
-
-        # lengh_of_seq = len(ya)
-        # numeric_code = int(code[1:-1])
-        # print(lengh_of_seq, "*", numeric_code)
-        # print()
-        # total += lengh_of_seq * numeric_code
+        lengh_of_seq = answer
+        numeric_code = int(code[1:-1])
+        print(lengh_of_seq, "*", numeric_code)
+        print()
+        total += lengh_of_seq * numeric_code
 
     print(total)
 
