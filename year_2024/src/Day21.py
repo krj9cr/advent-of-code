@@ -1,3 +1,4 @@
+import functools
 import sys
 import time
 
@@ -242,6 +243,27 @@ def try_again2(directions):
         memo[directions] = result
     return result
 
+def get_directions2(directions, level=2):
+    if memo.get(directions) is not None:
+        return memo[directions]
+    # get the new directions
+    new_directions = ""
+    for i in range(len(directions) - 1):
+        c1 = directions[i]
+        c2 = directions[i + 1]
+        sub_directions = ""
+        if c1 != c2:
+            sub_directions = ''.join(dir_pad_directions[(c1, c2)])
+        new_directions += sub_directions + "A"
+    print(level, len(new_directions))
+
+    if level == 0:
+        return len(new_directions)
+
+    # recursive cost for this
+    res = get_directions2(new_directions, level-1)
+    memo[directions] = res
+    return res
 
 def part2():
     sys.setrecursionlimit(5000)
@@ -256,12 +278,17 @@ def part2():
         directions = get_directions(code, num_pad_directions)
         print("numeric pad", directions)
 
-        for d in range(25):
-            # memo_keys = list(memo.keys())
-            # memo_keys.sort(key=lambda x: len(x))
-            new_directions = try_again2(directions)
-            print(d, len(new_directions))
-            directions = new_directions
+        # IDK
+        directions = get_directions2(directions, 25)
+        print("wow", directions)
+
+        # OLD
+        # for d in range(25):
+        #     # memo_keys = list(memo.keys())
+        #     # memo_keys.sort(key=lambda x: len(x))
+        #     new_directions = try_again2(directions)
+        #     print(d, len(new_directions))
+        #     directions = new_directions
             # print(memo)
 
         # print(len(ya))
