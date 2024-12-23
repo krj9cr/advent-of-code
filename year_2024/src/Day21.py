@@ -148,75 +148,52 @@ def part1():
     print(memo)
 
 memo = {}
-def aaa(directions, depth=0):
-    if depth >= 3:
-        return directions
-    result = ""
-    # if memo.get(directions) is not None:
-    #     return memo[directions]
-    substring = ""
-    for char in directions:
-        substring += char
-        if char == "A":
-            # if substring == "":
-            #     print("UH OH")
-            #     sys.exit(1)
-
-            # TODO: something with memoization or summing/combining must not be right...?
-
-            if memo.get(substring) is None:
-                # print("sub", substring)
-                sub_directions = get_directions("A" + substring, dir_pad_directions)
-                # print("sub directions", sub_directions)
-                # memo[substring] = sub_directions
-            else:
-                sub_directions = memo[substring]
-            print(depth, substring, "=>", sub_directions)
-            idek = aaa(sub_directions, depth+1)
-            result += idek
-            substring = ""
-    memo[directions] = result
-    print(depth, "res", directions, "=>", result)
-    return result
-
-# 218187266 too low
-# 146318050
 
 '''
-<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
-v<<A>>^A<A>AvA<^AA>A<vAAA>^A
-<A^A>^^AvvvA
-029A
-
 Here are all the counts for 029A all the way to 25: 
 4, 12, 28, 68, 164, 404, 998, 2482, 6166, 15340, 38154, 94910, 236104, 587312, 1461046, 3634472, 9041286, 22491236, 55949852, 139182252, 346233228, 861298954, 2142588658, 5329959430, 13258941912, 32983284966, 82050061710 
-
 '''
 
 def try_again(directions):
+    # if directions == "":
+    #     return ""
     if memo.get(directions) is not None:
         # print("memo'd", directions, "=>", memo[directions])
         return memo[directions]
-    if directions.count("A") <= 1:
+    if directions.count("A") <= 2:
         sub_directions = get_directions("A"+directions, dir_pad_directions)
         memo[directions] = sub_directions
         return sub_directions
 
-    result = ""
-    # split by A's but also keep the A's
-    substring = ""
-    for i in range(len(directions)):
-        char = directions[i]
-        substring += char
-        if char == "A":
-            sub_directions = try_again(substring)
-            # print("sub", substring, "=>", sub_directions)
-            result += sub_directions
+    i = 0
+    num_directions = len(directions)
+    # split on the first A
+    while i < num_directions:
+        if directions[i] == "A":
+            first = directions[:i+1]
+            second = directions[i+1:]
+            # print("splitting", first, second)
+            first_directions = try_again(first)
+            second_directions = try_again(second)
 
-            substring = ""
+            # memoize?
+            memo[first] = first_directions
+            memo[second] = second_directions
+            # print("memo'd", first, "=>", first_directions)
+            # print("memo'd", second, "=>", second_directions)
+
+            result = first_directions + second_directions
+            memo[first+second] = result
+            # print("memo'd", first+second, "=>", result)
+            return result
+
+        i += 1
+
     # memo[directions] = result
     # print("result", len(result), result)
-    return result
+    print("UH OH idk")
+    sys.exit(1)
+    # return result
 
 def split_directions_in_half(directions):
     mid = len(directions) // 2
@@ -247,7 +224,7 @@ def try_again2(directions):
     if memo.get(directions) is not None:
         # print("memo'd", directions, "=>", memo[directions])
         return memo[directions]
-    if directions.count("A") <= 1:
+    if directions.count("A") <= 2:
         sub_directions = get_directions("A"+directions, dir_pad_directions)
         memo[directions] = sub_directions
         return sub_directions
@@ -258,16 +235,16 @@ def try_again2(directions):
     first_result = try_again2(first_half)
     second_result = try_again2(second_half)
 
-    memo[first_half] = first_result
-    memo[second_half] = second_result
-
     result = first_result + second_result
-    memo[directions] = result
+    if len(directions) <= 100000000:
+        memo[first_half] = first_result
+        memo[second_half] = second_result
+        memo[directions] = result
     return result
 
 
 def part2():
-    sys.setrecursionlimit(10000)
+    sys.setrecursionlimit(5000)
     codes = parseInput(21)
 
     total = 0
@@ -282,7 +259,7 @@ def part2():
         for d in range(25):
             # memo_keys = list(memo.keys())
             # memo_keys.sort(key=lambda x: len(x))
-            new_directions = try_again(directions)
+            new_directions = try_again2(directions)
             print(d, len(new_directions))
             directions = new_directions
             # print(memo)
