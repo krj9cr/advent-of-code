@@ -194,34 +194,33 @@ def part2():
     # nx.set_node_attributes(G, levels, "level")
 
     my_pos = {}
-    spacing = 10
     for i in range(45):
         node_name = f"y{i:02}"
-        my_pos[node_name] = [i*spacing, 50]
+        my_pos[node_name] = [i, 48]
     for i in range(45):
         node_name = f"x{i:02}"
-        my_pos[node_name] = [i*spacing + spacing/2, 50]
+        my_pos[node_name] = [i, 50]
         # find whatever nodes are output of dis
         for gate in gates:
             if gate.input1 == node_name or gate.input2 == node_name:
-                my_pos[gate.output] = [i*spacing + spacing/2, 40]
+                my_pos[gate.output] = [i, 40]
                 for gate2 in gates:
                     if gate2.input1 == gate.output or gate2.input2 == gate.output:
-                        my_pos[gate2.output] = [i*spacing + spacing/2, 30]
+                        my_pos[gate2.output] = [i, 30]
                         for gate3 in gates:
                             if gate3.input1 == gate2.output or gate3.input2 == gate2.output:
-                                my_pos[gate3.output] = [i*spacing + spacing/2, 20]
+                                my_pos[gate3.output] = [i, 20]
 
     for i in range(46):
         node_name = f"z{i:02}"
-        my_pos[node_name] = [i*spacing, 0]
+        my_pos[node_name] = [i, 0]
         # find some stuff that outputs to this wire
         for gate in gates:
             if gate.output == node_name:
                 if gate.input1 not in my_pos:
-                    my_pos[gate.input1] = [i*spacing, 10]
+                    my_pos[gate.input1] = [i, 10]
                 if gate.input2 not in my_pos:
-                    my_pos[gate.input2] = [i*spacing + spacing/2, 10]
+                    my_pos[gate.input2] = [i, 10]
     for node in nodes:
         if node not in my_pos:
             print(node, "not in pos")
