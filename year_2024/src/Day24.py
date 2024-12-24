@@ -1,15 +1,21 @@
 import copy
+import itertools
 import time
+import networkx as nx
+import matplotlib.pyplot as plt
+import pydot
+import scipy
 
 class Gate:
-    def __init__(self, input1, input2, op, output):
+    def __init__(self, input1, input2, op, output, gid):
+        self.gid = gid
         self.input1 = input1
         self.input2 = input2
         self.op = op
         self.output = output
 
     def __str__(self):
-        return f"{self.input1} {self.op} {self.input2} -> {self.output}"
+        return f"{self.gid}: {self.input1} {self.op} {self.input2} -> {self.output}"
 
     def do_op(self, wires):
         if wires.get(self.input1) is None or wires.get(self.input2) is None:
@@ -36,6 +42,7 @@ def parseInput(day):
         wires = {}
         gates = []
         parsing_gates = False
+        gid = 0
         for line in file:
             line = line.strip()
             if line == "":
@@ -45,7 +52,8 @@ def parseInput(day):
                 linesplit = line.split(" -> ")
                 first = linesplit[0].split(" ")
                 output_wire = linesplit[1]
-                gates.append(Gate(first[0], first[2], first[1], output_wire))
+                gates.append(Gate(first[0], first[2], first[1], output_wire, gid))
+                gid += 1
             else:
                 linesplit = line.split(": ")
                 wire = linesplit[0]
@@ -53,14 +61,7 @@ def parseInput(day):
                 wires[wire] = value
         return wires, gates
 
-def part1():
-    initial_wires, gates = parseInput(24)
-
-    wires = copy.deepcopy(initial_wires)
-    print(wires)
-
-    # have the gates run
-    # TODO: keep going until they all actually run
+def run_gates(gates, wires):
     seen_gates = set()
     num_gates = len(gates)
     num_processed_gates = 0
@@ -73,7 +74,36 @@ def part1():
             if processed:
                 seen_gates.add(i)
                 num_processed_gates += 1
-                print(wires)
+
+def get_register_bits(prefix, wires):
+    bits = ""
+    for z in range(46):
+        register = f'{prefix}{z:02}'
+        try:
+            value = wires[register]
+        except:
+            break
+        bits += str(value)
+    # print(bits)
+    return bits[::-1]
+
+def numberToBase(n, b):
+    if n == 0:
+        return [0]
+    digits = []
+    while n:
+        digits.append(str(int(n % b)))
+        n //= b
+    return digits[::-1]
+
+def part1():
+    initial_wires, gates = parseInput(24)
+
+    wires = copy.deepcopy(initial_wires)
+    print(wires)
+
+    # have all the gates run
+    run_gates(gates, wires)
 
     # get all the z outputs
     max_z = 45  # for my input
@@ -86,19 +116,132 @@ def part1():
     print(bits)
     print(int(bits, 2))
 
+def switch_gates(gate1, gate2):
+    new_gate1 = copy.deepcopy(gate1)
+    new_gate2 = copy.deepcopy(gate2)
+    new_gate1.output = gate2.output
+    new_gate2.output = gate1.output
+    return new_gate1, new_gate2
+
+def process_group_combo(first_pair, second_pair, gates, wires):
+    new_gates = list(switch_gates(first_pair[0], first_pair[1])) + list(
+        switch_gates(second_pair[0], second_pair[1]))
+    tmp_gates = copy.deepcopy(gates)
+    for new_gate in new_gates:
+        tmp_gates[new_gate.gid] = new_gate
+    run_gates(tmp_gates, wires)
+    z_bits = get_register_bits("z", wires)
+    return z_bits
+
 def part2():
-    lines = parseInput(24)
-    print(lines)
+    initial_wires, gates = parseInput(24)
+    wires = copy.deepcopy(initial_wires)
+    for gate in gates:
+        print(gate)
+    print("num gates", len(gates))
+
+    '''
+    222 gates, choose 8 is big number
+    then out of those, 3 possible pairings, so big number * 3
+    '''
+
+    # get all the x and y wires to check em out
+    x_bits = get_register_bits("x", wires)
+    x_value = int(x_bits, 2)
+    print("X", x_bits, x_value)
+
+    y_bits = get_register_bits("y", wires)
+    y_value = int(y_bits, 2)
+    print("Y", y_bits, y_value)
+
+    desired_result = x_value + y_value
+    desired_bits = ''.join(numberToBase(desired_result, 2))
+    print("O", desired_bits, desired_result)
+
+    # have all the gates run
+    run_gates(gates, wires)
+
+    # get all the z outputs
+    z_bits = get_register_bits("z", wires)
+
+    # which z's are wrong?
+    if len(z_bits) < len(desired_bits):
+        z_bits = "0" + z_bits
+    print("Z", z_bits, int(z_bits, 2))
+
+    # make a graph I GUESS ugh
+    nodes = set()
+    edges = set()
+
+    G = nx.DiGraph()
+    for gate in gates:
+        nodes.add(gate.input1)
+        nodes.add(gate.input2)
+        nodes.add(gate.output)
+        edges.add((gate.input1, gate.output))
+        edges.add((gate.input2, gate.output))
+    G.add_nodes_from(nodes)
+    G.add_edges_from(edges)
+    print(G)
+
+    # levels = nx.trophic_levels(G)
+    # for key in levels:
+    #     if key.startswith('z'):
+    #         levels[key] = 5
+    #     else:
+    #         levels[key] = int(levels[key])
+    # print(levels)
+    # nx.set_node_attributes(G, levels, "level")
+
+    my_pos = {}
+    spacing = 10
+    for i in range(45):
+        node_name = f"y{i:02}"
+        my_pos[node_name] = [i*spacing, 50]
+    for i in range(45):
+        node_name = f"x{i:02}"
+        my_pos[node_name] = [i*spacing + spacing/2, 50]
+        # find whatever nodes are output of dis
+        for gate in gates:
+            if gate.input1 == node_name or gate.input2 == node_name:
+                my_pos[gate.output] = [i*spacing + spacing/2, 40]
+                for gate2 in gates:
+                    if gate2.input1 == gate.output or gate2.input2 == gate.output:
+                        my_pos[gate2.output] = [i*spacing + spacing/2, 30]
+                        for gate3 in gates:
+                            if gate3.input1 == gate2.output or gate3.input2 == gate2.output:
+                                my_pos[gate3.output] = [i*spacing + spacing/2, 20]
+
+    for i in range(46):
+        node_name = f"z{i:02}"
+        my_pos[node_name] = [i*spacing, 0]
+        # find some stuff that outputs to this wire
+        for gate in gates:
+            if gate.output == node_name:
+                if gate.input1 not in my_pos:
+                    my_pos[gate.input1] = [i*spacing, 10]
+                if gate.input2 not in my_pos:
+                    my_pos[gate.input2] = [i*spacing + spacing/2, 10]
+    for node in nodes:
+        if node not in my_pos:
+            print(node, "not in pos")
+            my_pos[node] = [25, 25]
+    plt.figure()
+    nx.draw(G, my_pos, with_labels=True, node_size=100, font_size=10)
+    plt.show()
+
+    sus_nodes = ['y44', 'tgs', 'fsh', 'csg', 'wnn', ]
+
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
