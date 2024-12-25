@@ -145,6 +145,36 @@ def part2():
     then out of those, 3 possible pairings, so big number * 3
     '''
 
+    da_map = {}
+    for gate in gates:
+        da_map[gate.output] = gate
+
+    # figured these out by looking at the graph
+    # z17 is last wrong one
+    sus_nodes = ['z07', 'nqk', 'z24', 'fpq', 'z32', 'srn', 'vtv', '']
+
+    # SWITCH SOME GATES
+    gate1 = da_map['z07']
+    gate2 = da_map['nqk']
+    gate1.output = 'nqk'
+    gate2.output = 'z07'
+    # two
+    gate1 = da_map['z24']
+    gate2 = da_map['fpq']
+    gate1.output = 'fpq'
+    gate2.output = 'z24'
+    # three
+    gate1 = da_map['z32']
+    gate2 = da_map['srn']
+    gate1.output = 'srn'
+    gate2.output = 'z32'
+    # four.... THIS PART
+    gate1 = da_map['vtv']
+    gate2 = da_map['nmq']
+    gate1.output = 'nmq'
+    gate2.output = 'vtv'
+
+
     # get all the x and y wires to check em out
     x_bits = get_register_bits("x", wires)
     x_value = int(x_bits, 2)
@@ -167,9 +197,8 @@ def part2():
     #     z_bits = "0" + z_bits
     print("Z", z_bits, int(z_bits, 2))
 
-    da_map = {}
-    for gate in gates:
-        da_map[gate.output] = gate
+    print(','.join(sorted(sus_nodes)))
+
 
     def get_all_node_inputs(node):
         sus_nodes = [node]
@@ -180,24 +209,24 @@ def part2():
         return sus_nodes
 
     # which z's are wrong?
-    # wrong_zs = []
-    # sus_nodes = []
-    # for i in range(len(z_bits)):
-    #     d_bit = desired_bits[i]
-    #     z_bit = z_bits[i]
-    #     if d_bit != z_bit:
-    #         z_node = f"z{45-i}"
-    #         wrong_zs.append(z_node)
-    # print("num wrong", len(wrong_zs), wrong_zs)
-    # for z_node in wrong_zs:
-    #     sus_nodes += get_all_node_inputs(z_node)
-    #     # get all the nodes that affect these Z's rip me
-    # sus_nodes = set(sus_nodes)
-    # sus_output_nodes = set()
-    # for node in sus_nodes:
-    #     if node in da_map:
-    #         sus_output_nodes.add(node)
-    # print("sus nodes", len(sus_output_nodes), sus_output_nodes)
+    wrong_zs = []
+    sus_nodes = []
+    for i in range(len(z_bits)):
+        d_bit = desired_bits[i]
+        z_bit = z_bits[i]
+        if d_bit != z_bit:
+            z_node = f"z{45-i}"
+            wrong_zs.append(z_node)
+    print("num wrong", len(wrong_zs), wrong_zs)
+    for z_node in wrong_zs:
+        sus_nodes += get_all_node_inputs(z_node)
+        # get all the nodes that affect these Z's rip me
+    sus_nodes = set(sus_nodes)
+    sus_output_nodes = set()
+    for node in sus_nodes:
+        if node in da_map:
+            sus_output_nodes.add(node)
+    print("sus nodes", len(sus_output_nodes), sus_output_nodes)
 
     # make a graph I GUESS ugh
     nodes = set()
@@ -265,7 +294,7 @@ def part2():
     nx.draw(G, my_pos, with_labels=True, node_size=100, font_size=10, node_color=color_map)
     plt.show()
 
-    sus_nodes = [('z07', 'nql'), ('z24', 'fpg'), ('z32', 'srn'), ('tgs', '???')]
+# not fpq,nqk,srn,vtv,z07,z17,z24,z32
 
 
 if __name__ == "__main__":
