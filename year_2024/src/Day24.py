@@ -136,8 +136,8 @@ def process_group_combo(first_pair, second_pair, gates, wires):
 def part2():
     initial_wires, gates = parseInput(24)
     wires = copy.deepcopy(initial_wires)
-    for gate in gates:
-        print(gate)
+    # for gate in gates:
+    #     print(gate)
     print("num gates", len(gates))
 
     '''
@@ -163,11 +163,41 @@ def part2():
 
     # get all the z outputs
     z_bits = get_register_bits("z", wires)
+    # if len(z_bits) < len(desired_bits):
+    #     z_bits = "0" + z_bits
+    print("Z", z_bits, int(z_bits, 2))
+
+    da_map = {}
+    for gate in gates:
+        da_map[gate.output] = gate
+
+    def get_all_node_inputs(node):
+        sus_nodes = [node]
+        if da_map.get(node) is not None:
+            gate = da_map[node]
+            sus_nodes += get_all_node_inputs(gate.input1)
+            sus_nodes += get_all_node_inputs(gate.input2)
+        return sus_nodes
 
     # which z's are wrong?
-    if len(z_bits) < len(desired_bits):
-        z_bits = "0" + z_bits
-    print("Z", z_bits, int(z_bits, 2))
+    # wrong_zs = []
+    # sus_nodes = []
+    # for i in range(len(z_bits)):
+    #     d_bit = desired_bits[i]
+    #     z_bit = z_bits[i]
+    #     if d_bit != z_bit:
+    #         z_node = f"z{45-i}"
+    #         wrong_zs.append(z_node)
+    # print("num wrong", len(wrong_zs), wrong_zs)
+    # for z_node in wrong_zs:
+    #     sus_nodes += get_all_node_inputs(z_node)
+    #     # get all the nodes that affect these Z's rip me
+    # sus_nodes = set(sus_nodes)
+    # sus_output_nodes = set()
+    # for node in sus_nodes:
+    #     if node in da_map:
+    #         sus_output_nodes.add(node)
+    # print("sus nodes", len(sus_output_nodes), sus_output_nodes)
 
     # make a graph I GUESS ugh
     nodes = set()
@@ -177,21 +207,30 @@ def part2():
     for gate in gates:
         nodes.add(gate.input1)
         nodes.add(gate.input2)
-        nodes.add(gate.output)
         edges.add((gate.input1, gate.output))
         edges.add((gate.input2, gate.output))
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
     print(G)
 
-    # levels = nx.trophic_levels(G)
-    # for key in levels:
-    #     if key.startswith('z'):
-    #         levels[key] = 5
-    #     else:
-    #         levels[key] = int(levels[key])
-    # print(levels)
-    # nx.set_node_attributes(G, levels, "level")
+    da_map = {}
+    for gate in gates:
+        da_map[gate.output] = gate
+
+    color_map = []
+    for node in G:
+        color = "gray"
+        if node.startswith("x") or node.startswith("y"):
+            color = "blue"
+        else:
+            gate = da_map[node]
+            if gate.op == "AND":
+                color = "red"
+            elif gate.op == "XOR":
+                color = "orange"
+            elif gate.op == "OR":
+                color = "yellow"
+        color_map.append(color)
 
     my_pos = {}
     for i in range(45):
@@ -199,51 +238,34 @@ def part2():
         y_name = f"y{i:02}"
         my_pos[x_name] = [i, 50]
         my_pos[y_name] = [i + 0.5, 48]
-        # find whatever nodes are output of dis
         for gate in gates:
-            child = False
             if (gate.input1 == x_name and gate.input2 == y_name) or (gate.input2 == x_name and gate.input1 == y_name):
-                my_pos[gate.output] = [i, 40]
-                # need to "recurse" on this output.. how many outputs does it have?
+                if gate.op == "XOR":
+                    my_pos[gate.output] = [i, 40]
+                else:
+                    my_pos[gate.output] = [i+0.5, 38]
                 for gate2 in gates:
-                    if gate2 == gate:
-                        continue
-                    # gate is a top-level thing wow, gate2 is below it
-                    if gate.output == gate2.input1 or gate.output == gate2.input2:
-                        my_pos[gate2.output] = [i, 30]
-                        # check again
-                        for gate3 in gates:
-                            if gate3 == gate2 or gate3 == gate:
-                                continue
-                            if gate2.output == gate3.input1 or gate2.output == gate3.input2:
-                                my_pos[gate3.output] = [i, 20]
-                                # check AGAIN
-                                for gate4 in gates:
-                                    if gate4 == gate3 or gate4 == gate2 or gate4 == gate:
-                                        continue
-                                    if gate3.output == gate4.input1 or gate3.output == gate4.input2:
-                                        my_pos[gate4.output] = [i, 10]
+                    if (gate2.input1 == gate.output or gate2.input2 == gate.output):
+                        if gate2.op == "XOR":
+                            my_pos[gate2.output] = [i, 30]
+                        elif gate2.op == "OR":
+                            my_pos[gate2.output] = [i, 25]
+                        else:
+                            my_pos[gate2.output] = [i, 20]
     # move all the z's to the bottom
     for i in range(46):
-        node_name = f"z{i:02}"
-        my_pos[node_name] = [i, 0]
-        # find some stuff that outputs to this wire
-        # for gate in gates:
-        #     if gate.output == node_name:
-        #         if gate.input1 not in my_pos:
-        #             my_pos[gate.input1] = [i, 10]
-        #         if gate.input2 not in my_pos:
-        #             my_pos[gate.input2] = [i, 10]
+        z_name = f"z{i:02}"
+        my_pos[z_name] = [i, 0]
     # make sure we got all the nodes
     for node in nodes:
         if node not in my_pos:
             print(node, "not in pos")
             my_pos[node] = [25, 25]
     plt.figure()
-    nx.draw(G, my_pos, with_labels=True, node_size=100, font_size=10)
+    nx.draw(G, my_pos, with_labels=True, node_size=100, font_size=10, node_color=color_map)
     plt.show()
 
-    sus_nodes = ['y44', 'tgs', 'fsh', 'csg', 'wnn', ]
+    sus_nodes = [('z07', 'nql'), ('z24', 'fpg'), ('z32', 'srn'), ('tgs', '???')]
 
 
 if __name__ == "__main__":
