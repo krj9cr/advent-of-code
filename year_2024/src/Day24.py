@@ -195,32 +195,46 @@ def part2():
 
     my_pos = {}
     for i in range(45):
-        node_name = f"y{i:02}"
-        my_pos[node_name] = [i, 48]
-    for i in range(45):
-        node_name = f"x{i:02}"
-        my_pos[node_name] = [i, 50]
+        x_name = f"x{i:02}"
+        y_name = f"y{i:02}"
+        my_pos[x_name] = [i, 50]
+        my_pos[y_name] = [i + 0.5, 48]
         # find whatever nodes are output of dis
         for gate in gates:
-            if gate.input1 == node_name or gate.input2 == node_name:
+            child = False
+            if (gate.input1 == x_name and gate.input2 == y_name) or (gate.input2 == x_name and gate.input1 == y_name):
                 my_pos[gate.output] = [i, 40]
+                # need to "recurse" on this output.. how many outputs does it have?
                 for gate2 in gates:
-                    if gate2.input1 == gate.output or gate2.input2 == gate.output:
+                    if gate2 == gate:
+                        continue
+                    # gate is a top-level thing wow, gate2 is below it
+                    if gate.output == gate2.input1 or gate.output == gate2.input2:
                         my_pos[gate2.output] = [i, 30]
+                        # check again
                         for gate3 in gates:
-                            if gate3.input1 == gate2.output or gate3.input2 == gate2.output:
+                            if gate3 == gate2 or gate3 == gate:
+                                continue
+                            if gate2.output == gate3.input1 or gate2.output == gate3.input2:
                                 my_pos[gate3.output] = [i, 20]
-
+                                # check AGAIN
+                                for gate4 in gates:
+                                    if gate4 == gate3 or gate4 == gate2 or gate4 == gate:
+                                        continue
+                                    if gate3.output == gate4.input1 or gate3.output == gate4.input2:
+                                        my_pos[gate4.output] = [i, 10]
+    # move all the z's to the bottom
     for i in range(46):
         node_name = f"z{i:02}"
         my_pos[node_name] = [i, 0]
         # find some stuff that outputs to this wire
-        for gate in gates:
-            if gate.output == node_name:
-                if gate.input1 not in my_pos:
-                    my_pos[gate.input1] = [i, 10]
-                if gate.input2 not in my_pos:
-                    my_pos[gate.input2] = [i, 10]
+        # for gate in gates:
+        #     if gate.output == node_name:
+        #         if gate.input1 not in my_pos:
+        #             my_pos[gate.input1] = [i, 10]
+        #         if gate.input2 not in my_pos:
+        #             my_pos[gate.input2] = [i, 10]
+    # make sure we got all the nodes
     for node in nodes:
         if node not in my_pos:
             print(node, "not in pos")
