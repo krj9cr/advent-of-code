@@ -169,10 +169,10 @@ def part2():
     gate1.output = 'srn'
     gate2.output = 'z32'
     # four.... THIS PART
-    gate1 = da_map['vtv']
-    gate2 = da_map['z17']
-    gate1.output = 'z17'
-    gate2.output = 'vtv'
+    gate1 = da_map['fgt']
+    gate2 = da_map['pcp']
+    gate1.output = 'pcp'
+    gate2.output = 'fgt'
 
 
     # get all the x and y wires to check em out
