@@ -151,7 +151,7 @@ def part2():
 
     # figured these out by looking at the graph
     # z17 is last wrong one
-    sus_nodes = ['z07', 'nqk', 'z24', 'fpq', 'z32', 'srn', 'vtv', 'z17']
+    sus_nodes = ['z07', 'nqk', 'z24', 'fpq', 'z32', 'srn', 'pcp', 'fgt']
 
     # SWITCH SOME GATES
     gate1 = da_map['z07']
