@@ -1,7 +1,12 @@
-import time
+import time, os
 
-def parseInput(day):
-    dayf = "{:02d}".format(day)
+def parseInput():
+    # Get the day number from the current file
+    full_path = __file__
+    file_name = os.path.basename(full_path)
+    dayf = file_name.strip("Day").strip(".py")
+
+    # Find the input file for this day and read in its lines
     path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
     with open(path, 'r') as file:
         lines = []
@@ -11,11 +16,11 @@ def parseInput(day):
         return lines
 
 def part1():
-    lines = parseInput(1)
+    lines = parseInput()
     print(lines)
 
 def part2():
-    lines = parseInput(1)
+    lines = parseInput()
     print(lines)
 
 if __name__ == "__main__":
