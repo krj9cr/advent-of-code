@@ -40,44 +40,43 @@ def part1():
 
 def part2():
     lines = parseInput()
-    print(lines)
+    # print(lines)
     # because modulo works better between 1-num
     # rather than 0-num, +1 to the start and 99
     # so we treat it as 1-100 rather than 0-99
     curr_num = 51
-    prev_num = None
     password = 0
     for direction, distance in lines:
         prev_num = curr_num
-        print("curr_num", curr_num, "prev_num", curr_num)
+        mid_num = curr_num
+        print("curr_num:", curr_num)
         print(direction, distance)
+        if distance >= 100:
+            quotient = (distance // 100)
+            print("quotient", quotient)
+            password += abs(quotient)
+            distance = distance % 100
+
         if direction == 'L':
-            curr_num = curr_num - distance
+            mid_num = mid_num - distance
         else:
-            curr_num = curr_num + distance
-        print("middle num:", curr_num)
-        quotient, remainder = divmod(curr_num, 100)
-        # quotient = abs(quotient)
-        print("quotient", quotient, "remainder", remainder)
-        # if curr_num < 0:
-        #     if quotient == -1:
-        #         password -= 1
+            mid_num = mid_num + distance
+        print("mid num:", mid_num)
+        remainder = mid_num % 100
         curr_num = remainder
         if curr_num == 0:
             curr_num = 100
-        if prev_num == 1 and quotient < 0:
-            password += abs(quotient) - 1
-        elif quotient == 0 and curr_num == 1:
+
+        # check if at "1"
+        print("next num", curr_num)
+        if curr_num == 1:
             password += 1
-        else:
-            password += abs(quotient)
-        print("new num:", curr_num, "password:", password)
+        elif curr_num != mid_num and prev_num != 1:
+            password += 1
+
+        print("password", password)
         print()
     print(password)
-
-# 6065 too low
-# 6149 too high
-# 7047 too high
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
