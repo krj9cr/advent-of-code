@@ -1,4 +1,5 @@
 import time, os
+import itertools
 
 def parseInput():
     # Get the day number from the current file
@@ -38,14 +39,39 @@ def part1():
     total = 0
     for bank in lines:
         joltage = findJoltage(bank)
-        print(joltage)
+        # print(joltage)
         total += joltage
     print(total)
 
 
+def findMax(bank):
+    return max(bank)
+
+def findJoltage2(bank, l=11):
+    # print("processing", bank, "l=", l)
+    if l == 0:
+        return str(max(bank))
+    # exclude the last number to find the max
+    firstMax = 0
+    firstIndex = -1
+    # print("checking:", bank[:-l])
+    for index, value in enumerate(bank[:-l]):
+        if value > firstMax:
+            firstMax = value
+            firstIndex = index
+    # print("max", firstMax, "at", firstIndex)
+    return str(firstMax) + findJoltage2(bank[firstIndex+1:], l-1)
+
 def part2():
     lines = parseInput()
-    print(lines)
+    # print(lines)
+    total = 0
+    for bank in lines:
+        joltage = findJoltage2(bank)
+        # print(joltage)
+        total += int(joltage)
+    print(total)
+
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
@@ -54,8 +80,8 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
 
-    # print("\nPART 2 RESULT")
-    # start = time.perf_counter()
-    # part2()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
