@@ -36,9 +36,9 @@ def custom_bfs(splitLocations, start, w, h):
     times_split = 0
 
     while queue:
-        print("queue:", queue)
+        # print("queue:", queue)
         curr = queue.popleft()
-        print("current", curr)
+        # print("current", curr)
         x, y = curr
 
         if x < w and y < h:
@@ -63,9 +63,9 @@ def custom_bfs(splitLocations, start, w, h):
 
 def part1():
     start, splitLocations, w, h = parseInput()
-    print(start)
-    print(splitLocations)
-    print(w, h)
+    # print(start)
+    # print(splitLocations)
+    # print(w, h)
 
     visited = custom_bfs(splitLocations, start, w, h)
 
@@ -80,20 +80,53 @@ def part1():
     #             print(".", end="")
     #     print()
 
+cache = {}
+
+def count_unique_paths_dfs(splitLocations, start, w, h):
+    if start in cache:
+        return cache[start]
+
+    x, y = start
+
+    # print(x,y)
+    count = 0
+
+    if x < w and y < h:
+        next = (x, y + 1)
+        if next in splitLocations:
+            # split
+            next1 = (x - 1, y + 1)
+            next2 = (x + 1, y + 1)
+
+            count += count_unique_paths_dfs(splitLocations, next1, w, h)
+            count += count_unique_paths_dfs(splitLocations, next2, w, h)
+        else:
+            count += count_unique_paths_dfs(splitLocations, next, w, h)
+    else:
+        cache[start] = 1
+        return 1
+
+    cache[start] = count
+    return count
 
 def part2():
-    lines = parseInput()
-    print(lines)
+    start, splitLocations, w, h = parseInput()
+
+    visited = count_unique_paths_dfs(splitLocations, start, w, h)
+
+    print(visited)
+
+
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
