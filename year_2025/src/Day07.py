@@ -1,5 +1,4 @@
 import time, os
-from collections import deque
 
 def parseInput():
     # Get the day number from the current file
@@ -30,66 +29,25 @@ def parseInput():
                     splitLocations.append((i, j))
         return start, splitLocations, w, h
 
-def custom_bfs(splitLocations, start, w, h):
-    queue = deque([start])
-    visited = set([])
-    times_split = 0
-
-    while queue:
-        # print("queue:", queue)
-        curr = queue.popleft()
-        # print("current", curr)
-        x, y = curr
-
-        if x < w and y < h:
-            next = (x, y + 1)
-            if next in splitLocations:
-                # split
-                next1 = (x - 1, y + 1)
-                next2 = (x + 1, y + 1)
-                visited.add(next1)
-                queue.append(next1)
-                visited.add(next2)
-                queue.append(next2)
-
-                times_split += 1
-            else:
-                if next not in visited:
-                    visited.add(next)
-                    queue.append(next)
-
-    print("split", times_split)
-    return visited
+cache = {}
 
 def part1():
     start, splitLocations, w, h = parseInput()
-    # print(start)
-    # print(splitLocations)
-    # print(w, h)
 
-    visited = custom_bfs(splitLocations, start, w, h)
+    paths, splits = count_unique_paths_dfs(splitLocations, start, w, h)
 
-    # print graph
-    # for j in range(h):
-    #     for i in range(w):
-    #         if (i, j) in splitLocations:
-    #             print("^", end="")
-    #         elif (i, j) in visited:
-    #             print("|", end="")
-    #         else:
-    #             print(".", end="")
-    #     print()
-
-cache = {}
+    print(splits)
+    return paths
 
 def count_unique_paths_dfs(splitLocations, start, w, h):
     if start in cache:
-        return cache[start]
+        return cache[start], 0
 
     x, y = start
 
     # print(x,y)
     count = 0
+    splits = 0
 
     if x < w and y < h:
         next = (x, y + 1)
@@ -98,32 +56,32 @@ def count_unique_paths_dfs(splitLocations, start, w, h):
             next1 = (x - 1, y + 1)
             next2 = (x + 1, y + 1)
 
-            count += count_unique_paths_dfs(splitLocations, next1, w, h)
-            count += count_unique_paths_dfs(splitLocations, next2, w, h)
+            c1, s1 = count_unique_paths_dfs(splitLocations, next1, w, h)
+            c2, s2 = count_unique_paths_dfs(splitLocations, next2, w, h)
+            count += c1 + c2
+            splits += 1 + s1 + s2
         else:
-            count += count_unique_paths_dfs(splitLocations, next, w, h)
+            c1, s1 = count_unique_paths_dfs(splitLocations, next, w, h)
+            count += c1
+            splits += s1
     else:
         cache[start] = 1
-        return 1
+        return 1, 0
 
     cache[start] = count
-    return count
+    return count, splits
 
 def part2():
-    start, splitLocations, w, h = parseInput()
-
-    visited = count_unique_paths_dfs(splitLocations, start, w, h)
-
-    print(visited)
-
+    paths = part1()
+    print(paths)
 
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
