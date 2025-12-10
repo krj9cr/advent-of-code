@@ -1,6 +1,7 @@
 import time, os
 import re
 import heapq
+import numpy as np
 
 class Machine:
     def __init__(self, lights_str, buttons_str, joltage_str):
@@ -124,53 +125,47 @@ class Machine:
         return new_joltages
 
     def part2(self):
-        initial_state = [0] * len(self.joltage)
-        # Priority queue stores tuples: (current_cost, current_state, button_sequence)
-        # The smallest cost is always popped first
-        priority_queue = [(0, initial_state, [])]
+        # create paths/branches for each button press, trying to press each button
+        # TODO: idea: rather than creating paths, simulate pressing this button multiple times?
+        # then press each button X times in different sequences? because the buttton sequence shouldn't
+        # matter as much since we're just incrementing?
+        # it is like we need
+        # b0 * x + b1 * y + b2 * z + ... = [j1, j2, j3, j4]
+        # which is really
+        # [b0a, b0b, b0c] * x + [b1a, b1b, b1c] * y + ... = [ja, jb, jc...]
 
-        # We track the minimum cost found so far to reach a specific node.
-        # This is crucial when cycles exist and nodes are revisited.
-        min_cost_to_node = {','.join([str(i) for i in initial_state]): 0}
+        # but that can be decomposed into multiple equations...
+        # b0a * x + b1a * y +... = ja
+        # b0b * x + b1b * y +... = jb
 
-        while priority_queue:
-            current_cost, current_state, button_sequence = heapq.heappop(priority_queue)
+        # for each joltage index
+        # find the buttons that press it, generate an array
+        coefficients = []
+        constants = []
+        for joltage_index, joltage in enumerate(self.joltage):
+            constants.append(joltage)
+            joltage_coefficients = []
+            for button_index, button in enumerate(self.buttons):
+                if joltage_index in button:
+                    joltage_coefficients.append(1)
+                else:
+                    joltage_coefficients.append(0)
+            coefficients.append(joltage_coefficients)
+        print(coefficients)
+        print(constants)
 
-            # If we have already found a cheaper way to this node than
-            # the current path's cost, skip this path.
-            if current_cost > min_cost_to_node.get(','.join([str(i) for i in current_state]), float('inf')):
-                continue
+        # A matrix coefficients (rows match equations, columns match variables x0, x1, x2)
+        A = np.array(coefficients)
 
-            # if all the lights off, we are done
-            if current_state == self.joltage:
-                print("DONE", current_state)
-                return button_sequence
+        # Constants vector b
+        b = np.array(constants)
 
-            # Explore neighbors, which are next buttons to press
-            # generate sequences of button presses...
-            # prioritize starting with buttons that include lights that are on
-            button_indices = range(len(self.buttons))  #self.find_buttons_to_press(current_state)
+        # Solve the system
+        x = np.linalg.solve(A, b)
 
-            # create paths/branches for each button press, trying to press each button
-            # TODO: idea: rather than creating paths, simulate pressing this button multiple times?
-            # then press each button X times in different sequences? because the buttton sequence shouldn't
-            # matter as much since we're just incrementing?
-            for button_index in button_indices:
-                button = self.buttons[button_index]
-                next_state = self.press_button_part2(current_state, button_index)
-                new_cost = current_cost + 1
+        print(f"Solution: {x}")
 
-                # If this new path to the neighbor is cheaper than any
-                # previous path recorded for that neighbor:
-                next_state_str = ','.join([str(i) for i in next_state])
-                if new_cost < min_cost_to_node.get(next_state_str, float('inf')):
-                    min_cost_to_node[next_state_str] = new_cost
-                    new_path = list(button_sequence)
-                    new_path.append(button)
-                    # Add this promising new path to the priority queue
-                    heapq.heappush(priority_queue, (new_cost, next_state, new_path))
-
-        return  None
+        return 0
 
 
 
@@ -211,8 +206,7 @@ def part2():
     for machine in machines:
         print(machine)
         # machine.press_button_part2([0] * len(machine.joltage), 0)
-        buttons = machine.part2()
-        presses = len(buttons)
+        presses = machine.part2()
         print("presses", presses)
         answer += presses
         print()
