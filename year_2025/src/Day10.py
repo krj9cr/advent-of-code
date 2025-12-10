@@ -1,4 +1,25 @@
 import time, os
+import re
+
+class Machine:
+    def __init__(self, lights_str, buttons_str, joltage_str):
+        lights = lights_str.strip("[").strip("]")
+        # print(lights)
+        self.lights = []
+        for l in lights:
+            if l == ".":
+                self.lights.append(False)
+            else:
+                self.lights.append(True)
+        buttons_split = buttons_str.split(" ")
+        # print(buttons_split)
+        self.buttons = []
+        for button in buttons_split:
+            self.buttons.append([int(i) for i in button.strip("(").strip(")").strip().split(",")])
+        self.joltage = [int(i) for i in joltage_str.strip("{").strip("}").split(",")]
+
+    def __str__(self):
+        return str(self.lights) + " " + str(self.buttons) + " " + str(self.joltage)
 
 def parseInput():
     # Get the day number from the current file
@@ -12,12 +33,15 @@ def parseInput():
         lines = []
         for line in file:
             line = line.strip()
-            lines.append(line)
+            pattern = r'(\[[\.#]+]) (.*) ({.*})'
+            data_groups = re.findall(pattern, line)
+            lines.append(Machine(data_groups[0][0], data_groups[0][1], data_groups[0][2]))
         return lines
 
 def part1():
-    lines = parseInput()
-    print(lines)
+    machines = parseInput()
+    for machine in machines:
+        print(machine)
 
 def part2():
     lines = parseInput()
