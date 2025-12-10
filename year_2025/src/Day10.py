@@ -96,16 +96,82 @@ class Machine:
                 next_state = self.press_button(current_state, button_index)
                 new_cost = current_cost + 1
 
+                # check if any joltages are higher than what we want
+                bad = False
+                for i, joltage in next_state:
+                    if joltage > self.joltage[i]:
+                        bad = True
+                        break
+                if not bad:
+                    # If this new path to the neighbor is cheaper than any
+                    # previous path recorded for that neighbor:
+                    if new_cost < min_cost_to_node.get(next_state, float('inf')):
+                        min_cost_to_node[next_state] = new_cost
+                        new_path = list(button_sequence)
+                        new_path.append(button)
+                        # Add this promising new path to the priority queue
+                        heapq.heappush(priority_queue, (new_cost, next_state, new_path))
+
+        return
+
+    def press_button_part2(self, joltages, button_idx):
+        button = self.buttons[button_idx]
+        # print("pressing button: ", button)
+        new_joltages = list(joltages)
+        for index in button:
+            new_joltages[index] += 1
+        # print("result", new_joltages)
+        return new_joltages
+
+    def part2(self):
+        initial_state = [0] * len(self.joltage)
+        # Priority queue stores tuples: (current_cost, current_state, button_sequence)
+        # The smallest cost is always popped first
+        priority_queue = [(0, initial_state, [])]
+
+        # We track the minimum cost found so far to reach a specific node.
+        # This is crucial when cycles exist and nodes are revisited.
+        min_cost_to_node = {','.join([str(i) for i in initial_state]): 0}
+
+        while priority_queue:
+            current_cost, current_state, button_sequence = heapq.heappop(priority_queue)
+
+            # If we have already found a cheaper way to this node than
+            # the current path's cost, skip this path.
+            if current_cost > min_cost_to_node.get(','.join([str(i) for i in current_state]), float('inf')):
+                continue
+
+            # if all the lights off, we are done
+            if current_state == self.joltage:
+                print("DONE", current_state)
+                return button_sequence
+
+            # Explore neighbors, which are next buttons to press
+            # generate sequences of button presses...
+            # prioritize starting with buttons that include lights that are on
+            button_indices = range(len(self.buttons))  #self.find_buttons_to_press(current_state)
+
+            # create paths/branches for each button press, trying to press each button
+            # TODO: idea: rather than creating paths, simulate pressing this button multiple times?
+            # then press each button X times in different sequences? because the buttton sequence shouldn't
+            # matter as much since we're just incrementing?
+            for button_index in button_indices:
+                button = self.buttons[button_index]
+                next_state = self.press_button_part2(current_state, button_index)
+                new_cost = current_cost + 1
+
                 # If this new path to the neighbor is cheaper than any
                 # previous path recorded for that neighbor:
-                if new_cost < min_cost_to_node.get(next_state, float('inf')):
-                    min_cost_to_node[next_state] = new_cost
+                next_state_str = ','.join([str(i) for i in next_state])
+                if new_cost < min_cost_to_node.get(next_state_str, float('inf')):
+                    min_cost_to_node[next_state_str] = new_cost
                     new_path = list(button_sequence)
                     new_path.append(button)
                     # Add this promising new path to the priority queue
                     heapq.heappush(priority_queue, (new_cost, next_state, new_path))
 
         return  None
+
 
 
 def parseInput():
@@ -140,18 +206,27 @@ def part1():
     print("answer:", answer)
 
 def part2():
-    lines = parseInput()
-    print(lines)
+    machines = parseInput()
+    answer = 0
+    for machine in machines:
+        print(machine)
+        # machine.press_button_part2([0] * len(machine.joltage), 0)
+        buttons = machine.part2()
+        presses = len(buttons)
+        print("presses", presses)
+        answer += presses
+        print()
+    print("answer:", answer)
 
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
-
-    # print("\nPART 2 RESULT")
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
