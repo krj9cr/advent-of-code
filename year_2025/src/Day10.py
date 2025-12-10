@@ -2,6 +2,7 @@ import time, os
 import re
 import heapq
 import numpy as np
+import pulp
 
 class Machine:
     def __init__(self, lights_str, buttons_str, joltage_str):
@@ -125,8 +126,7 @@ class Machine:
         return new_joltages
 
     def part2(self):
-        # create paths/branches for each button press, trying to press each button
-        # TODO: idea: rather than creating paths, simulate pressing this button multiple times?
+        # idea: rather than creating paths, simulate pressing this button multiple times?
         # then press each button X times in different sequences? because the buttton sequence shouldn't
         # matter as much since we're just incrementing?
         # it is like we need
@@ -154,19 +154,31 @@ class Machine:
         print(coefficients)
         print(constants)
 
-        # A matrix coefficients (rows match equations, columns match variables x0, x1, x2)
         A = np.array(coefficients)
-
-        # Constants vector b
         b = np.array(constants)
 
-        # Solve the system
-        x = np.linalg.solve(A, b)
+        n = A.shape[1]
 
-        print(f"Solution: {x}")
+        # ILP problem: minimize sum(x)
+        prob = pulp.LpProblem("MinIntegerSolution", pulp.LpMinimize)
 
-        return 0
+        # integer variables x1..xn >= 0
+        x = [pulp.LpVariable(f'x{i}', lowBound=0, cat='Integer') for i in range(n)]
 
+        # objective
+        prob += sum(x)
+
+        # constraints A·x = b
+        for i in range(A.shape[0]):
+            prob += (pulp.lpDot(A[i], x) == int(b[i]))
+
+        # solve
+        prob.solve(pulp.PULP_CBC_CMD(msg=False))
+
+        button_presses = [x[i].value() for i in range(n)]
+        print(button_presses)
+
+        return int(sum(button_presses))
 
 
 def parseInput():
