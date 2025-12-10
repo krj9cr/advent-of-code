@@ -48,6 +48,12 @@ def part2():
 
     big_shape = Polygon(lines)
 
+    # fig, ax = plt.subplots()
+    # plot_polygon(big_shape, ax=ax, add_points=True, color='green', alpha=0.5)
+    # # plot_polygon(rectangle, ax=ax, add_points=True, color='blue', alpha=0.5)
+    # ax.set_aspect('equal')
+    # plt.show()
+
     maxarea = 0
     for i, (x1, y1) in enumerate(lines):
         for j, (x2, y2) in enumerate(lines):
@@ -66,11 +72,6 @@ def part2():
             # if area is contained
             rectangle = Polygon([(maxx, miny), (minx, miny), (minx, maxy), (maxx, maxy)])
 
-            # fig, ax = plt.subplots()
-            # plot_polygon(big_shape, ax=ax, add_points=True, color='green', alpha=0.5)
-            # plot_polygon(rectangle, ax=ax, add_points=True, color='blue', alpha=0.5)
-            # ax.set_aspect('equal')
-            # plt.show()
 
             if rectangle.within(big_shape):
                 print("area", area)
