@@ -1,6 +1,6 @@
 import time, os
 import matplotlib.pyplot as plt
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point
 from shapely.plotting import plot_polygon
 
 def parseInput():
@@ -41,50 +41,55 @@ def part1():
                 maxarea = area
     print(maxarea)
 
-
 def part2():
-    lines = parseInput()
-    # print(lines)
+    points = parseInput()
+    # print(points)
 
-    big_shape = Polygon(lines)
+    big_shape = Polygon(points)
 
     # fig, ax = plt.subplots()
     # plot_polygon(big_shape, ax=ax, add_points=True, color='green', alpha=0.5)
-    # # plot_polygon(rectangle, ax=ax, add_points=True, color='blue', alpha=0.5)
     # ax.set_aspect('equal')
     # plt.show()
 
+    # sort points by y and x
+    # points_by_x = sorted(points, key=lambda x: x[0])
+    points_by_y = sorted(points, key=lambda x: x[1])
+    # print(points_by_x)
+    # print(points_by_y)
+
     maxarea = 0
-    for i, (x1, y1) in enumerate(lines):
-        for j, (x2, y2) in enumerate(lines):
-            if i == j:
-                continue
-            # print(x1,y1, "and", x2, y2)
-            # find the min x, y, and max x, y
-            minx = min(x1, x2)
-            miny = min(y1, y2)
-            maxx = max(x1, x2)
-            maxy = max(y1, y2)
-            # the area will be (maxx - minx) * (maxy - miny)?
-            # print(maxx, minx, maxy, miny)
-            area = (maxx - minx + 1) * (maxy - miny + 1)
+    # going top to bottom (because of the shape)
+    for i, (x1, y1) in enumerate(points_by_y):
+        for j, (x2, y2) in enumerate(points_by_y):
+            if i > j:
+                # find the min x, y, and max x, y
+                minx = min(x1, x2)
+                miny = min(y1, y2)
+                maxx = max(x1, x2)
+                maxy = max(y1, y2)
+                # the area will be (maxx - minx) * (maxy - miny)?
+                # print(maxx, minx, maxy, miny)
+                area = (maxx - minx + 1) * (maxy - miny + 1)
+                if area <= maxarea:
+                    continue
 
-            # if area is contained
-            rectangle = Polygon([(maxx, miny), (minx, miny), (minx, maxy), (maxx, maxy)])
+                # if area is contained
+                rectangle = Polygon([(maxx, miny), (minx, miny), (minx, maxy), (maxx, maxy)])
+                if rectangle.within(big_shape):
+                    if area > maxarea:
+                        maxarea = area
 
-
-            if rectangle.within(big_shape):
-                # print("area", area)
-                if area > maxarea:
-                    maxarea = area
     print(maxarea)
 
+
+
 if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
+    # print("\nPART 1 RESULT")
+    # start = time.perf_counter()
+    # part1()
+    # end = time.perf_counter()
+    # print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()

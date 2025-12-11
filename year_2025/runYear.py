@@ -36,7 +36,7 @@ if __name__ == '__main__':
     plt.bar(ind + width, part2Times, width, label='Part 2')
 
     plt.ylabel('Time (ms)')
-    plt.title("AoC 2025` Times Python 3.9")
+    plt.title("AoC 2025 Times Python 3.9")
 
     plt.xticks(ind + width / 2, days)
     plt.legend(loc='best')
