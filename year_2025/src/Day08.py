@@ -21,7 +21,7 @@ def parseInput():
 
 def part1():
     lines = parseInput()
-    print(lines)
+    # print(lines)
 
     # find distances between all pairs?
     distances = {}
@@ -36,10 +36,10 @@ def part1():
             if hash in distances:
                 continue
             distances[hash] = math.dist(node1, node2)
-            print(hash)
+            # print(hash)
 
     sorted_items = sorted(distances.items(), key=lambda item: item[1])
-    print(sorted_items)
+    # print(sorted_items)
 
     # make top connections
     num_connections = 1000 # 1000
@@ -50,10 +50,10 @@ def part1():
         ids_split = ids.split('->')
         id1 = int(ids_split[0])
         id2 = int(ids_split[1])
-        print(id1, id2)
+        # print(id1, id2)
         node1 = lines[id1][1]
         node2 = lines[id2][1]
-        print(node1, node2)
+        # print(node1, node2)
         G.add_edge(node1, node2)
 
     components = list(nx.connected_components(G))
@@ -63,7 +63,7 @@ def part1():
 
     answer = 1
     for i in range(3):
-        print(sorted_comps[i])
+        # print(sorted_comps[i])
         answer *= len(sorted_comps[i])
     print("answer", answer)
 
@@ -108,7 +108,7 @@ def part2():
         # check num connected components
         components = list(nx.connected_components(G))
         if len(components) == 1:
-            print("OHO", num_connections)
+            # print("OHO", num_connections)
             print("answwer", node1[0] * node2[0])
             break
         num_connections += 1
@@ -116,11 +116,11 @@ def part2():
 
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()

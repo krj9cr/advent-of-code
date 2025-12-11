@@ -23,7 +23,7 @@ def parseInput():
 
 def part1():
     lines = parseInput()
-    print(lines)
+    # print(lines)
 
     total = 0
     for line in lines:
@@ -33,12 +33,12 @@ def part1():
             acc = 1
         for num in line[:-1]:
             if op == "*":
-                print("mult", num)
+                # print("mult", num)
                 acc *= int(num)
             else:
-                print("add", num)
+                # print("add", num)
                 acc += int(num)
-        print("acc", acc)
+        # print("acc", acc)
         total += acc
     print("total", total)
 
@@ -70,24 +70,24 @@ def part2():
         l = len(line)
         if l > longest:
             longest = l
-    print("longest", longest)
+    # print("longest", longest)
 
     for line in lines:
         for i in range(longest-len(line)):
             line.append(" ")
 
-    for line in lines:
-        print(line)
+    # for line in lines:
+    #     print(line)
 
     array = np.array(lines)
     rotated = np.rot90(array, k=1)
-    print(rotated)
+    # print(rotated)
 
     nums = []
     for line in rotated:
         nums.append(''.join(line).strip())
 
-    print(nums)
+    # print(nums)
 
     # split on empty rows, so they are grouped
     res = []
@@ -99,13 +99,13 @@ def part2():
     if start < len(nums):
         res.append(nums[start:])
 
-    print(res)
+    # print(res)
 
     total = 0
     for group in res:
         op = group[-1][-1]
         group[-1] = group[-1][:-1]
-        print(group, op)
+        # print(group, op)
         acc = 0
         if op == "*":
             acc = 1
@@ -115,7 +115,7 @@ def part2():
                 acc *= num
             else:
                 acc += num
-        print(acc)
+        # print(acc)
         total += acc
 
     print("total", total)
@@ -125,11 +125,11 @@ def part2():
 
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()

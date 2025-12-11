@@ -20,23 +20,23 @@ def parseInput():
 
 def part1():
     lines = parseInput()
-    print(lines)
+    # print(lines)
 
     maxarea = 0
     for i, (x1, y1) in enumerate(lines):
         for j, (x2, y2) in enumerate(lines):
             if i == j:
                 continue
-            print(x1,y1, "and", x2, y2)
+            # print(x1,y1, "and", x2, y2)
             # find the min x, y, and max x, y
             minx = min(x1, x2)
             miny = min(y1, y2)
             maxx = max(x1, x2)
             maxy = max(y1, y2)
             # the area will be (maxx - minx) * (maxy - miny)?
-            print(maxx, minx, maxy, miny)
+            # print(maxx, minx, maxy, miny)
             area = (maxx - minx + 1) * (maxy - miny + 1)
-            print("area", area)
+            # print("area", area)
             if area > maxarea:
                 maxarea = area
     print(maxarea)
@@ -44,7 +44,7 @@ def part1():
 
 def part2():
     lines = parseInput()
-    print(lines)
+    # print(lines)
 
     big_shape = Polygon(lines)
 
@@ -59,14 +59,14 @@ def part2():
         for j, (x2, y2) in enumerate(lines):
             if i == j:
                 continue
-            print(x1,y1, "and", x2, y2)
+            # print(x1,y1, "and", x2, y2)
             # find the min x, y, and max x, y
             minx = min(x1, x2)
             miny = min(y1, y2)
             maxx = max(x1, x2)
             maxy = max(y1, y2)
             # the area will be (maxx - minx) * (maxy - miny)?
-            print(maxx, minx, maxy, miny)
+            # print(maxx, minx, maxy, miny)
             area = (maxx - minx + 1) * (maxy - miny + 1)
 
             # if area is contained
@@ -74,17 +74,17 @@ def part2():
 
 
             if rectangle.within(big_shape):
-                print("area", area)
+                # print("area", area)
                 if area > maxarea:
                     maxarea = area
     print(maxarea)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
