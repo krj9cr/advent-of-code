@@ -33,35 +33,20 @@ class Machine:
     def __str__(self):
         return str(self.lights) + " " + str(self.buttons) + " " + str(self.joltage)
 
-    def find_buttons_to_press(self, lights):
-        indicies = []
-        for index, char in enumerate(lights):
-            if char == "1":
-                indicies.append(index)
-        # print(indicies)
-        # find buttons that include these indicies
-        button_indices = set()
-        for button_index, button in enumerate(self.buttons):
-            for index in indicies:
-                if index in button:
-                    button_indices.add(button_index)
-        # print("button_indices:", button_indices)
-        return button_indices
-
     def press_button(self, lights, button_idx):
         button = self.buttons[button_idx]
-        print("pressing button: ", button)
+        # print("pressing button: ", button)
         # turn the button into a binary sequence
         # TODO: separate this out so we don't repeat it every button press
         button_flags = ["0"] * len(lights)
-        print("lights", lights)
+        # print("lights", lights)
         for light_idx in button:
             button_flags[light_idx] = "1"
-        print("flags ", ''.join(button_flags))
+        # print("flags ", ''.join(button_flags))
         # do an XOR on the lights with button flags
         xor_result = int(lights,2) ^  int(''.join(button_flags), 2)
         result = f"{xor_result:0{len(lights)}b}"
-        print("result", lights)
+        # print("result", lights)
         return result
 
     def part1(self):
@@ -84,13 +69,13 @@ class Machine:
 
             # if all the lights off, we are done
             if current_state == self.original_lights:
-                print("DONE", current_state)
+                # print("DONE", current_state)
                 return button_sequence
 
             # Explore neighbors, which are next buttons to press
             # generate sequences of button presses...
             # prioritize starting with buttons that include lights that are on
-            button_indices = range(len(self.buttons))  #self.find_buttons_to_press(current_state)
+            button_indices = range(len(self.buttons))
 
             # create paths/branches for each button press, trying to press each button
             for button_index in button_indices:
@@ -98,32 +83,17 @@ class Machine:
                 next_state = self.press_button(current_state, button_index)
                 new_cost = current_cost + 1
 
-                # check if any joltages are higher than what we want
-                bad = False
-                for i, joltage in next_state:
-                    if joltage > self.joltage[i]:
-                        bad = True
-                        break
-                if not bad:
-                    # If this new path to the neighbor is cheaper than any
-                    # previous path recorded for that neighbor:
-                    if new_cost < min_cost_to_node.get(next_state, float('inf')):
-                        min_cost_to_node[next_state] = new_cost
-                        new_path = list(button_sequence)
-                        new_path.append(button)
-                        # Add this promising new path to the priority queue
-                        heapq.heappush(priority_queue, (new_cost, next_state, new_path))
+                # If this new path to the neighbor is cheaper than any
+                # previous path recorded for that neighbor:
+                if new_cost < min_cost_to_node.get(next_state, float('inf')):
+                    min_cost_to_node[next_state] = new_cost
+                    new_path = list(button_sequence)
+                    new_path.append(button)
+                    # Add this promising new path to the priority queue
+                    heapq.heappush(priority_queue, (new_cost, next_state, new_path))
 
-        return
+        return None
 
-    def press_button_part2(self, joltages, button_idx):
-        button = self.buttons[button_idx]
-        # print("pressing button: ", button)
-        new_joltages = list(joltages)
-        for index in button:
-            new_joltages[index] += 1
-        # print("result", new_joltages)
-        return new_joltages
 
     def part2(self):
         # idea: rather than creating paths, simulate pressing this button multiple times?
@@ -151,8 +121,8 @@ class Machine:
                 else:
                     joltage_coefficients.append(0)
             coefficients.append(joltage_coefficients)
-        print(coefficients)
-        print(constants)
+        # print(coefficients)
+        # print(constants)
 
         A = np.array(coefficients)
         b = np.array(constants)
@@ -176,7 +146,7 @@ class Machine:
         prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
         button_presses = [x[i].value() for i in range(n)]
-        print(button_presses)
+        # print(button_presses)
 
         return int(sum(button_presses))
 
@@ -202,37 +172,37 @@ def part1():
     machines = parseInput()
     answer = 0
     for machine in machines:
-        print(machine)
+        # print(machine)
         # machine.press_button(0)
         # machine.find_buttons_to_press()
         buttons = machine.part1()
         presses = len(buttons)
-        print(buttons, presses)
+        # print(buttons, presses)
         answer += presses
-        print()
+        # print()
     print("answer:", answer)
 
 def part2():
     machines = parseInput()
     answer = 0
     for machine in machines:
-        print(machine)
+        # print(machine)
         # machine.press_button_part2([0] * len(machine.joltage), 0)
         presses = machine.part2()
-        print("presses", presses)
+        # print("presses", presses)
         answer += presses
-        print()
+        # print()
     print("answer:", answer)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
-
-    print("\nPART 2 RESULT")
+    print("\nPART 1 RESULT")
     start = time.perf_counter()
-    part2()
+    part1()
     end = time.perf_counter()
     print("Time (ms):", (end - start) * 1000)
+
+    # print("\nPART 2 RESULT")
+    # start = time.perf_counter()
+    # part2()
+    # end = time.perf_counter()
+    # print("Time (ms):", (end - start) * 1000)
