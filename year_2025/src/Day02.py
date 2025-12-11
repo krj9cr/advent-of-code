@@ -28,10 +28,10 @@ def isInvalid(num):
 
 def part1():
     lines = parseInput()
-    print(lines)
+    # print(lines)
     total = 0
     for start, end in lines:
-        print(start, end)
+        # print(start, end)
         for i in range(start, end + 1):
             # print(i)
             if isInvalid(i):
@@ -49,10 +49,10 @@ def isInvalid2(num):
 
 def part2():
     lines = parseInput()
-    print(lines)
+    # print(lines)
     total = 0
     for start, end in lines:
-        print(start, end)
+        # print(start, end)
         for i in range(start, end + 1):
             # print(i)
             if isInvalid2(i):
@@ -61,11 +61,11 @@ def part2():
     print("total", total)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()

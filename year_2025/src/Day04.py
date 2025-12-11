@@ -27,21 +27,21 @@ def checkNeighborRolls(x, y, grid):
 
 def part1():
     lines = parseInput()
-    print(lines)
+    # print(lines)
     allRolls = set()
     for j in range(len(lines)):
         row = lines[j]
         for i in range(len(row)):
             item = row[i]
             if item == '@':
-                print(i,j)
+                # print(i,j)
                 neighbors = checkNeighborRolls(i, j, lines)
-                print(neighbors)
+                # print(neighbors)
                 if len(neighbors) < 4:
-                    print("adding to all")
+                    # print("adding to all")
                     allRolls.add((i, j))
-                    print("all:", allRolls)
-    print("all:", allRolls)
+                    # print("all:", allRolls)
+    # print("all:", allRolls)
     print(len(allRolls))
 
 def print_2d_grid(grid):
@@ -53,14 +53,14 @@ def print_2d_grid(grid):
 
 def part2():
     lines = parseInput()
-    print(lines)
+    # print(lines)
     grid = copy.deepcopy(lines)
 
     turn = 0
     totalRollsRemoved = 0
     while True:
-        print(turn)
-        print_2d_grid(grid)
+        # print(turn)
+        # print_2d_grid(grid)
 
         # find what we can remove
         allRolls = set()
@@ -76,8 +76,8 @@ def part2():
                         # print("adding to all")
                         allRolls.add((i, j))
                         # print("all:", allRolls)
-        print("all:", allRolls)
-        print(len(allRolls))
+        # print("all:", allRolls)
+        # print(len(allRolls))
         if len(allRolls) == 0:
             break
         else:
@@ -87,7 +87,7 @@ def part2():
                 newGrid[y][x] = '.'
             grid = newGrid
             totalRollsRemoved += len(allRolls)
-            print("removed", len(allRolls), "total", totalRollsRemoved)
+            # print("removed", len(allRolls), "total", totalRollsRemoved)
         # TODO: temporary
         # if turn > 5:
         #     break
@@ -95,11 +95,11 @@ def part2():
     print("total", totalRollsRemoved)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
