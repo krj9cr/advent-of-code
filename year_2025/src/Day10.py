@@ -1,208 +1,160 @@
-import time, os
-import re
-import heapq
+import time, os, re, heapq
 import numpy as np
 import pulp
 
+
+BUTTON_REGEX = re.compile(r'(\[[.#]+]) (.*) ({.*})')
+
+
 class Machine:
     def __init__(self, lights_str, buttons_str, joltage_str):
-        # parse lights
-        lights = lights_str.strip("[").strip("]")
-        self.lights = ""
-        for l in lights:
-            if l == ".":
-                self.lights += "0"
-            else:
-                self.lights += "1"
+        # Convert `.##.` → "0110"
+        raw = lights_str[1:-1]       # remove brackets
+        self.original_lights = "".join("1" if c == "#" else "0" for c in raw)
+        self.lights = self.original_lights
 
-        self.original_lights = self.lights
+        # Parse buttons into lists of indices
+        self.buttons = [
+            [int(i) for i in btn.strip("()").split(",")]
+            for btn in buttons_str.split()
+        ]
 
-        # parse buttons
-        buttons_split = buttons_str.split(" ")
-        # print(buttons_split)
-        self.buttons = []
-        for button in buttons_split:
-            self.buttons.append([int(i) for i in button.strip("(").strip(")").strip().split(",")])
+        # Precompute bitmasks for fast XOR
+        self.button_masks = [
+            self._make_bitmask(button, len(self.lights))
+            for button in self.buttons
+        ]
 
-        # parst joltage
-        self.joltage = [int(i) for i in joltage_str.strip("{").strip("}").split(",")]
+        # Parse joltage
+        self.joltage = [int(i) for i in joltage_str[1:-1].split(",")]
+
+    @staticmethod
+    def _make_bitmask(indices, length):
+        """Return an integer bitmask from indices."""
+        mask = 0
+        for i in indices:
+            mask |= (1 << (length - 1 - i))
+        return mask
 
     def reset_lights(self):
         self.lights = self.original_lights
 
     def __str__(self):
-        return str(self.lights) + " " + str(self.buttons) + " " + str(self.joltage)
+        return f"{self.lights} {self.buttons} {self.joltage}"
 
+    # ------------------------------------------------------------
+    # Button pressing (FAST)
+    # ------------------------------------------------------------
     def press_button(self, lights, button_idx):
-        button = self.buttons[button_idx]
-        # print("pressing button: ", button)
-        # turn the button into a binary sequence
-        # TODO: separate this out so we don't repeat it every button press
-        button_flags = ["0"] * len(lights)
-        # print("lights", lights)
-        for light_idx in button:
-            button_flags[light_idx] = "1"
-        # print("flags ", ''.join(button_flags))
-        # do an XOR on the lights with button flags
-        xor_result = int(lights,2) ^  int(''.join(button_flags), 2)
-        result = f"{xor_result:0{len(lights)}b}"
-        # print("result", lights)
-        return result
+        """XOR lights with a precomputed bitmask."""
+        mask = self.button_masks[button_idx]
+        xor_value = int(lights, 2) ^ mask
+        return f"{xor_value:0{len(lights)}b}"
 
+    # ------------------------------------------------------------
+    # Part 1: Dijkstra / Uniform Cost Search
+    # ------------------------------------------------------------
     def part1(self):
-        initial_state = "0" * len(self.original_lights)
-        # Priority queue stores tuples: (current_cost, current_state, button_sequence)
-        # The smallest cost is always popped first
-        priority_queue = [(0, initial_state, [])]
+        start_state = "0" * len(self.lights)
+        goal_state = self.original_lights
 
-        # We track the minimum cost found so far to reach a specific node.
-        # This is crucial when cycles exist and nodes are revisited.
-        min_cost_to_node = {initial_state: 0}
+        pq = [(0, start_state)]
+        min_cost = {start_state: 0}
 
-        while priority_queue:
-            current_cost, current_state, button_sequence = heapq.heappop(priority_queue)
+        while pq:
+            cost, state = heapq.heappop(pq)
 
-            # If we have already found a cheaper way to this node than
-            # the current path's cost, skip this path.
-            if current_cost > min_cost_to_node.get(current_state, float('inf')):
+            if cost > min_cost.get(state, float("inf")):
                 continue
 
-            # if all the lights off, we are done
-            if current_state == self.original_lights:
-                # print("DONE", current_state)
-                return button_sequence
+            if state == goal_state:
+                return cost   # (you only care about number of presses)
 
-            # Explore neighbors, which are next buttons to press
-            # generate sequences of button presses...
-            # prioritize starting with buttons that include lights that are on
-            button_indices = range(len(self.buttons))
+            for idx in range(len(self.buttons)):
+                next_state = self.press_button(state, idx)
+                new_cost = cost + 1
 
-            # create paths/branches for each button press, trying to press each button
-            for button_index in button_indices:
-                button = self.buttons[button_index]
-                next_state = self.press_button(current_state, button_index)
-                new_cost = current_cost + 1
-
-                # If this new path to the neighbor is cheaper than any
-                # previous path recorded for that neighbor:
-                if new_cost < min_cost_to_node.get(next_state, float('inf')):
-                    min_cost_to_node[next_state] = new_cost
-                    new_path = list(button_sequence)
-                    new_path.append(button)
-                    # Add this promising new path to the priority queue
-                    heapq.heappush(priority_queue, (new_cost, next_state, new_path))
+                if new_cost < min_cost.get(next_state, float("inf")):
+                    min_cost[next_state] = new_cost
+                    heapq.heappush(pq, (new_cost, next_state))
 
         return None
 
-
+    # ------------------------------------------------------------
+    # Part 2: Integer Linear Programming
+    # ------------------------------------------------------------
     def part2(self):
-        # idea: rather than creating paths, simulate pressing this button multiple times?
-        # then press each button X times in different sequences? because the buttton sequence shouldn't
-        # matter as much since we're just incrementing?
-        # it is like we need
-        # b0 * x + b1 * y + b2 * z + ... = [j1, j2, j3, j4]
-        # which is really
-        # [b0a, b0b, b0c] * x + [b1a, b1b, b1c] * y + ... = [ja, jb, jc...]
+        # Build A (coeffs) and b (constants)
+        num_buttons = len(self.buttons)
+        num_joltage = len(self.joltage)
 
-        # but that can be decomposed into multiple equations...
-        # b0a * x + b1a * y +... = ja
-        # b0b * x + b1b * y +... = jb
+        A = np.zeros((num_joltage, num_buttons), dtype=int)
 
-        # for each joltage index
-        # find the buttons that press it, generate an array
-        coefficients = []
-        constants = []
-        for joltage_index, joltage in enumerate(self.joltage):
-            constants.append(joltage)
-            joltage_coefficients = []
-            for button_index, button in enumerate(self.buttons):
-                if joltage_index in button:
-                    joltage_coefficients.append(1)
-                else:
-                    joltage_coefficients.append(0)
-            coefficients.append(joltage_coefficients)
-        # print(coefficients)
-        # print(constants)
+        for j_idx in range(num_joltage):
+            for b_idx, button in enumerate(self.buttons):
+                if j_idx in button:
+                    A[j_idx][b_idx] = 1
 
-        A = np.array(coefficients)
-        b = np.array(constants)
+        b = np.array(self.joltage, dtype=int)
 
-        n = A.shape[1]
-
-        # ILP problem: minimize sum(x)
+        # ILP: minimize sum(x_i)
         prob = pulp.LpProblem("MinIntegerSolution", pulp.LpMinimize)
+        x_vars = [pulp.LpVariable(f"x{i}", lowBound=0, cat="Integer")
+                  for i in range(num_buttons)]
 
-        # integer variables x1..xn >= 0
-        x = [pulp.LpVariable(f'x{i}', lowBound=0, cat='Integer') for i in range(n)]
+        prob += sum(x_vars)
 
-        # objective
-        prob += sum(x)
+        for row in range(A.shape[0]):
+            prob += pulp.lpDot(A[row], x_vars) == int(b[row])
 
-        # constraints A·x = b
-        for i in range(A.shape[0]):
-            prob += (pulp.lpDot(A[i], x) == int(b[i]))
-
-        # solve
         prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
-        button_presses = [x[i].value() for i in range(n)]
-        # print(button_presses)
-
-        return int(sum(button_presses))
+        return int(sum(var.value() for var in x_vars))
 
 
+# ------------------------------------------------------------
+# Input Parsing
+# ------------------------------------------------------------
 def parseInput():
-    # Get the day number from the current file
-    full_path = __file__
-    file_name = os.path.basename(full_path)
-    dayf = file_name.strip("Day").strip(".py")
+    path = os.path.abspath(__file__)
+    day = os.path.basename(path).removeprefix("Day").removesuffix(".py")
+    input_path = os.path.join(os.path.dirname(path), f"../input/day{day}.txt")
 
-    # Find the input file for this day and read in its lines
-    path = __file__.rstrip(f"Day{dayf}.py") + f"../input/day{dayf}.txt"
-    with open(path, 'r') as file:
-        lines = []
-        for line in file:
+    machines = []
+    with open(input_path, "r") as f:
+        for line in f:
             line = line.strip()
-            pattern = r'(\[[\.#]+]) (.*) ({.*})'
-            data_groups = re.findall(pattern, line)
-            lines.append(Machine(data_groups[0][0], data_groups[0][1], data_groups[0][2]))
-        return lines
+            match = BUTTON_REGEX.findall(line)[0]
+            machines.append(Machine(*match))
+
+    return machines
+
 
 def part1():
     machines = parseInput()
     answer = 0
     for machine in machines:
-        # print(machine)
-        # machine.press_button(0)
-        # machine.find_buttons_to_press()
-        buttons = machine.part1()
-        presses = len(buttons)
-        # print(buttons, presses)
-        answer += presses
-        # print()
+        answer += machine.part1()
     print("answer:", answer)
+
 
 def part2():
     machines = parseInput()
     answer = 0
     for machine in machines:
-        # print(machine)
-        # machine.press_button_part2([0] * len(machine.joltage), 0)
-        presses = machine.part2()
-        # print("presses", presses)
-        answer += presses
-        # print()
+        answer += machine.part2()
     print("answer:", answer)
 
-if __name__ == "__main__":
-    print("\nPART 1 RESULT")
-    start = time.perf_counter()
-    part1()
-    end = time.perf_counter()
-    print("Time (ms):", (end - start) * 1000)
 
-    # print("\nPART 2 RESULT")
+if __name__ == "__main__":
+    # print("\nPART 1 RESULT")
     # start = time.perf_counter()
-    # part2()
+    # part1()
     # end = time.perf_counter()
     # print("Time (ms):", (end - start) * 1000)
+
+    print("\nPART 2 RESULT")
+    start = time.perf_counter()
+    part2()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
