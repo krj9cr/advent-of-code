@@ -19,7 +19,7 @@ def parseInput():
 
 def part1():
     lines = parseInput()
-    print(lines)
+    # print(lines)
     # because modulo works better between 1-num
     # rather than 0-num, +1 to the start and 99
     # so we treat it as 1-100 rather than 0-99
@@ -32,7 +32,7 @@ def part1():
             curr_num = curr_num + distance
         curr_num = (curr_num % 100)
         # check if at "1"
-        print(direction, distance, "->", curr_num)
+        # print(direction, distance, "->", curr_num)
         if curr_num == 1:
             password += 1
     print(password)
@@ -49,11 +49,11 @@ def part2():
     for direction, distance in lines:
         prev_num = curr_num
         mid_num = curr_num
-        print("curr_num:", curr_num)
-        print(direction, distance)
+        # print("curr_num:", curr_num)
+        # print(direction, distance)
         if distance >= 100:
             quotient = (distance // 100)
-            print("quotient", quotient)
+            # print("quotient", quotient)
             password += abs(quotient)
             distance = distance % 100
 
@@ -61,29 +61,29 @@ def part2():
             mid_num = mid_num - distance
         else:
             mid_num = mid_num + distance
-        print("mid num:", mid_num)
+        # print("mid num:", mid_num)
         remainder = mid_num % 100
         curr_num = remainder
         if curr_num == 0:
             curr_num = 100
 
         # check if at "1"
-        print("next num", curr_num)
+        # print("next num", curr_num)
         if curr_num == 1:
             password += 1
         elif curr_num != mid_num and prev_num != 1:
             password += 1
 
-        print("password", password)
-        print()
+        # print("password", password)
+        # print()
     print(password)
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
