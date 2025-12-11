@@ -1,5 +1,7 @@
 import time, os
 import networkx as nx
+import matplotlib.pyplot as plt
+
 
 def parseInput():
     # Get the day number from the current file
@@ -56,26 +58,28 @@ def part2():
 
 
     # Create a directed graph
-    DG = nx.DiGraph()
-    DG.add_edges_from(edges)
+    G = nx.DiGraph()
+    G.add_edges_from(edges)
 
-    svr = 'svr'
-    out = 'out'
-    dac = 'dac'
-    fft = 'fft'
+    nx.write_graphml(G, "large_graph.graphml")
 
-    # Find all simple paths (paths without cycles)
-    svr_dac = list(nx.all_simple_paths(DG, source=svr, target=dac))
-    dac_fft = list(nx.all_simple_paths(DG, source=dac, target=fft))
-    fft_out = list(nx.all_simple_paths(DG, source=fft, target=out))
-
-    print("halfway")
-
-    svr_fft = list(nx.all_simple_paths(DG, source=svr, target=fft))
-    fft_dac = list(nx.all_simple_paths(DG, source=fft, target=dac))
-    dac_out = list(nx.all_simple_paths(DG, source=dac, target=out))
-
-    print("some amount of paths)")
+    # svr = 'svr'
+    # out = 'out'
+    # dac = 'dac'
+    # fft = 'fft'
+    #
+    # # Find all simple paths (paths without cycles)
+    # svr_dac = list(nx.all_simple_paths(G, source=svr, target=dac))
+    # dac_fft = list(nx.all_simple_paths(G, source=dac, target=fft))
+    # fft_out = list(nx.all_simple_paths(G, source=fft, target=out))
+    #
+    # print("halfway")
+    #
+    # svr_fft = list(nx.all_simple_paths(G, source=svr, target=fft))
+    # fft_dac = list(nx.all_simple_paths(G, source=fft, target=dac))
+    # dac_out = list(nx.all_simple_paths(G, source=dac, target=out))
+    #
+    # print("some amount of paths)")
 
 if __name__ == "__main__":
     # print("\nPART 1 RESULT")
