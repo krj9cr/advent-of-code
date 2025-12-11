@@ -24,13 +24,13 @@ def parseInput():
 
 def part1():
     conns = parseInput()
-    print(conns)
+    # print(conns)
 
     edges = []
     for c in conns:
         for node in conns[c]:
             edges.append([c, node])
-    print(edges)
+    # print(edges)
 
 
     # Create a directed graph
@@ -43,9 +43,9 @@ def part1():
     # Find all simple paths (paths without cycles)
     all_paths = list(nx.all_simple_paths(DG, source=source_node, target=target_node))
 
-    print(f"All simple paths from {source_node} to {target_node}:")
-    for path in all_paths:
-        print(path)
+    # print(f"All simple paths from {source_node} to {target_node}:")
+    # for path in all_paths:
+    #     print(path)
     print(len(all_paths))
 
 def plotGraph(G):
@@ -79,39 +79,9 @@ def plotGraph(G):
     plt.axis('off')  # Hide the axis
     plt.show()
 
-
-def find_all_paths(graph,  nodes_after_fft, nodes_after_dac, start, end, path=[]):
-    # Append the current node to the path
-    path = path + [start]
-
-    # Base case: If the start node is the end node, we've found a path
-    if start == end:
-        return [path]
-
-    # If the start node is not in the graph, there are no paths
-    if start not in graph:
-        print("UH OH", start, "not in graph")
-        sys.exit(1)
-
-    paths = []
-    # Recurse through all neighbors of the current node
-    for node in graph[start]:
-        if node in nodes_after_fft and 'fft' not in path:
-            continue
-        if node in nodes_after_dac and 'dac' not in path:
-            continue
-        # Find all paths from the neighbor to the end
-        newpaths = find_all_paths(graph,  nodes_after_fft, nodes_after_dac, node, end, path)
-        # Add the new paths to the main list of paths
-        for newpath in newpaths:
-            paths.append(newpath)
-            print("found path", newpath)
-
-    return paths
-
 def part2():
     conns = parseInput()
-    print(conns)
+    # print(conns)
 
     edges = []
     nodes = set()
@@ -120,7 +90,7 @@ def part2():
         for node in conns[c]:
             edges.append([c, node])
             nodes.add(node)
-    print(edges)
+    # print(edges)
 
 
     # Create a directed graph
@@ -132,7 +102,7 @@ def part2():
 
     # topo sort
     sorted_nodes = list(nx.topological_sort(G))
-    print("Topologically sorted order:", sorted_nodes)
+    # print("Topologically sorted order:", sorted_nodes)
     fft_idx = sorted_nodes.index('fft')
     dac_idx = sorted_nodes.index('dac')
     nodes_after_fft = sorted_nodes[fft_idx+1:]
@@ -142,20 +112,51 @@ def part2():
     # do dfs?
     # can stop checking paths where we passed fft or dac
     # also seems like in my case, fft is before dac
+    cache = {}
+    graph = conns
+    end = 'out'
+
+    def find_all_paths(start, path=[]):
+        if start in cache:
+            return cache[start]
+        # Append the current node to the path
+        path = path + [start]
+
+        # Base case: If the start node is the end node, we've found a path
+        if start == end:
+            return 1
+
+        # If the start node is not in the graph, there are no paths
+        if start not in graph:
+            print("UH OH", start, "not in graph")
+            sys.exit(1)
+
+        total_paths = 0
+        # Recurse through all neighbors of the current node
+        for next_node in graph[start]:
+            if next_node in nodes_after_fft and 'fft' not in path:
+                continue
+            if next_node in nodes_after_dac and 'dac' not in path:
+                continue
+            # Find all paths from the neighbor to the end
+            total_paths += find_all_paths(next_node, path)
+
+        cache[start] = total_paths
+        return total_paths
 
     # Find all paths and print the result
-    all_paths = find_all_paths(conns, nodes_after_fft, nodes_after_dac, 'svr', 'out')
+    num_paths = find_all_paths('svr')
     # for p in all_paths:
     #     print(p)
-    print("num paths:", len(all_paths))
+    print(num_paths)
 
 
 if __name__ == "__main__":
-    # print("\nPART 1 RESULT")
-    # start = time.perf_counter()
-    # part1()
-    # end = time.perf_counter()
-    # print("Time (ms):", (end - start) * 1000)
+    print("\nPART 1 RESULT")
+    start = time.perf_counter()
+    part1()
+    end = time.perf_counter()
+    print("Time (ms):", (end - start) * 1000)
 
     print("\nPART 2 RESULT")
     start = time.perf_counter()
