@@ -1,13 +1,54 @@
 import time, os
+import numpy as np
 
-class Region():
+class Shape:
+    def __init__(self, arr):
+        self.arr = np.array(arr)
+        self.area = len(self.get_coords(arr))
+
+    @staticmethod
+    def get_coords(arr):
+        coords = []
+        for j, row in enumerate(arr):
+            for i, item in enumerate(row):
+                if item == "#":
+                    coords.append((i, j))
+        return coords
+
+    def __str__(self):
+        arr_str = ""
+        for row in self.arr:
+            arr_str += row + "\n"
+        return arr_str
+
+
+class Region:
     def __init__(self, width, height, quantities):
         self.width = width
         self.height = height
         self.quantities = quantities
+        self.filled_spots = []
 
     def __str__(self):
         return f"{self.width}x{self.height}: {str(self.quantities)}"
+
+    def print_region(self):
+        for j in range(self.height):
+            for i in range(self.width):
+                if (i, j) in self.filled_spots:
+                    print("#", end="")
+                else:
+                    print(".", end="")
+            print()
+
+    def check_shapes(self, shapes):
+        area = self.width * self.height
+        # ....ew
+        over_assumed_shape_area = sum(self.quantities) * 8
+
+        if over_assumed_shape_area < area:
+            return True
+        return False
 
 def parseInput():
     # Get the day number from the current file
@@ -26,14 +67,16 @@ def parseInput():
 
         # grab the shapes manually I guess idc
         shapes = [ lines[1:4], lines[6:9], lines[11:14], lines[16:19], lines[21:24], lines[26:29]]
+        for i, shape in enumerate(shapes):
+            shapes[i] = Shape(shape)
 
         # set up the regions
         regions = []
         for line in lines[30:]:
             line_split = line.split(": ")
             w_h = line_split[0].split("x")
-            width = w_h[0]
-            height = w_h[1]
+            width = int(w_h[0])
+            height = int(w_h[1])
             quantities = [int(i) for i in line_split[1].split(" ")]
             regions.append(Region(width, height, quantities))
 
@@ -41,18 +84,22 @@ def parseInput():
 
 def part1():
     shapes, regions = parseInput()
-    for shape_index, shape in enumerate(shapes):
-        print(f"{shape_index}:")
-        for row in shape:
-            print(row)
-        print()
 
+    # for shape in shapes:
+    #     print(shape)
+    #     print()
+
+    count = 0
     for region in regions:
-        print(region)
+        # print(region)
+        fits = region.check_shapes(shapes)
+        if fits:
+            count += 1
+    print(count)
+
 
 def part2():
-    lines = parseInput()
-    print(lines)
+    print("gold star")
 
 if __name__ == "__main__":
     print("\nPART 1 RESULT")
