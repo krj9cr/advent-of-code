@@ -8,10 +8,7 @@ if __name__ == '__main__':
     days = []
     part1Times = []
     part2Times = []
-    for i in range(1, 11):
-        # if i in [5]:
-        #     print("Skipping day", i)
-        #     continue
+    for i in range(1, 13):
         day = "{:02d}".format(i)
         days.append(day)
         print("Running day", day)
